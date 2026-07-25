@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.mcstructure binary
+*.mcworld binary
+*.mctemplate binary
+*.mcaddon binary

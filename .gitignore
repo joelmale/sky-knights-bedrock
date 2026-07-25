@@ -1,0 +1,14 @@
+node_modules/
+dist/
+lib/
+coverage/
+
+*.log
+*.mcaddon
+*.mcpack
+*.mcworld
+*.mctemplate
+
+.DS_Store
+Thumbs.db
+.env.local

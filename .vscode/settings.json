@@ -1,0 +1,8 @@
+{
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "*.lang": "properties",
+    "*.mcfunction": "mcfunction"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
