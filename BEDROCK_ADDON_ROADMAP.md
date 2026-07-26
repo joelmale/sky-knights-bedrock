@@ -1,10 +1,34 @@
 # Sky Knights — Minecraft Bedrock Add-On Plan and Roadmap
 
-> Status: implementation in progress; Phase 2 complete and first Phase 5 ship-progression slice built
+> Status: implementation in progress; `0.2.0` Dockyard Refit and Airship Combat
+> built and automatically verified; focused hands-on acceptance pending
 > Last updated: 2026-07-26
 > Working title: **Sky Knights: Bedrock**
 > Namespace: `skyknights`
 > Recommended implementation: Bedrock Behavior Pack + Resource Pack + TypeScript, optionally bundled with a world template
+
+Current repository capabilities and remaining gates are tracked in
+[`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md). Version history is in
+[`CHANGELOG.md`](CHANGELOG.md), and completed validation evidence is in
+[`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md). Those files are
+authoritative for implementation status; this roadmap remains the product
+target.
+
+### Implementation checkpoint — 2026-07-26
+
+- Phases 0–1 infrastructure is substantially implemented.
+- The Phase 2 starter-island, skiff, expedition, recovery, and persistence loop
+  has been built and exercised.
+- Phase 3 has three authored, deterministic, content-versioned islands; the
+  broader four-biome/hybrid realm remains.
+- Phase 4 has guaranteed Crystal/Froststeel progression, the Dockmaster,
+  tutorial, island guards, and the Ashwing Raider; the full content roster
+  remains.
+- Phase 5 now has two entity ship frames, four atomic module slots, ownership,
+  seats, cargo, health, repair, recall, reconstruction, advanced variants,
+  aimed cannon combat, and a shield choice.
+- The next gate is the focused `0.2.0` Minecraft test plan, followed by
+  multiplayer, controller/touch, and clean-client packaging checks.
 
 ## 1. Purpose
 

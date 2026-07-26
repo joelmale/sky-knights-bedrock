@@ -1,0 +1,31 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "skyknights:cannon_control",
+      "menu_category": {
+        "category": "equipment"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "item.skyknights:cannon_control.name"
+      },
+      "minecraft:icon": "skyknights_cannon_control",
+      "minecraft:max_stack_size": 1,
+      "minecraft:rarity": "rare",
+      "minecraft:interact_button": "Fire Aether Cannon",
+      "minecraft:use_animation": "bow",
+      "minecraft:use_modifiers": {
+        "use_duration": 0.05,
+        "movement_modifier": 1,
+        "start_sound": "crossbow.loading.start"
+      },
+      "minecraft:cooldown": {
+        "category": "skyknights_cannon",
+        "duration": 1
+      },
+      "skyknights:fire_cannon": {}
+    }
+  }
+}

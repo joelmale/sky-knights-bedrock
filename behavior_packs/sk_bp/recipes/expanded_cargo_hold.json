@@ -1,0 +1,29 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "skyknights:expanded_cargo_hold"
+    },
+    "tags": ["crafting_table"],
+    "pattern": ["IFI", "CCC", "IFI"],
+    "key": {
+      "F": {
+        "item": "skyknights:froststeel_ingot"
+      },
+      "I": {
+        "item": "minecraft:iron_ingot"
+      },
+      "C": {
+        "item": "minecraft:chest"
+      }
+    },
+    "result": {
+      "item": "skyknights:expanded_cargo_hold"
+    },
+    "unlock": [
+      {
+        "context": "AlwaysUnlocked"
+      }
+    ]
+  }
+}

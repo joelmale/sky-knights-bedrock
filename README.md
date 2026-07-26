@@ -108,10 +108,22 @@ docs/                   Decisions and environment notes
 
 See [BEDROCK_ADDON_ROADMAP.md](BEDROCK_ADDON_ROADMAP.md) for the full implementation plan.
 
-## Playable Crystal-to-Cutter slice
+## Project tracking
 
-The stable pack now provides a two-expedition survival and ship-progression
-loop:
+- [Current implementation status](docs/PROJECT_STATUS.md)
+- [Version changelog](CHANGELOG.md)
+- [Automated and hands-on validation log](docs/VALIDATION_LOG.md)
+- [Architecture decisions](docs/DECISIONS.md)
+- [Product roadmap](BEDROCK_ADDON_ROADMAP.md)
+
+The status tracker distinguishes implemented code, automated verification, and
+Minecraft hands-on acceptance. Update the implementation, changelog, validation
+evidence, and focused test plan together for each feature slice.
+
+## Playable Dockyard Refit and Airship Combat slice
+
+The stable `0.2.0` pack extends the two-expedition survival progression into
+dockyard refitting and airship combat:
 
 1. Start on a solid Verdant home island and assemble a two-seat starter skiff.
 2. Fly to Ember Outpost and return its guaranteed Aether Crystal to Dockmaster
@@ -120,13 +132,19 @@ loop:
 4. Assemble a persistent four-seat Skycutter with an 18-slot cargo hold.
 5. Cross the starter craft's range boundary, raid Frostspire, and return
    Froststeel in the ship's cargo.
-6. Use dock recall, repair, and reconstruction to maintain the owned ship.
+6. Craft and atomically install advanced Hull, Engine, Cargo, and Utility
+   modules while the owned Skycutter is secured at the dock.
+7. Equip the Aether Cannon, load Aether Charges, and defeat the persistent
+   Ashwing Raider encounter.
+8. Return its Raider Core for a defensive Shield Projector.
+9. Use dock recall, repair, and reconstruction to maintain the owned ship.
 
-World schema 3 records an independent content version for every island. Player
-and ship schemas are version 2. Opening an older test world upgrades the solid
-`starter_island:v3`, replenishes progression-safe `ember_outpost:v3`, and
-generates `frostspire:v1`. Dockmaster Elian also self-heals if an older reload
-left the starter dock without its NPC.
+World schema 4 records the shared Raider encounter in addition to independent
+island content versions. Player and ship schemas are version 3. Opening an
+older test world upgrades the solid `starter_island:v3`, replenishes
+progression-safe `ember_outpost:v4`, upgrades `frostspire:v2`, and migrates
+completed Crystal-to-Cutter saves into the refit objective. Dockmaster Elian
+also self-heals if an older reload left the starter dock without its NPC.
 
 Development commands:
 
@@ -135,14 +153,17 @@ Development commands:
 /skyknights:skycutter   Developer shortcut: spawn a configured Skycutter
 /skyknights:debug       Show schema, generation, input, and entity state
 /skyknights:island      Requeue starter-island placement
+/skyknights:raider      Reset and spawn the Ashwing Raider for development
 /skyknights:recover     Return to the last safe dock
 ```
 
 Run the focused
-[Crystal-to-Cutter test plan](docs/CRYSTAL_TO_CUTTER_TEST_PLAN.md) before
-treating the complete survival and ship-progression loop as accepted in-engine.
-The earlier [Phase 2 Playtest](docs/PHASE_2_PLAYTEST.md) remains the shorter
-starter-skiff regression pass.
+[Dockyard Refit and Airship Combat test plan](docs/DOCKYARD_REFIT_COMBAT_TEST_PLAN.md)
+before treating the new progression as accepted in-engine. The
+[Crystal-to-Cutter test plan](docs/CRYSTAL_TO_CUTTER_TEST_PLAN.md) remains the
+base progression regression pass, and the earlier
+[Phase 2 Playtest](docs/PHASE_2_PLAYTEST.md) remains the shorter starter-skiff
+check.
 
 The custom-dimension and GameTest packs are opt-in because those capabilities
 still require experimental APIs. See

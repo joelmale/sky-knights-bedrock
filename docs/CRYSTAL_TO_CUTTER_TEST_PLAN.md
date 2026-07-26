@@ -179,7 +179,7 @@ Pass when:
 1. Fly the Skycutter east to Frostspire near `X=253, Z=0`.
 2. Land on or beside its spruce dock.
 3. Defeat the Frostspire Warden.
-4. Open the ruin chest and confirm it includes eight Froststeel Ingots.
+4. Open the ruin chest and confirm it includes 16 Froststeel Ingots.
 5. Put at least one Froststeel Ingot in the Skycutter cargo hold.
 6. Return to the starter dock.
 7. Open the Dockmaster form and choose **Deliver Froststeel**.
@@ -190,7 +190,7 @@ Pass when:
 - the objective changes to `return_frost_cargo`;
 - the Froststeel remains in cargo throughout the return flight;
 - the Dockmaster accepts one ingot directly from docked cargo;
-- the objective becomes `complete`;
+- the objective becomes `craft_combat_refit`;
 - the player receives two Repair Kits.
 
 ## 10. Damage, repair, destruction, and reconstruction

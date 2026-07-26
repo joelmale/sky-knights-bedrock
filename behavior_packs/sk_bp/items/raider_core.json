@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "skyknights:raider_core",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "item.skyknights:raider_core.name"
+      },
+      "minecraft:icon": "skyknights_raider_core",
+      "minecraft:max_stack_size": 16,
+      "minecraft:rarity": "epic",
+      "minecraft:glint": true
+    }
+  }
+}

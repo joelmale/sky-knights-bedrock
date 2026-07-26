@@ -1,8 +1,8 @@
-import { IDENTIFIERS } from "../config/constants";
 import { DockLocation, ShipModuleSlots } from "../persistence/schema";
+import { hasExtendedRangeModule, shipModuleDefinition } from "./ship-modules";
 
 export function hasExtendedRange(modules: ShipModuleSlots): boolean {
-  return modules.engine === IDENTIFIERS.aetherEngine;
+  return hasExtendedRangeModule(modules);
 }
 
 export function horizontalDistanceSquared(
@@ -15,10 +15,7 @@ export function horizontalDistanceSquared(
 }
 
 export function isCompleteSkycutterLoadout(modules: ShipModuleSlots): boolean {
-  return (
-    modules.hull === IDENTIFIERS.reinforcedHull &&
-    modules.engine === IDENTIFIERS.aetherEngine &&
-    modules.cargo === IDENTIFIERS.cargoHold &&
-    modules.utility === IDENTIFIERS.navigatorModule
+  return (["hull", "engine", "cargo", "utility"] as const).every(
+    (slot) => shipModuleDefinition(modules[slot])?.slot === slot,
   );
 }

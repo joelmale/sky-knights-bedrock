@@ -1,0 +1,28 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.skyknights.skycutter": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": ["Texture.default"],
+      "part_visibility": [
+        {
+          "armor_plates": "query.mark_variant == 1"
+        },
+        {
+          "expanded_cargo": "query.skin_id == 1"
+        },
+        {
+          "aether_cannon": "query.variant == 1"
+        },
+        {
+          "shield_projector": "query.variant == 2"
+        }
+      ]
+    }
+  }
+}

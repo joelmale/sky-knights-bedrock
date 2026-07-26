@@ -50,9 +50,9 @@ function prepareEmberLoot(dimension: Dimension, logger: Logger): void {
   container.clearAll();
   container.setItem(0, new ItemStack(IDENTIFIERS.aetherCrystal));
   container.setItem(1, new ItemStack("minecraft:emerald", 3));
-  container.setItem(2, new ItemStack("minecraft:iron_ingot", 12));
+  container.setItem(2, new ItemStack("minecraft:iron_ingot", 24));
   container.setItem(3, new ItemStack("minecraft:cooked_beef", 8));
-  container.setItem(4, new ItemStack("minecraft:redstone", 4));
+  container.setItem(4, new ItemStack("minecraft:redstone", 8));
   logger.info("Ember Outpost guaranteed loot prepared.", {
     location: EMBER_OUTPOST.lootChest,
   });
@@ -102,7 +102,7 @@ function prepareFrostspireLoot(dimension: Dimension, logger: Logger): void {
   }
 
   container.clearAll();
-  container.setItem(0, new ItemStack(IDENTIFIERS.froststeelIngot, 8));
+  container.setItem(0, new ItemStack(IDENTIFIERS.froststeelIngot, 16));
   container.setItem(1, new ItemStack("minecraft:diamond", 2));
   container.setItem(2, new ItemStack("minecraft:arrow", 24));
   container.setItem(3, new ItemStack("minecraft:cooked_salmon", 8));

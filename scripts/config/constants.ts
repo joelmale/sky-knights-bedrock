@@ -16,6 +16,15 @@ export const IDENTIFIERS = {
   navigatorModule: "skyknights:navigator_module",
   repairKit: "skyknights:repair_kit",
   froststeelIngot: "skyknights:froststeel_ingot",
+  armoredHull: "skyknights:armored_hull",
+  frostfireEngine: "skyknights:frostfire_engine",
+  expandedCargoHold: "skyknights:expanded_cargo_hold",
+  aetherCannon: "skyknights:aether_cannon",
+  shieldProjector: "skyknights:shield_projector",
+  cannonControl: "skyknights:cannon_control",
+  aetherCharge: "skyknights:aether_charge",
+  raiderCore: "skyknights:raider_core",
+  skyRaider: "skyknights:sky_raider",
 } as const;
 
 export const STARTER_ISLAND = {
@@ -43,7 +52,7 @@ export const STARTER_ISLAND = {
 
 export const EMBER_OUTPOST = {
   id: "ember_outpost",
-  contentVersion: 3,
+  contentVersion: 4,
   dimensionId: "minecraft:overworld",
   structureId: IDENTIFIERS.emberOutpost,
   origin: { x: 72, y: 151, z: -10 },
@@ -64,7 +73,7 @@ export const EMBER_OUTPOST = {
 
 export const FROSTSPIRE = {
   id: "frostspire",
-  contentVersion: 1,
+  contentVersion: 2,
   dimensionId: "minecraft:overworld",
   structureId: IDENTIFIERS.frostspire,
   origin: { x: 240, y: 150, z: -11 },
@@ -94,6 +103,22 @@ export const SKYCUTTER_LOADOUT = {
   engine: IDENTIFIERS.aetherEngine,
   cargo: IDENTIFIERS.cargoHold,
   utility: IDENTIFIERS.navigatorModule,
+} as const;
+
+export const SKY_RAIDER_ENCOUNTER = {
+  dimensionId: "minecraft:overworld",
+  patrolCenter: { x: 174, y: 172, z: 28 },
+  activationDistanceFromDock: 60,
+  spawnDistanceFromPlayer: 28,
+  rewardDistance: 72,
+} as const;
+
+export const COMBAT = {
+  cannonRange: 64,
+  cannonDamage: 24,
+  cannonCooldownTicks: 20,
+  armoredHullDamageMultiplier: 0.8,
+  shieldDamageMultiplier: 0.55,
 } as const;
 
 export const DOCKYARD = {
@@ -130,4 +155,4 @@ export const VOID_RESCUE_Y = 64;
 export const RECOVERY_INTERVAL_TICKS = 10;
 export const BASIC_SHIP_RANGE = 150;
 export const BASIC_SHIP_WARNING_RANGE = 130;
-export const WORLD_STATE_SEED_SALT = "skyknights:world-state:v3";
+export const WORLD_STATE_SEED_SALT = "skyknights:world-state:v4";

@@ -30,8 +30,15 @@ export function objectiveText(objective: TutorialObjective): string {
       "Use the Aether Engine to fly east beyond the old range limit to Frostspire.",
     return_frost_cargo:
       "Load Froststeel into the Skycutter cargo hold and return it to the Dockmaster.",
-    complete:
-      "Crystal-to-Cutter expedition complete. Continue exploring and improving the fleet.",
+    craft_combat_refit:
+      "Use Froststeel to craft an Aether Cannon and advanced ship modules.",
+    install_combat_refit:
+      "Dock the Skycutter and install the Aether Cannon in its Utility slot.",
+    defeat_sky_raider:
+      "Launch the cannon-equipped Skycutter and defeat the Ashwing Raider.",
+    return_raider_core: "Return the captured Raider Core to Dockmaster Elian.",
+    combat_complete:
+      "Dockyard Refit expedition complete. Continue improving the fleet.",
   };
   return text[objective];
 }
@@ -67,6 +74,28 @@ function updateInventoryObjective(player: Player): void {
     repository.save(state);
     player.sendMessage(
       "§aStarter ship components complete. Bring them to Dockmaster Elian.§r",
+    );
+  }
+
+  if (
+    state.objective === "craft_combat_refit" &&
+    containsItem(inventory.container, IDENTIFIERS.aetherCannon)
+  ) {
+    state.objective = "install_combat_refit";
+    repository.save(state);
+    player.sendMessage(
+      "§aAether Cannon crafted. Dock the Skycutter and ask Dockmaster Elian for a refit.§r",
+    );
+  }
+
+  if (
+    state.objective === "defeat_sky_raider" &&
+    containsItem(inventory.container, IDENTIFIERS.raiderCore)
+  ) {
+    state.objective = "return_raider_core";
+    repository.save(state);
+    player.sendMessage(
+      "§aRaider Core secured. Return it to Dockmaster Elian.§r",
     );
   }
 }

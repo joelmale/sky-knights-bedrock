@@ -10,6 +10,48 @@
     "component_groups": {
       "skyknights:tamed": {
         "minecraft:is_tamed": {}
+      },
+      "skyknights:armored_hull": {
+        "minecraft:health": {
+          "value": 180,
+          "max": 180
+        },
+        "minecraft:knockback_resistance": {
+          "value": 0.8
+        },
+        "minecraft:mark_variant": {
+          "value": 1
+        }
+      },
+      "skyknights:frostfire_engine": {
+        "minecraft:movement": {
+          "value": 0.25
+        },
+        "minecraft:flying_speed": {
+          "value": 0.25
+        }
+      },
+      "skyknights:expanded_cargo_hold": {
+        "minecraft:inventory": {
+          "container_type": "chest_boat",
+          "inventory_size": 27,
+          "can_be_siphoned_from": true,
+          "private": false,
+          "restrict_to_owner": true
+        },
+        "minecraft:skin_id": {
+          "value": 1
+        }
+      },
+      "skyknights:aether_cannon": {
+        "minecraft:variant": {
+          "value": 1
+        }
+      },
+      "skyknights:shield_projector": {
+        "minecraft:variant": {
+          "value": 2
+        }
       }
     },
     "components": {
@@ -122,6 +164,83 @@
       "skyknights:on_tame": {
         "add": {
           "component_groups": ["skyknights:tamed"]
+        }
+      },
+      "skyknights:clear_hull_module": {
+        "remove": {
+          "component_groups": ["skyknights:armored_hull"]
+        }
+      },
+      "skyknights:apply_reinforced_hull": {
+        "remove": {
+          "component_groups": ["skyknights:armored_hull"]
+        }
+      },
+      "skyknights:apply_armored_hull": {
+        "add": {
+          "component_groups": ["skyknights:armored_hull"]
+        }
+      },
+      "skyknights:clear_engine_module": {
+        "remove": {
+          "component_groups": ["skyknights:frostfire_engine"]
+        }
+      },
+      "skyknights:apply_aether_engine": {
+        "remove": {
+          "component_groups": ["skyknights:frostfire_engine"]
+        }
+      },
+      "skyknights:apply_frostfire_engine": {
+        "add": {
+          "component_groups": ["skyknights:frostfire_engine"]
+        }
+      },
+      "skyknights:clear_cargo_module": {
+        "remove": {
+          "component_groups": ["skyknights:expanded_cargo_hold"]
+        }
+      },
+      "skyknights:apply_cargo_hold": {
+        "remove": {
+          "component_groups": ["skyknights:expanded_cargo_hold"]
+        }
+      },
+      "skyknights:apply_expanded_cargo_hold": {
+        "add": {
+          "component_groups": ["skyknights:expanded_cargo_hold"]
+        }
+      },
+      "skyknights:clear_utility_module": {
+        "remove": {
+          "component_groups": [
+            "skyknights:aether_cannon",
+            "skyknights:shield_projector"
+          ]
+        }
+      },
+      "skyknights:apply_navigator_module": {
+        "remove": {
+          "component_groups": [
+            "skyknights:aether_cannon",
+            "skyknights:shield_projector"
+          ]
+        }
+      },
+      "skyknights:apply_aether_cannon": {
+        "remove": {
+          "component_groups": ["skyknights:shield_projector"]
+        },
+        "add": {
+          "component_groups": ["skyknights:aether_cannon"]
+        }
+      },
+      "skyknights:apply_shield_projector": {
+        "remove": {
+          "component_groups": ["skyknights:aether_cannon"]
+        },
+        "add": {
+          "component_groups": ["skyknights:shield_projector"]
         }
       }
     }

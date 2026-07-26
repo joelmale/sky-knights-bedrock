@@ -10,7 +10,9 @@ import {
 import { IDENTIFIERS, STARTER_ISLAND } from "../config/constants";
 import { ensureStarterIslandQueued } from "../generation/service";
 import { recoverPlayer } from "../gameplay/recovery";
+import { spawnSkyRaiderForPlayer } from "../gameplay/sky-raider";
 import {
+  loadShipState,
   spawnSkiffForPlayer,
   spawnSkycutterForPlayer,
 } from "../gameplay/skiff";
@@ -151,6 +153,38 @@ export function registerDevelopmentCommands(
       };
     },
   );
+
+  registry.registerCommand(
+    {
+      name: "skyknights:raider",
+      description: "Developer shortcut: reset and spawn the Ashwing Raider.",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: true,
+    },
+    (origin) => {
+      const player = commandPlayer(origin.sourceEntity);
+
+      if (player === undefined) {
+        return {
+          status: CustomCommandStatus.Failure,
+          message: "Run this command as a player.",
+        };
+      }
+
+      system.run(() =>
+        spawnSkyRaiderForPlayer(
+          player,
+          worldRepository,
+          logger.child("raider"),
+          true,
+        ),
+      );
+      return {
+        status: CustomCommandStatus.Success,
+        message: "Resetting and spawning the Ashwing Raider.",
+      };
+    },
+  );
 }
 
 function sendDebugReport(
@@ -167,10 +201,19 @@ function sendDebugReport(
   const skycutterCount = player.dimension.getEntities({
     type: IDENTIFIERS.skycutter,
   }).length;
+  const raiderCount = player.dimension.getEntities({
+    type: IDENTIFIERS.skyRaider,
+  }).length;
   const playerState = new PlayerStateRepository(
     player,
     STARTER_ISLAND.safeDock,
   ).load();
+  const ownedEntity =
+    playerState.ownedShip?.entityId === undefined
+      ? undefined
+      : world.getEntity(playerState.ownedShip.entityId);
+  const shipState =
+    ownedEntity === undefined ? undefined : loadShipState(ownedEntity);
 
   player.sendMessage("§bSky Knights debug§r");
   player.sendMessage(
@@ -191,11 +234,25 @@ function sendDebugReport(
 
   player.sendMessage(`islandVersions=${islandVersions.join(",") || "none"}`);
   player.sendMessage(
-    `skiffsHere=${skiffCount} skycuttersHere=${skycutterCount} dockmastersHere=${dockmasterCount}`,
+    `skiffsHere=${skiffCount} skycuttersHere=${skycutterCount} raidersHere=${raiderCount} dockmastersHere=${dockmasterCount}`,
+  );
+  player.sendMessage(
+    `raiderEncounter=${state.skyRaiderEncounter.status}:${state.skyRaiderEncounter.entityId ?? "none"}`,
   );
   player.sendMessage(
     `objective=${playerState.objective} skycutterUnlocked=${playerState.skycutterUnlocked} ownedShip=${playerState.ownedShip?.frame ?? "none"}:${playerState.ownedShip?.entityId ?? "unavailable"}`,
   );
+  if (shipState !== undefined) {
+    const moduleText = (["hull", "engine", "cargo", "utility"] as const)
+      .map(
+        (slot) => `${slot}:${shipState.configuration.modules[slot] ?? "empty"}`,
+      )
+      .join(",");
+    player.sendMessage(`modules=${moduleText}`);
+    player.sendMessage(
+      `combat=shots:${shipState.combat.shotsFired},hits:${shipState.combat.hits},raiders:${shipState.combat.raidersDefeated}`,
+    );
+  }
   player.sendMessage(
     `dynamicPropertyBytes=${world.getDynamicPropertyTotalByteCount()}`,
   );

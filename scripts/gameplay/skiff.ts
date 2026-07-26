@@ -21,9 +21,15 @@ import {
 import {
   DockLocation,
   ShipFrame,
+  ShipModuleSlot,
   ShipModuleSlots,
   ShipState,
 } from "../persistence/schema";
+import {
+  installedModuleTag,
+  moduleApplyEvent,
+  moduleTagsForSlot,
+} from "./ship-modules";
 import { getSkiffSpawnLocation } from "./skiff-placement";
 
 const DEFAULT_SKIFF_MODULES: ShipModuleSlots = {
@@ -79,9 +85,13 @@ export function initializeSpawnedShip(entity: Entity): void {
     STARTER_ISLAND.safeDock,
     frame,
   );
-  repository.load();
+  const state = repository.load();
   entity.addTag("skyknights.ship");
   entity.addTag(`skyknights.ship.${frame}`);
+
+  if (frame === "skycutter") {
+    applyShipConfiguration(entity, state.configuration.modules);
+  }
 }
 
 export function loadShipState(entity: Entity): ShipState | undefined {
@@ -113,6 +123,15 @@ export function isShipOwner(player: Player, state: ShipState): boolean {
     state.ownerPlayerId === player.id ||
     (state.ownerName !== undefined && state.ownerName === player.name)
   );
+}
+
+export function applyShipConfiguration(
+  entity: Entity,
+  modules: ShipModuleSlots,
+): void {
+  for (const slot of ["hull", "engine", "cargo", "utility"] as const) {
+    applyShipModule(entity, slot, modules[slot]);
+  }
 }
 
 export function updateOwnedShipTracking(): void {
@@ -180,6 +199,11 @@ export function updateOwnedShipTracking(): void {
           Math.abs(
             previous.lastKnownLocation.z - nextReference.lastKnownLocation.z,
           ) > 0.25;
+        const modulesChanged =
+          previous === undefined ||
+          (["hull", "engine", "cargo", "utility"] as const).some(
+            (slot) => previous.modules[slot] !== nextReference.modules[slot],
+          );
         let objectiveChanged = false;
 
         if (
@@ -201,7 +225,7 @@ export function updateOwnedShipTracking(): void {
           objectiveChanged = true;
         }
 
-        if (moved || objectiveChanged) {
+        if (moved || modulesChanged || objectiveChanged) {
           playerState.ownedShip = nextReference;
           repository.save(playerState);
         }
@@ -254,6 +278,10 @@ function spawnOwnedShip(
   state.configuration.frame = frame;
   state.configuration.modules = { ...modules };
   repository.save(state);
+
+  if (frame === "skycutter") {
+    applyShipConfiguration(ship, state.configuration.modules);
+  }
   ship.nameTag =
     frame === "skycutter" ? "Sky Knights Skycutter" : "Sky Knights Skiff";
   ship.addTag("skyknights.ship");
@@ -276,6 +304,24 @@ function spawnOwnedShip(
   });
 
   return ship;
+}
+
+function applyShipModule(
+  entity: Entity,
+  slot: ShipModuleSlot,
+  itemId: string | undefined,
+): void {
+  entity.triggerEvent(moduleApplyEvent(slot, itemId));
+
+  for (const tag of moduleTagsForSlot(slot)) {
+    entity.removeTag(tag);
+  }
+
+  const activeTag = installedModuleTag(slot, itemId);
+
+  if (activeTag !== undefined) {
+    entity.addTag(activeTag);
+  }
 }
 
 function shipFrameForEntity(entity: Entity): ShipFrame | undefined {

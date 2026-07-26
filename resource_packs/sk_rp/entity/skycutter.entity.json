@@ -12,7 +12,7 @@
       "geometry": {
         "default": "geometry.skyknights.skycutter"
       },
-      "render_controllers": ["controller.render.default"],
+      "render_controllers": ["controller.render.skyknights.skycutter"],
       "spawn_egg": {
         "base_color": "#4A2E1C",
         "overlay_color": "#88E6FF"

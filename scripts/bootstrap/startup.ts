@@ -17,6 +17,11 @@ import {
 } from "../gameplay/dockyard";
 import { runDestinationDiscoverySweep } from "../gameplay/exploration";
 import { runRecoverySweep } from "../gameplay/recovery";
+import {
+  registerSkyRaiderEvents,
+  runSkyRaiderSweep,
+} from "../gameplay/sky-raider";
+import { registerCombatItemComponents } from "../gameplay/ship-combat";
 import { initializeSpawnedShip } from "../gameplay/skiff";
 import {
   registerShipEvents,
@@ -37,14 +42,21 @@ const worldRepository = new WorldStateRepository(world, () =>
 
 registerDockyardInteractions(logger.child("dockyard"));
 registerShipEvents(logger.child("ships"));
+registerSkyRaiderEvents(worldRepository, logger.child("sky-raider"));
 
-system.beforeEvents.startup.subscribe(({ customCommandRegistry }) => {
-  registerDevelopmentCommands(
-    customCommandRegistry,
-    worldRepository,
-    logger.child("commands"),
-  );
-});
+system.beforeEvents.startup.subscribe(
+  ({ customCommandRegistry, itemComponentRegistry }) => {
+    registerCombatItemComponents(
+      itemComponentRegistry,
+      logger.child("ship-combat"),
+    );
+    registerDevelopmentCommands(
+      customCommandRegistry,
+      worldRepository,
+      logger.child("commands"),
+    );
+  },
+);
 
 world.afterEvents.worldLoad.subscribe(() => {
   system.run(() => {
@@ -62,6 +74,7 @@ world.afterEvents.worldLoad.subscribe(() => {
       runRecoverySweep(logger.child("recovery"));
       runDestinationDiscoverySweep();
       runShipSystemsSweep(logger.child("ships"));
+      runSkyRaiderSweep(worldRepository, logger.child("sky-raider"));
       runTutorialSweep();
     }, RECOVERY_INTERVAL_TICKS);
     system.runInterval(() => {
@@ -76,6 +89,10 @@ world.afterEvents.worldLoad.subscribe(() => {
 });
 
 world.afterEvents.entitySpawn.subscribe(({ entity }) => {
+  initializeSpawnedShip(entity);
+});
+
+world.afterEvents.entityLoad.subscribe(({ entity }) => {
   initializeSpawnedShip(entity);
 });
 

@@ -22,6 +22,7 @@ import {
   PlayerStateRepository,
   WorldStateRepository,
 } from "../persistence/repositories";
+import { ShipModuleSlot } from "../persistence/schema";
 import {
   MaterialConsumption,
   countMaterials,
@@ -29,9 +30,13 @@ import {
   shouldEnsureDockmaster,
 } from "./dockyard-materials";
 import { dockOwnedShip, isAtDock, resolveOwnedShip } from "./ship-docking";
+import { modulesForSlot, shipModuleName } from "./ship-modules";
 import { isCompleteSkycutterLoadout } from "./ship-rules";
 import {
+  applyShipConfiguration,
+  isShipOwner,
   loadShipState,
+  saveShipState,
   spawnSkiffForPlayer,
   spawnSkycutterForPlayer,
 } from "./skiff";
@@ -123,12 +128,14 @@ export function ensureDockmaster(
 }
 
 async function showDockyard(player: Player, logger: Logger): Promise<void> {
-  await resolveOwnedShip(player, true, logger);
+  const ownedShip = await resolveOwnedShip(player, true, logger);
   const playerRepository = new PlayerStateRepository(
     player,
     STARTER_ISLAND.safeDock,
   );
   const playerState = playerRepository.load();
+  const ownedShipState =
+    ownedShip === undefined ? undefined : loadShipState(ownedShip);
   const container = playerInventory(player);
   const stacks = inventorySnapshot(container);
   const starterCounts = countMaterials(stacks, DOCKYARD.assemblyRequirements);
@@ -202,6 +209,23 @@ async function showDockyard(player: Player, logger: Logger): Promise<void> {
     });
   }
 
+  if (
+    playerState.ownedShip?.frame === "skycutter" &&
+    playerState.ownedShip.entityId !== undefined
+  ) {
+    actions.push({
+      label: "Refit Docked Skycutter",
+      execute: () => showRefitMenu(player, logger),
+    });
+  }
+
+  if (playerState.objective === "return_raider_core") {
+    actions.push({
+      label: "Return Raider Core",
+      execute: () => returnRaiderCore(player, container, logger),
+    });
+  }
+
   actions.push({
     label: "Current Objective",
     execute: () => sendBriefing(player),
@@ -233,6 +257,11 @@ async function showDockyard(player: Player, logger: Logger): Promise<void> {
     playerState.skycutterUnlocked
       ? `Skycutter slots:\n${skycutterRequirements}`
       : "Skycutter blueprint: locked until an Aether Crystal is returned.",
+    ownedShipState?.configuration.frame === "skycutter"
+      ? `\nInstalled refit:\n${moduleLoadoutText(
+          ownedShipState.configuration.modules,
+        )}`
+      : "",
   ].join("\n");
   let form = new ActionFormData().title("Sky Knights Shipyard").body(body);
 
@@ -247,6 +276,238 @@ async function showDockyard(player: Player, logger: Logger): Promise<void> {
   }
 
   await actions[response.selection]?.execute();
+}
+
+async function showRefitMenu(player: Player, logger: Logger): Promise<void> {
+  const ship = await resolveOwnedShip(player, false, logger);
+  const state = ship === undefined ? undefined : loadShipState(ship);
+
+  if (
+    ship === undefined ||
+    state === undefined ||
+    state.configuration.frame !== "skycutter" ||
+    !isShipOwner(player, state)
+  ) {
+    player.sendMessage("§cNo owned Skycutter is available for refit.§r");
+    return;
+  }
+
+  if (!isAtDock(ship)) {
+    player.sendMessage(
+      "§eRecall or land the Skycutter at the starter dock before refitting.§r",
+    );
+    return;
+  }
+
+  const slots = ["hull", "engine", "cargo", "utility"] as const;
+  let form = new ActionFormData()
+    .title("Dockyard Refit")
+    .body(
+      [
+        "Select one slot. Installing a module returns the previous module to your inventory.",
+        "",
+        moduleLoadoutText(state.configuration.modules),
+      ].join("\n"),
+    );
+
+  for (const slot of slots) {
+    form = form.button(
+      `${displaySlot(slot)}: ${shipModuleName(
+        state.configuration.modules[slot],
+      )}`,
+    );
+  }
+
+  const response = await form.show(player);
+
+  if (response.canceled || response.selection === undefined) {
+    return;
+  }
+
+  const slot = slots[response.selection];
+
+  if (slot !== undefined) {
+    await showSlotRefit(player, ship, slot, logger);
+  }
+}
+
+async function showSlotRefit(
+  player: Player,
+  ship: Entity,
+  slot: ShipModuleSlot,
+  logger: Logger,
+): Promise<void> {
+  const state = loadShipState(ship);
+
+  if (
+    state === undefined ||
+    state.configuration.frame !== "skycutter" ||
+    !isShipOwner(player, state) ||
+    !isAtDock(ship)
+  ) {
+    player.sendMessage("§eThe Skycutter left refit range.§r");
+    return;
+  }
+
+  const container = playerInventory(player);
+  const definitions = modulesForSlot(slot);
+  let form = new ActionFormData()
+    .title(`${displaySlot(slot)} Refit`)
+    .body(
+      `Installed: ${shipModuleName(
+        state.configuration.modules[slot],
+      )}\n\nChoose a replacement module. The swap is atomic.`,
+    );
+
+  for (const definition of definitions) {
+    const installed = state.configuration.modules[slot] === definition.itemId;
+    form = form.button(
+      `${
+        installed
+          ? "Installed"
+          : `Owned: ${countItem(container, definition.itemId)}`
+      } — ${definition.displayName}\n${definition.description}`,
+    );
+  }
+
+  const response = await form.show(player);
+
+  if (response.canceled || response.selection === undefined) {
+    return;
+  }
+
+  const selected = definitions[response.selection];
+
+  if (selected !== undefined) {
+    installShipModule(player, ship, slot, selected.itemId, logger);
+  }
+}
+
+function installShipModule(
+  player: Player,
+  ship: Entity,
+  slot: ShipModuleSlot,
+  itemId: string,
+  logger: Logger,
+): void {
+  const state = loadShipState(ship);
+
+  if (
+    state === undefined ||
+    state.configuration.frame !== "skycutter" ||
+    !isShipOwner(player, state) ||
+    !isAtDock(ship)
+  ) {
+    player.sendMessage("§eThe Skycutter is not secured in refit range.§r");
+    return;
+  }
+
+  const previousItemId = state.configuration.modules[slot];
+
+  if (previousItemId === itemId) {
+    if (itemId === IDENTIFIERS.aetherCannon) {
+      issueCannonControl(player, ship);
+    }
+
+    player.sendMessage(`§a${shipModuleName(itemId)} is already installed.§r`);
+    return;
+  }
+
+  if (
+    slot === "cargo" &&
+    previousItemId === IDENTIFIERS.expandedCargoHold &&
+    !canShrinkCargo(ship)
+  ) {
+    player.sendMessage(
+      "§cEmpty cargo slots 19–27 before replacing the Expanded Cargo Hold.§r",
+    );
+    return;
+  }
+
+  const container = playerInventory(player);
+  const plan = planMaterialConsumption(inventorySnapshot(container), [
+    { itemId, count: 1 },
+  ]);
+
+  if (plan === undefined) {
+    player.sendMessage(
+      `§cCraft or recover ${shipModuleName(itemId)} before installing it.§r`,
+    );
+    return;
+  }
+
+  consumeMaterials(container, plan);
+
+  if (previousItemId !== undefined) {
+    const remainder = container.addItem(new ItemStack(previousItemId));
+
+    if (remainder !== undefined) {
+      restoreMaterials(container, plan);
+      player.sendMessage(
+        "§cClear one inventory slot so the removed module can be returned.§r",
+      );
+      return;
+    }
+  }
+
+  const previousModules = { ...state.configuration.modules };
+  state.configuration.modules[slot] = itemId;
+
+  try {
+    applyShipConfiguration(ship, state.configuration.modules);
+    saveShipState(ship, state);
+  } catch (error) {
+    state.configuration.modules = previousModules;
+
+    try {
+      applyShipConfiguration(ship, previousModules);
+      saveShipState(ship, state);
+    } finally {
+      if (previousItemId !== undefined) {
+        consumeOne(container, previousItemId);
+      }
+
+      restoreMaterials(container, plan);
+    }
+
+    throw error;
+  }
+
+  const playerRepository = new PlayerStateRepository(
+    player,
+    STARTER_ISLAND.safeDock,
+  );
+  const playerState = playerRepository.load();
+
+  if (playerState.ownedShip !== undefined) {
+    playerState.ownedShip.modules = { ...state.configuration.modules };
+  }
+
+  if (
+    itemId === IDENTIFIERS.aetherCannon &&
+    (playerState.objective === "craft_combat_refit" ||
+      playerState.objective === "install_combat_refit")
+  ) {
+    playerState.objective = "defeat_sky_raider";
+  }
+
+  if (itemId === IDENTIFIERS.aetherCannon) {
+    issueCannonControl(player, ship);
+  }
+
+  playerRepository.save(playerState);
+  player.sendMessage(
+    `§a${shipModuleName(itemId)} installed. ${shipModuleName(
+      previousItemId,
+    )} returned.§r`,
+  );
+  logger.info("Skycutter module swapped.", {
+    playerId: player.id,
+    shipId: state.shipId,
+    slot,
+    previousItemId,
+    itemId,
+  });
 }
 
 function returnAetherCrystal(
@@ -579,12 +840,66 @@ async function deliverFroststeel(
 
   const repository = new PlayerStateRepository(player, STARTER_ISLAND.safeDock);
   const state = repository.load();
-  state.objective = "complete";
+  state.objective = "craft_combat_refit";
   repository.save(state);
   playerContainer.addItem(new ItemStack(IDENTIFIERS.repairKit, 2));
   player.sendMessage(
-    "§bCrystal-to-Cutter expedition complete. Dockmaster Elian awarded two Repair Kits.§r",
+    "§bCrystal-to-Cutter expedition complete. Dockmaster Elian awarded two Repair Kits and opened the Froststeel refit program.§r",
   );
+}
+
+async function returnRaiderCore(
+  player: Player,
+  playerContainer: Container,
+  logger: Logger,
+): Promise<void> {
+  const repository = new PlayerStateRepository(player, STARTER_ISLAND.safeDock);
+  const playerState = repository.load();
+
+  if (playerState.objective !== "return_raider_core") {
+    player.sendMessage("§eNo Raider Core delivery is currently expected.§r");
+    return;
+  }
+
+  let delivered = consumeOne(playerContainer, IDENTIFIERS.raiderCore);
+
+  if (!delivered) {
+    const ship = await resolveOwnedShip(player, false, logger);
+
+    if (ship !== undefined && isAtDock(ship)) {
+      const inventory = ship.getComponent(EntityComponentTypes.Inventory) as
+        EntityInventoryComponent | undefined;
+
+      if (inventory?.container !== undefined) {
+        delivered = consumeOne(inventory.container, IDENTIFIERS.raiderCore);
+      }
+    }
+  }
+
+  if (!delivered) {
+    player.sendMessage(
+      "§cBring the Raider Core in your inventory or docked Skycutter cargo.§r",
+    );
+    return;
+  }
+
+  const remainder = playerContainer.addItem(
+    new ItemStack(IDENTIFIERS.shieldProjector),
+  );
+
+  if (remainder !== undefined) {
+    player.dimension.spawnItem(remainder, player.location);
+  }
+
+  playerState.objective = "combat_complete";
+  repository.save(playerState);
+  player.sendMessage(
+    "§bDockyard Refit complete. Dockmaster Elian converted the core into a Shield Projector.§r",
+  );
+  player.sendMessage(
+    "Install it in the Utility slot for strong defense, or keep the Aether Cannon equipped for offense.",
+  );
+  logger.info("Raider Core returned.", { playerId: player.id });
 }
 
 function sendBriefing(player: Player): void {
@@ -599,6 +914,84 @@ function sendBriefing(player: Player): void {
       "Frostspire is east near X=253, Z=0. A starter skiff is repelled before reaching it.",
     );
   }
+}
+
+function issueCannonControl(player: Player, ship: Entity): void {
+  const playerContainer = playerInventory(player);
+  const shipInventory = ship.getComponent(EntityComponentTypes.Inventory) as
+    EntityInventoryComponent | undefined;
+
+  if (
+    countItem(playerContainer, IDENTIFIERS.cannonControl) > 0 ||
+    (shipInventory?.container !== undefined &&
+      countItem(shipInventory.container, IDENTIFIERS.cannonControl) > 0)
+  ) {
+    return;
+  }
+
+  const playerRemainder = playerContainer.addItem(
+    new ItemStack(IDENTIFIERS.cannonControl),
+  );
+
+  if (playerRemainder === undefined) {
+    player.sendMessage(
+      "§bDockmaster Elian issued a reusable Cannon Control.§r",
+    );
+    return;
+  }
+
+  const shipRemainder = shipInventory?.container?.addItem(playerRemainder);
+
+  if (shipRemainder === undefined && shipInventory?.container !== undefined) {
+    player.sendMessage(
+      "§bA reusable Cannon Control was loaded into Skycutter cargo.§r",
+    );
+    return;
+  }
+
+  player.dimension.spawnItem(shipRemainder ?? playerRemainder, player.location);
+  player.sendMessage(
+    "§eYour inventory was full, so the Cannon Control was dropped nearby.§r",
+  );
+}
+
+function canShrinkCargo(ship: Entity): boolean {
+  const inventory = ship.getComponent(EntityComponentTypes.Inventory) as
+    EntityInventoryComponent | undefined;
+  const container = inventory?.container;
+
+  if (container === undefined) {
+    return true;
+  }
+
+  for (let slot = 18; slot < container.size; slot += 1) {
+    if (container.getItem(slot) !== undefined) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function moduleLoadoutText(modules: {
+  hull?: string;
+  engine?: string;
+  cargo?: string;
+  utility?: string;
+}): string {
+  return (["hull", "engine", "cargo", "utility"] as const)
+    .map((slot) => `${displaySlot(slot)}: ${shipModuleName(modules[slot])}`)
+    .join("\n");
+}
+
+function displaySlot(slot: ShipModuleSlot): string {
+  const names: Readonly<Record<ShipModuleSlot, string>> = {
+    hull: "Hull",
+    engine: "Engine",
+    cargo: "Cargo",
+    utility: "Utility",
+  };
+  return names[slot];
 }
 
 function playerInventory(player: Player): Container {

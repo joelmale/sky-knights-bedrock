@@ -1,0 +1,22 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "skyknights:sky_raider",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/boat/dark_oak"
+      },
+      "geometry": {
+        "default": "geometry.skyknights.sky_raider"
+      },
+      "render_controllers": ["controller.render.default"],
+      "spawn_egg": {
+        "base_color": "#281810",
+        "overlay_color": "#D14B32"
+      }
+    }
+  }
+}

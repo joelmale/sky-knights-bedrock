@@ -268,7 +268,8 @@ Pass when:
 - A copied world retains pack bindings and saved state.
 - Two players can spawn safely and share a skiff.
 
-Defer the pack-upgrade row until a real `0.1.0` to `0.1.1` upgrade exists;
+Use the `0.1.0` to `0.2.0` upgrade session in
+`docs/DOCKYARD_REFIT_COMBAT_TEST_PLAN.md` for the pack-upgrade row;
 reinstalling the same version is not a meaningful upgrade test.
 
 ## Release acceptance criteria

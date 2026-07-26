@@ -1,6 +1,6 @@
-export const CURRENT_WORLD_SCHEMA_VERSION = 3;
-export const CURRENT_PLAYER_SCHEMA_VERSION = 2;
-export const CURRENT_SHIP_SCHEMA_VERSION = 2;
+export const CURRENT_WORLD_SCHEMA_VERSION = 4;
+export const CURRENT_PLAYER_SCHEMA_VERSION = 3;
+export const CURRENT_SHIP_SCHEMA_VERSION = 3;
 
 export interface DockLocation {
   dimensionId: string;
@@ -39,12 +39,30 @@ interface WorldStateV2 {
   migrations: string[];
 }
 
+interface WorldStateV3 {
+  schemaVersion: 3;
+  seed: number;
+  generatedIslandIds: string[];
+  islandVersions: Record<string, number>;
+  activeGeneration?: unknown;
+  migrations: string[];
+}
+
+export type SkyRaiderEncounterStatus = "dormant" | "active" | "defeated";
+
+export interface SkyRaiderEncounterState {
+  status: SkyRaiderEncounterStatus;
+  entityId?: string;
+  lastKnownLocation?: DockLocation;
+}
+
 export interface WorldState {
   schemaVersion: typeof CURRENT_WORLD_SCHEMA_VERSION;
   seed: number;
   generatedIslandIds: string[];
   islandVersions: Record<string, number>;
   activeGeneration?: GenerationJob;
+  skyRaiderEncounter: SkyRaiderEncounterState;
   migrations: string[];
 }
 
@@ -56,7 +74,11 @@ export type TutorialObjective =
   | "assemble_skycutter"
   | "reach_frostspire"
   | "return_frost_cargo"
-  | "complete";
+  | "craft_combat_refit"
+  | "install_combat_refit"
+  | "defeat_sky_raider"
+  | "return_raider_core"
+  | "combat_complete";
 
 export type ShipFrame = "skiff" | "skycutter";
 export type ShipModuleSlot = "hull" | "engine" | "cargo" | "utility";
@@ -76,6 +98,17 @@ interface PlayerStateV1 {
   recoveryEnabled: boolean;
   discoveredIslandIds: string[];
   lastSafeDock: DockLocation;
+}
+
+interface PlayerStateV2 {
+  schemaVersion: 2;
+  initialized: boolean;
+  recoveryEnabled: boolean;
+  discoveredIslandIds: string[];
+  lastSafeDock: DockLocation;
+  skycutterUnlocked: boolean;
+  objective: unknown;
+  ownedShip?: unknown;
 }
 
 export interface PlayerState {
@@ -100,6 +133,25 @@ interface ShipStateV1 {
   };
 }
 
+interface ShipStateV2 {
+  schemaVersion: 2;
+  shipId: string;
+  ownerPlayerId?: string;
+  ownerName?: string;
+  homeDock: DockLocation;
+  docked: boolean;
+  configuration: {
+    frame: ShipFrame;
+    modules: ShipModuleSlots;
+  };
+}
+
+export interface ShipCombatState {
+  shotsFired: number;
+  hits: number;
+  raidersDefeated: number;
+}
+
 export interface ShipState {
   schemaVersion: typeof CURRENT_SHIP_SCHEMA_VERSION;
   shipId: string;
@@ -107,6 +159,7 @@ export interface ShipState {
   ownerName?: string;
   homeDock: DockLocation;
   docked: boolean;
+  combat: ShipCombatState;
   configuration: {
     frame: ShipFrame;
     modules: ShipModuleSlots;
@@ -211,9 +264,17 @@ function tutorialObjective(
     value === "assemble_skycutter" ||
     value === "reach_frostspire" ||
     value === "return_frost_cargo" ||
-    value === "complete"
+    value === "craft_combat_refit" ||
+    value === "install_combat_refit" ||
+    value === "defeat_sky_raider" ||
+    value === "return_raider_core" ||
+    value === "combat_complete"
   ) {
     return value;
+  }
+
+  if (value === "complete") {
+    return "craft_combat_refit";
   }
 
   return discoveredIslandIds.includes("ember_outpost")
@@ -235,6 +296,51 @@ function ownedShip(
     frame: shipFrame(value.frame, "skiff"),
     lastKnownLocation: dockLocation(value.lastKnownLocation, fallbackDock),
     modules: shipModules(value.modules),
+  };
+}
+
+function skyRaiderEncounter(value: unknown): SkyRaiderEncounterState {
+  if (!isRecord(value)) {
+    return { status: "dormant" };
+  }
+
+  const status =
+    value.status === "active" || value.status === "defeated"
+      ? value.status
+      : "dormant";
+  const fallback = {
+    dimensionId: "minecraft:overworld",
+    x: 174,
+    y: 172,
+    z: 28,
+  };
+
+  return {
+    status,
+    entityId: typeof value.entityId === "string" ? value.entityId : undefined,
+    lastKnownLocation:
+      value.lastKnownLocation === undefined
+        ? undefined
+        : dockLocation(value.lastKnownLocation, fallback),
+  };
+}
+
+function shipCombat(value: unknown): ShipCombatState {
+  if (!isRecord(value)) {
+    return {
+      shotsFired: 0,
+      hits: 0,
+      raidersDefeated: 0,
+    };
+  }
+
+  return {
+    shotsFired: Math.max(0, Math.trunc(finiteNumber(value.shotsFired, 0))),
+    hits: Math.max(0, Math.trunc(finiteNumber(value.hits, 0))),
+    raidersDefeated: Math.max(
+      0,
+      Math.trunc(finiteNumber(value.raidersDefeated, 0)),
+    ),
   };
 }
 
@@ -280,6 +386,7 @@ export function createWorldState(seed: number): WorldState {
     seed: seed >>> 0,
     generatedIslandIds: [],
     islandVersions: {},
+    skyRaiderEncounter: { status: "dormant" },
     migrations: [],
   };
 }
@@ -300,7 +407,8 @@ export function migrateWorldState(
       seed: finiteNumber(legacy.seed, createSeed()) >>> 0,
       generatedIslandIds: stringArray(legacy.generatedIslandIds),
       islandVersions: {},
-      migrations: ["world:v1->v2", "world:v2->v3"],
+      skyRaiderEncounter: { status: "dormant" },
+      migrations: ["world:v1->v2", "world:v2->v3", "world:v3->v4"],
     };
   }
 
@@ -313,7 +421,26 @@ export function migrateWorldState(
       generatedIslandIds: stringArray(legacy.generatedIslandIds),
       islandVersions: {},
       activeGeneration: generationJob(legacy.activeGeneration),
-      migrations: [...stringArray(legacy.migrations), "world:v2->v3"],
+      skyRaiderEncounter: { status: "dormant" },
+      migrations: [
+        ...stringArray(legacy.migrations),
+        "world:v2->v3",
+        "world:v3->v4",
+      ],
+    };
+  }
+
+  if (value.schemaVersion === 3) {
+    const legacy = value as unknown as WorldStateV3;
+
+    return {
+      schemaVersion: CURRENT_WORLD_SCHEMA_VERSION,
+      seed: finiteNumber(legacy.seed, createSeed()) >>> 0,
+      generatedIslandIds: stringArray(legacy.generatedIslandIds),
+      islandVersions: numberRecord(legacy.islandVersions),
+      activeGeneration: generationJob(legacy.activeGeneration),
+      skyRaiderEncounter: { status: "dormant" },
+      migrations: [...stringArray(legacy.migrations), "world:v3->v4"],
     };
   }
 
@@ -329,6 +456,7 @@ export function migrateWorldState(
     generatedIslandIds: stringArray(value.generatedIslandIds),
     islandVersions: numberRecord(value.islandVersions),
     activeGeneration: generationJob(value.activeGeneration),
+    skyRaiderEncounter: skyRaiderEncounter(value.skyRaiderEncounter),
     migrations: stringArray(value.migrations),
   };
 }
@@ -355,12 +483,13 @@ export function parsePlayerState(
 
   if (
     value.schemaVersion !== 1 &&
+    value.schemaVersion !== 2 &&
     value.schemaVersion !== CURRENT_PLAYER_SCHEMA_VERSION
   ) {
     return createPlayerState(fallbackDock);
   }
 
-  const legacy = value as unknown as PlayerStateV1;
+  const legacy = value as unknown as PlayerStateV1 | PlayerStateV2;
   const dock = dockLocation(legacy.lastSafeDock, fallbackDock);
   const discoveredIslandIds = stringArray(legacy.discoveredIslandIds);
 
@@ -388,6 +517,7 @@ export function parseShipState(
       shipId: fallbackId,
       homeDock: fallbackDock,
       docked: false,
+      combat: shipCombat(undefined),
       configuration: {
         frame: fallbackFrame,
         modules: {},
@@ -407,9 +537,32 @@ export function parseShipState(
           : undefined,
       homeDock: dockLocation(legacy.homeDock, fallbackDock),
       docked: false,
+      combat: shipCombat(undefined),
       configuration: {
         frame: "skiff",
         modules: legacyShipModules(legacy.configuration?.modules),
+      },
+    };
+  }
+
+  if (value.schemaVersion === 2) {
+    const legacy = value as unknown as ShipStateV2;
+
+    return {
+      schemaVersion: CURRENT_SHIP_SCHEMA_VERSION,
+      shipId: typeof legacy.shipId === "string" ? legacy.shipId : fallbackId,
+      ownerPlayerId:
+        typeof legacy.ownerPlayerId === "string"
+          ? legacy.ownerPlayerId
+          : undefined,
+      ownerName:
+        typeof legacy.ownerName === "string" ? legacy.ownerName : undefined,
+      homeDock: dockLocation(legacy.homeDock, fallbackDock),
+      docked: legacy.docked === true,
+      combat: shipCombat(undefined),
+      configuration: {
+        frame: shipFrame(legacy.configuration?.frame, fallbackFrame),
+        modules: shipModules(legacy.configuration?.modules),
       },
     };
   }
@@ -431,6 +584,7 @@ export function parseShipState(
       typeof value.ownerName === "string" ? value.ownerName : undefined,
     homeDock: dockLocation(value.homeDock, fallbackDock),
     docked: value.docked === true,
+    combat: shipCombat(value.combat),
     configuration: {
       frame: shipFrame(configuration?.frame, fallbackFrame),
       modules: shipModules(configuration?.modules),

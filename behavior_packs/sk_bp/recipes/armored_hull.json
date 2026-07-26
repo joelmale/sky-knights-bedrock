@@ -1,0 +1,29 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "skyknights:armored_hull"
+    },
+    "tags": ["crafting_table"],
+    "pattern": ["FIF", "ICI", "FIF"],
+    "key": {
+      "F": {
+        "item": "skyknights:froststeel_ingot"
+      },
+      "I": {
+        "item": "minecraft:iron_ingot"
+      },
+      "C": {
+        "item": "skyknights:canvas_bundle"
+      }
+    },
+    "result": {
+      "item": "skyknights:armored_hull"
+    },
+    "unlock": [
+      {
+        "context": "AlwaysUnlocked"
+      }
+    ]
+  }
+}

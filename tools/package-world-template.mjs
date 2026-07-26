@@ -66,13 +66,13 @@ await cp(path.join(root, "resource_packs", "sk_rp"), resourcePackTarget, {
 await writeJson(path.join(staging, "world_behavior_packs.json"), [
   {
     pack_id: "4e8ae092-a400-48fc-82d7-f1c42decefd6",
-    version: [0, 1, 0],
+    version: [0, 2, 0],
   },
 ]);
 await writeJson(path.join(staging, "world_resource_packs.json"), [
   {
     pack_id: "83d16786-1603-4b13-b4d1-4c555fb37865",
-    version: [0, 1, 0],
+    version: [0, 2, 0],
   },
 ]);
 

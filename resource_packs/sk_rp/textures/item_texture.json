@@ -31,6 +31,30 @@
     },
     "skyknights_froststeel_ingot": {
       "textures": "textures/items/diamond"
+    },
+    "skyknights_armored_hull": {
+      "textures": "textures/items/netherite_ingot"
+    },
+    "skyknights_frostfire_engine": {
+      "textures": "textures/items/blaze_rod"
+    },
+    "skyknights_expanded_cargo_hold": {
+      "textures": "textures/items/bundle"
+    },
+    "skyknights_aether_cannon": {
+      "textures": "textures/items/compass_item"
+    },
+    "skyknights_shield_projector": {
+      "textures": "textures/items/totem"
+    },
+    "skyknights_cannon_control": {
+      "textures": "textures/items/carrot_on_a_stick"
+    },
+    "skyknights_aether_charge": {
+      "textures": "textures/items/fireball"
+    },
+    "skyknights_raider_core": {
+      "textures": "textures/items/nether_star"
     }
   }
 }

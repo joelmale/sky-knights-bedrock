@@ -15,6 +15,7 @@ export function validateRegistries(logger: Logger): ValidationResult {
     IDENTIFIERS.skiff,
     IDENTIFIERS.skycutter,
     IDENTIFIERS.dockmaster,
+    IDENTIFIERS.skyRaider,
   ];
   const requiredStructures = [
     IDENTIFIERS.starterIsland,
@@ -32,6 +33,14 @@ export function validateRegistries(logger: Logger): ValidationResult {
     IDENTIFIERS.navigatorModule,
     IDENTIFIERS.repairKit,
     IDENTIFIERS.froststeelIngot,
+    IDENTIFIERS.armoredHull,
+    IDENTIFIERS.frostfireEngine,
+    IDENTIFIERS.expandedCargoHold,
+    IDENTIFIERS.aetherCannon,
+    IDENTIFIERS.shieldProjector,
+    IDENTIFIERS.cannonControl,
+    IDENTIFIERS.aetherCharge,
+    IDENTIFIERS.raiderCore,
   ];
 
   for (const identifier of requiredEntities) {

@@ -34,21 +34,22 @@ class FakeDynamicPropertyHost implements DynamicPropertyHost {
 }
 
 describe("WorldStateRepository", () => {
-  it("creates and persists a v3 world state", () => {
+  it("creates and persists a v4 world state", () => {
     const host = new FakeDynamicPropertyHost();
     const repository = new WorldStateRepository(host, () => 42);
 
     expect(repository.load()).toEqual({
-      schemaVersion: 3,
+      schemaVersion: 4,
       seed: 42,
       generatedIslandIds: [],
       islandVersions: {},
+      skyRaiderEncounter: { status: "dormant" },
       migrations: [],
     });
     expect(repository.load().seed).toBe(42);
   });
 
-  it("migrates a v1 world through v3 once", () => {
+  it("migrates a v1 world through v4 once", () => {
     const host = new FakeDynamicPropertyHost();
     host.setDynamicProperty(
       "skyknights:world_state",
@@ -61,15 +62,17 @@ describe("WorldStateRepository", () => {
     const repository = new WorldStateRepository(host, () => 99);
 
     expect(repository.load()).toEqual({
-      schemaVersion: 3,
+      schemaVersion: 4,
       seed: 7,
       generatedIslandIds: ["starter_island"],
       islandVersions: {},
-      migrations: ["world:v1->v2", "world:v2->v3"],
+      skyRaiderEncounter: { status: "dormant" },
+      migrations: ["world:v1->v2", "world:v2->v3", "world:v3->v4"],
     });
     expect(repository.load().migrations).toEqual([
       "world:v1->v2",
       "world:v2->v3",
+      "world:v3->v4",
     ]);
   });
 
@@ -87,11 +90,36 @@ describe("WorldStateRepository", () => {
     const repository = new WorldStateRepository(host, () => 99);
 
     expect(repository.load()).toEqual({
-      schemaVersion: 3,
+      schemaVersion: 4,
       seed: 8,
       generatedIslandIds: ["starter_island"],
       islandVersions: {},
-      migrations: ["world:v1->v2", "world:v2->v3"],
+      activeGeneration: undefined,
+      skyRaiderEncounter: { status: "dormant" },
+      migrations: ["world:v1->v2", "world:v2->v3", "world:v3->v4"],
+    });
+  });
+
+  it("migrates a v3 world into a dormant shared combat encounter", () => {
+    const host = new FakeDynamicPropertyHost();
+    host.setDynamicProperty(
+      "skyknights:world_state",
+      JSON.stringify({
+        schemaVersion: 3,
+        seed: 12,
+        generatedIslandIds: ["starter_island", "frostspire"],
+        islandVersions: { starter_island: 3, frostspire: 1 },
+        migrations: ["world:v2->v3"],
+      }),
+    );
+    const repository = new WorldStateRepository(host, () => 99);
+
+    expect(repository.load()).toMatchObject({
+      schemaVersion: 4,
+      seed: 12,
+      islandVersions: { starter_island: 3, frostspire: 1 },
+      skyRaiderEncounter: { status: "dormant" },
+      migrations: ["world:v2->v3", "world:v3->v4"],
     });
   });
 });
@@ -117,7 +145,7 @@ describe("gameplay document migrations", () => {
         fallbackDock,
       ),
     ).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       initialized: true,
       recoveryEnabled: true,
       discoveredIslandIds: ["ember_outpost"],
@@ -145,11 +173,16 @@ describe("gameplay document migrations", () => {
         fallbackDock,
       ),
     ).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       shipId: "old-skiff",
       ownerPlayerId: "player-1",
       homeDock: fallbackDock,
       docked: false,
+      combat: {
+        shotsFired: 0,
+        hits: 0,
+        raidersDefeated: 0,
+      },
       configuration: {
         frame: "skiff",
         modules: {
@@ -188,5 +221,28 @@ describe("gameplay document migrations", () => {
     expect(state.configuration.modules.engine).toBe("skyknights:aether_engine");
     expect(state.ownerName).toBe("SkyKnight");
     expect(state.docked).toBe(true);
+    expect(state.combat).toEqual({
+      shotsFired: 0,
+      hits: 0,
+      raidersDefeated: 0,
+    });
+  });
+
+  it("maps the legacy completed objective to the refit progression", () => {
+    const state = parsePlayerState(
+      {
+        schemaVersion: 2,
+        initialized: true,
+        recoveryEnabled: true,
+        discoveredIslandIds: ["ember_outpost", "frostspire"],
+        lastSafeDock: fallbackDock,
+        skycutterUnlocked: true,
+        objective: "complete",
+      },
+      fallbackDock,
+    );
+
+    expect(state.schemaVersion).toBe(3);
+    expect(state.objective).toBe("craft_combat_refit");
   });
 });

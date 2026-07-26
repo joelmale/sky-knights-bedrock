@@ -1,0 +1,109 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "skyknights:sky_raider",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "spawn_category": "monster"
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [
+          "skyknights_hostile_ship",
+          "skyknights_raider",
+          "monster",
+          "inanimate"
+        ]
+      },
+      "minecraft:collision_box": {
+        "width": 4.2,
+        "height": 1.5
+      },
+      "minecraft:health": {
+        "value": 120,
+        "max": 120
+      },
+      "minecraft:follow_range": {
+        "value": 56,
+        "max": 56
+      },
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": true
+      },
+      "minecraft:can_fly": {},
+      "minecraft:movement": {
+        "value": 0.17
+      },
+      "minecraft:flying_speed": {
+        "value": 0.17
+      },
+      "minecraft:movement.fly": {
+        "max_turn": 12,
+        "start_speed": 0.08,
+        "speed_when_turning": 0.13
+      },
+      "minecraft:navigation.fly": {
+        "can_path_from_air": true,
+        "can_path_over_water": true,
+        "avoid_damage_blocks": true
+      },
+      "minecraft:shooter": {
+        "def": "minecraft:arrow"
+      },
+      "minecraft:behavior.nearest_attackable_target": {
+        "priority": 1,
+        "must_see": true,
+        "reselect_targets": true,
+        "within_radius": 56,
+        "entity_types": [
+          {
+            "filters": {
+              "test": "is_family",
+              "subject": "other",
+              "value": "skyknights_ship"
+            },
+            "max_dist": 56
+          },
+          {
+            "filters": {
+              "test": "is_family",
+              "subject": "other",
+              "value": "player"
+            },
+            "max_dist": 48
+          }
+        ]
+      },
+      "minecraft:behavior.hurt_by_target": {
+        "priority": 2
+      },
+      "minecraft:behavior.ranged_attack": {
+        "priority": 3,
+        "attack_interval": 2.5,
+        "attack_radius": 48,
+        "attack_radius_min": 8,
+        "ranged_fov": 180,
+        "speed_multiplier": 1
+      },
+      "minecraft:knockback_resistance": {
+        "value": 1
+      },
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "fall",
+            "deals_damage": "no"
+          }
+        ]
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:nameable": {},
+      "minecraft:persistent": {}
+    }
+  }
+}

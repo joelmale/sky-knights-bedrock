@@ -11,6 +11,7 @@ import {
 import {
   BASIC_SHIP_RANGE,
   BASIC_SHIP_WARNING_RANGE,
+  COMBAT,
   DOCKYARD,
   IDENTIFIERS,
   STARTER_ISLAND,
@@ -28,6 +29,36 @@ import { hasExtendedRange, horizontalDistanceSquared } from "./ship-rules";
 const RANGE_WARNING_TAG = "skyknights.range_warning";
 
 export function registerShipEvents(logger: Logger): void {
+  world.beforeEvents.entityHurt.subscribe((event) => {
+    if (!isShip(event.hurtEntity)) {
+      return;
+    }
+
+    let multiplier = 1;
+
+    if (event.hurtEntity.hasTag("skyknights.module.hull.armored")) {
+      multiplier *= COMBAT.armoredHullDamageMultiplier;
+    }
+
+    if (event.hurtEntity.hasTag("skyknights.module.utility.shield")) {
+      multiplier *= COMBAT.shieldDamageMultiplier;
+    }
+
+    if (multiplier < 1) {
+      event.damage *= multiplier;
+      const ship = event.hurtEntity;
+
+      system.run(() => {
+        if (ship.isValid) {
+          ship.dimension.spawnParticle(
+            "minecraft:critical_hit_emitter",
+            ship.location,
+          );
+        }
+      });
+    }
+  });
+
   world.afterEvents.playerInteractWithEntity.subscribe(({ player, target }) => {
     if (!isShip(target)) {
       return;
