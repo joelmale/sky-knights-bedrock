@@ -214,10 +214,16 @@ function sendDebugReport(
       : world.getEntity(playerState.ownedShip.entityId);
   const shipState =
     ownedEntity === undefined ? undefined : loadShipState(ownedEntity);
+  const layoutRecords = Object.keys(state.islandLayout)
+    .sort()
+    .map((id) => state.islandLayout[id]);
+  const modifiedIslandIds = layoutRecords
+    .filter((record) => record.playerModified)
+    .map((record) => record.id);
 
   player.sendMessage("§bSky Knights debug§r");
   player.sendMessage(
-    `schema=${state.schemaVersion} seed=${state.seed} control=${player.getControlScheme()}`,
+    `schema=${state.schemaVersion} seed=${state.seed} worldSeed=${state.worldSeed} profile=${state.worldProfile} layoutVersion=${state.layoutVersion} control=${player.getControlScheme()}`,
   );
   player.sendMessage(
     `islands=${state.generatedIslandIds.join(",") || "none"} activeJob=${
@@ -233,6 +239,14 @@ function sendDebugReport(
   }
 
   player.sendMessage(`islandVersions=${islandVersions.join(",") || "none"}`);
+  player.sendMessage(
+    `layoutRecords=${layoutRecords.length} playerModified=${modifiedIslandIds.join(",") || "none"}`,
+  );
+  for (const record of layoutRecords) {
+    player.sendMessage(
+      `layout:${record.id}=${record.origin.x},${record.origin.y},${record.origin.z}:${record.placement}:${record.playerModified ? "modified" : "authored"}`,
+    );
+  }
   player.sendMessage(
     `skiffsHere=${skiffCount} skycuttersHere=${skycutterCount} raidersHere=${raiderCount} dockmastersHere=${dockmasterCount}`,
   );

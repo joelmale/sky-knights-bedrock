@@ -85,6 +85,8 @@ npm run local-deploy:experimental
 npm run local-deploy:gametest Deploy the in-engine GameTest pack
 npm run mcaddon               Build an importable development .mcaddon
 npm run mcaddon:production    Build a production .mcaddon
+npm run structures:generate   Rewrite authored structures from deterministic sources
+npm run structures:check      Verify checked-in structures without rewriting them
 npm run world-template -- --world "<path>"
                               Package a copy of a void source world
 npm run verify                Run all checks and package production output
@@ -139,12 +141,17 @@ dockyard refitting and airship combat:
 8. Return its Raider Core for a defensive Shield Projector.
 9. Use dock recall, repair, and reconstruction to maintain the owned ship.
 
-World schema 4 records the shared Raider encounter in addition to independent
-island content versions. Player and ship schemas are version 3. Opening an
-older test world upgrades the solid `starter_island:v3`, replenishes
-progression-safe `ember_outpost:v4`, upgrades `frostspire:v2`, and migrates
-completed Crystal-to-Cutter saves into the refit objective. Dockmaster Elian
-also self-heals if an older reload left the starter dock without its NPC.
+The current development checkpoint uses world schema 5. It retains the schema-4
+Raider encounter and island content versions, then adds a derived world seed,
+profile, deterministic layout records, and player-modified island protection.
+Player and ship schemas remain version 3. Opening an older test world preserves
+the three released island origins, ships, progression, and encounter state
+while recording the expanded realm layout.
+
+Five additional authored island structures are packaged and deterministically
+planned, but remain explicitly `structure_only`. They cannot be discovered or
+generated through gameplay until their creatures, items, guaranteed rewards,
+and progression paths are implemented and validated.
 
 Development commands:
 
@@ -172,6 +179,11 @@ keyboard, controller, touch, reload, multiplayer, GameTest, experimental
 dimension, and world-template validation sessions. The shorter
 [docs/PHASE_0_VALIDATION.md](docs/PHASE_0_VALIDATION.md) remains the acceptance
 checklist.
+
+Substantial future slices use the vendor-neutral
+[multi-agent development workflow](docs/MULTI_AGENT_WORKFLOW.md): one central
+architect/integrator, bounded lower-cost specialists with exclusive file
+ownership, and an independent QA review before verification and commit.
 
 ## API policy
 

@@ -42,7 +42,7 @@ Pass when:
 
 - the Content Log has no pack, script, entity, recipe, texture, geometry, or
   structure errors;
-- debug reports world schema `3`, `activeJob=none`,
+- debug reports world schema `5`, `activeJob=none`,
   `starter_island:v3`, `ember_outpost:v3`, and `frostspire:v1`;
 - the starter island is a continuous solid mass with no ordinary walking
   surface gaps;

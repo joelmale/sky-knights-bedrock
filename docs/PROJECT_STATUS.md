@@ -7,8 +7,8 @@
 > Stable API baseline: Minecraft Bedrock 1.26.30+, `@minecraft/server` 2.8.0,
 > `@minecraft/server-ui` 2.1.0
 >
-> Current state: implemented, automatically verified, and locally deployed;
-> `0.2.0` hands-on validation pending
+> Current state: `0.2.0` gameplay plus the Phase 3 deterministic-realm
+> foundation implemented; Phase 3 hands-on validation pending
 
 This is the authoritative implementation tracker. The roadmap describes the
 target product; this document records what the repository currently delivers.
@@ -22,7 +22,7 @@ in [`VALIDATION_LOG.md`](VALIDATION_LOG.md).
 | Phase 0 — capability proofs | Substantially implemented | Stable packs, entity flight, authored structures, persistence, GameTest, world-template packager, and experimental dimension profile exist. Controller/touch, clean-client template import, and the complete experimental matrix remain manual gates. |
 | Phase 1 — production scaffold | Implemented | Repeatable lint/build/test/deploy/package commands, startup registry validation, structured logging, diagnostics, CI, and fixed dynamic-property repositories are present. |
 | Phase 2 — gray-box vertical loop | Implemented and hands-on exercised | Solid home island, Dockmaster, crafting, Ember expedition, starter skiff, rescue, persistence, and safe return were exercised during development. Full multiplayer/input matrix remains open. |
-| Phase 3 — deterministic sky realm | Partially implemented | Three fixed authored islands use resumable placement and independent content versions. Seed/profile selection, four biome families, and hybrid procedural layout remain deferred. |
+| Phase 3 — deterministic sky realm | Foundation implemented; content activation pending | Schema 5, world profile/seed derivation, four-family registry, three pinned islands, five seeded structure-only islands, persistent placements, clear-lane checks, origin-aware resumable placement, activation gates, and progression closure exist. New-island creatures, rewards, reveal UI, and gameplay activation remain. |
 | Phase 4 — progression/combat/NPC depth | Partially implemented | Guaranteed Crystal/Froststeel progression, tutorial, Dockmaster, Frostspire Warden, and Ashwing Raider exist. Full tool ladder, four NPC roles, structure set, creature roster, and named weapons remain. |
 | Phase 5 — ship builder depth | First substantial slice implemented | Skiff and Skycutter frames, four module slots, atomic refits, variants, seats, ownership, cargo, hull, cannon, shield, docking, recall, and reconstruction exist. `0.2.0` hands-on and device/multiplayer gates remain. |
 | Phases 6–7 — content complete and hardening | Not started as milestones | Packaging infrastructure exists, but final art/content, balance, localization breadth, performance, device matrix, migrations from public builds, and release-candidate checks remain. |
@@ -52,7 +52,7 @@ not require them.
 
 | Content type | Implemented |
 | --- | --- |
-| Authored islands | Verdant starter island, Ember Outpost, Frostspire |
+| Authored islands | 8 packaged: 3 gameplay-ready and 5 structure-only |
 | Custom entities | Dockmaster, starter skiff, Skycutter, Ashwing Raider |
 | Custom items | 18 |
 | Custom recipes | 12 |
@@ -62,7 +62,7 @@ not require them.
 | Advanced modules | Armored Hull, Frostfire Engine, Expanded Cargo Hold, Aether Cannon, Shield Projector |
 | Encounters | Ember Guardian, Frostspire Warden, Ashwing Raider |
 | GameTests | 4 registered in-engine tests |
-| Host tests | 25 tests across 8 files |
+| Host tests | 138 tests across 14 files |
 | Developer commands | `debug`, `skiff`, `skycutter`, `island`, `raider`, `recover` |
 
 ## Systems implemented
@@ -82,6 +82,12 @@ not require them.
 ### World generation and recovery
 
 - Authored `.mcstructure` placement through a resumable generation queue.
+- Four-family deterministic registry with three permanently pinned islands and
+  five seeded island placements.
+- Persisted world profile, layout seed, layout version, origins, reserved
+  bounds, and sticky player-modified protection.
+- New-island activation fails closed at `structure_only`; incomplete content
+  cannot enter the generation queue.
 - Per-island content versions and integrity checks.
 - Deterministic rebuilding of corrected islands.
 - Solid starter-island surface and safe dock.
@@ -93,11 +99,11 @@ not require them.
 
 | Document | Schema | Tracks |
 | --- | --- | --- |
-| World | 4 | seed, generated islands, content versions, active generation job, shared Raider encounter, migrations |
+| World | 5 | base/derived seed, profile, deterministic island layout, player-modified protection, generated islands, content versions, active job, shared Raider encounter, migrations |
 | Player | 3 | initialization, recovery, discoveries, safe dock, objectives, Skycutter unlock, owned ship |
 | Ship | 3 | identity, owner, home dock, docked state, frame, named modules, combat counters |
 
-Supported migrations cover world schemas 1–3, player schemas 1–2, and ship
+Supported migrations cover world schemas 1–4, player schemas 1–2, and ship
 schemas 1–2.
 
 ### Airships
@@ -126,7 +132,7 @@ schemas 1–2.
 
 ## Verification snapshot
 
-The `0.2.0` source state has passed:
+The current development source has passed:
 
 ```text
 npm run verify
@@ -136,9 +142,10 @@ node tools/project.mjs local-deploy --once
 
 Results:
 
+- non-mutating generated-structure verification: passed;
 - formatting/lint: passed;
 - TypeScript/stable bundle: passed;
-- host tests: 25 passed;
+- host tests: 138 passed across 14 files;
 - production `.mcaddon`: built;
 - experimental profile: built;
 - GameTest profile: built;
@@ -152,6 +159,9 @@ Minecraft validation is explicitly tracked below.
 
 | Gate | Status | Test source |
 | --- | --- | --- |
+| Phase 3 fresh/schema-4 migration and layout safety | Pending | [`PHASE_3_STABILIZATION_TEST_PLAN.md`](PHASE_3_STABILIZATION_TEST_PLAN.md) |
+| Phase 3 player-modified terrain protection | Pending | Phase 3 stabilization plan, Session D |
+| Phase 3 structure-only activation isolation | Pending | Phase 3 stabilization plan, Session E |
 | `0.2.0` fresh Survival progression | Pending | [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md) |
 | `0.1.0` → `0.2.0` world migration | Pending | Dockyard test plan, Session A |
 | All refit effects and visuals | Pending | Dockyard test plan, Sessions D–E |
@@ -170,6 +180,9 @@ Minecraft validation is explicitly tracked below.
   structures.
 - Island placement is authored-first; infinite/procedural generation is not
   implemented.
+- Five additional structures have deterministic placements but intentionally
+  have no player-facing reveal or activation until their content dependencies
+  ship.
 - Stable release architecture remains a supplied world/template; the custom
   dimension is experimental.
 - Current art is functional gray-box/vanilla-derived presentation, not final
@@ -179,13 +192,13 @@ Minecraft validation is explicitly tracked below.
 
 ## Next recommended work
 
-1. Execute and record the complete `0.2.0` hands-on test plan.
-2. Fix only reproducible playtest defects before adding another feature slice.
-3. Run the two-player owner/gunner encounter and controller checks.
-4. Import the `.mcaddon` and world template on a clean client.
-5. After the validation gate passes, choose between:
-   - a combat/balance polish slice; or
-   - the first new biome/structure/content-family slice.
+1. Execute and record the Phase 3 stabilization plan on a fresh world and a
+   backed-up schema-4 world copy.
+2. Complete the outstanding `0.2.0` combat/refit hands-on rows.
+3. Fix only reproducible playtest defects before activating new content.
+4. Implement one complete new-island vertical slice, including assets,
+   guaranteed progression, reveal/holding behavior, and multiplayer checks.
+5. Activate that island only after its content-contract and hands-on gates pass.
 
 ## Documentation map
 
@@ -195,9 +208,11 @@ Minecraft validation is explicitly tracked below.
 | [`PROJECT_STATUS.md`](PROJECT_STATUS.md) | Current authoritative implementation and remaining work |
 | [`VALIDATION_LOG.md`](VALIDATION_LOG.md) | Automated and hands-on evidence ledger |
 | [`DECISIONS.md`](DECISIONS.md) | Accepted architecture decisions |
+| [`MULTI_AGENT_WORKFLOW.md`](MULTI_AGENT_WORKFLOW.md) | Vendor-neutral central/specialist/QA workflow |
 | [`BEDROCK_ADDON_ROADMAP.md`](../BEDROCK_ADDON_ROADMAP.md) | Product target and phased roadmap |
 | [`DEVELOPMENT_ENVIRONMENT.md`](DEVELOPMENT_ENVIRONMENT.md) | Tooling, deployment, audit, and debugging |
 | [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md) | Current `0.2.0` acceptance plan |
+| [`PHASE_3_STABILIZATION_TEST_PLAN.md`](PHASE_3_STABILIZATION_TEST_PLAN.md) | Schema-5, layout, activation, and migration acceptance |
 | [`CRYSTAL_TO_CUTTER_TEST_PLAN.md`](CRYSTAL_TO_CUTTER_TEST_PLAN.md) | Base Skycutter progression regression |
 | [`PHASE_2_PLAYTEST.md`](PHASE_2_PLAYTEST.md) | Short starter-island/skiff regression |
 | [`HANDS_ON_TEST_PLAN.md`](HANDS_ON_TEST_PLAN.md) | Broad platform, input, multiplayer, profile, and packaging matrix |

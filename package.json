@@ -25,8 +25,9 @@
     "mcaddon": "node tools/project.mjs mcaddon",
     "mcaddon:production": "node tools/project.mjs mcaddon --production",
     "structures:generate": "node tools/generate-structures.mjs",
+    "structures:check": "node tools/generate-structures.mjs --check",
     "world-template": "npm run build && node tools/package-world-template.mjs",
-    "verify": "npm run structures:generate && npm run check && npm run mcaddon:production && npm run build:profiles",
+    "verify": "npm run structures:check && npm run check && npm run mcaddon:production && npm run build:profiles",
     "enablemcloopback": "CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-1958404141-86561845-1752920682-3514627264-368642714-62675701-733520436",
     "enablemcpreviewloopback": "CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-424268864-5579737-879501358-346833251-474568803-887069379-4040235476"
   },

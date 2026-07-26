@@ -1,10 +1,17 @@
+import {
+  ISLAND_STRUCTURE_IDS,
+  IslandDefinition,
+  islandDefinition,
+} from "./islands";
+
 export const IDENTIFIERS = {
   skiff: "skyknights:skiff",
   skycutter: "skyknights:skycutter",
   dockmaster: "skyknights:dockmaster",
-  starterIsland: "skyknights:starter_island",
-  emberOutpost: "skyknights:ember_outpost",
-  frostspire: "skyknights:frostspire",
+  // Keep legacy consumers aligned with the authoritative island registry.
+  starterIsland: ISLAND_STRUCTURE_IDS.starter_island,
+  emberOutpost: ISLAND_STRUCTURE_IDS.ember_outpost,
+  frostspire: ISLAND_STRUCTURE_IDS.frostspire,
   skyRealm: "skyknights:sky_realm",
   shipCore: "skyknights:ship_core",
   canvasBundle: "skyknights:canvas_bundle",
@@ -27,69 +34,86 @@ export const IDENTIFIERS = {
   skyRaider: "skyknights:sky_raider",
 } as const;
 
+function pinnedIsland(id: string): {
+  definition: IslandDefinition;
+  origin: NonNullable<IslandDefinition["pinnedOrigin"]>;
+} {
+  const definition = islandDefinition(id);
+
+  if (definition.pinnedOrigin === undefined) {
+    throw new Error(`Legacy island ${id} must have a pinned origin.`);
+  }
+
+  return { definition, origin: definition.pinnedOrigin };
+}
+
+function requiredAnchor(
+  definition: IslandDefinition,
+  anchor: "lootChest" | "encounterSpawn",
+) {
+  const offset = definition.anchors[anchor];
+
+  if (offset === undefined) {
+    throw new Error(`Legacy island ${definition.id} must have ${anchor}.`);
+  }
+
+  const origin = definition.pinnedOrigin;
+
+  if (origin === undefined) {
+    throw new Error(
+      `Legacy island ${definition.id} must have a pinned origin.`,
+    );
+  }
+
+  return {
+    x: origin.x + offset.x,
+    y: origin.y + offset.y,
+    z: origin.z + offset.z,
+  };
+}
+
+const starter = pinnedIsland("starter_island");
+const ember = pinnedIsland("ember_outpost");
+const frost = pinnedIsland("frostspire");
+
 export const STARTER_ISLAND = {
-  id: "starter_island",
-  contentVersion: 3,
-  dimensionId: "minecraft:overworld",
-  structureId: IDENTIFIERS.starterIsland,
-  origin: { x: -12, y: 149, z: -10 },
-  size: { x: 31, y: 16, z: 23 },
-  integrityBlocks: [
-    { offset: { x: 12, y: 0, z: 10 }, typeId: "minecraft:stone" },
-    { offset: { x: 1, y: 11, z: 10 }, typeId: "minecraft:grass_block" },
-    { offset: { x: 23, y: 11, z: 10 }, typeId: "minecraft:grass_block" },
-    { offset: { x: 12, y: 11, z: 1 }, typeId: "minecraft:grass_block" },
-    { offset: { x: 12, y: 11, z: 19 }, typeId: "minecraft:grass_block" },
-    { offset: { x: 30, y: 11, z: 10 }, typeId: "minecraft:oak_planks" },
-  ],
+  id: starter.definition.id,
+  contentVersion: starter.definition.contentVersion,
+  dimensionId: starter.definition.dimensionId,
+  structureId: starter.definition.structureId,
+  origin: starter.origin,
+  size: starter.definition.size,
+  integrityBlocks: starter.definition.integrityBlocks,
   safeDock: {
-    dimensionId: "minecraft:overworld",
-    x: 9.5,
-    y: 161,
-    z: 0.5,
+    dimensionId: starter.definition.dimensionId,
+    x: starter.origin.x + starter.definition.anchors.safeDock.x,
+    y: starter.origin.y + starter.definition.anchors.safeDock.y,
+    z: starter.origin.z + starter.definition.anchors.safeDock.z,
   },
 } as const;
 
 export const EMBER_OUTPOST = {
-  id: "ember_outpost",
-  contentVersion: 4,
-  dimensionId: "minecraft:overworld",
-  structureId: IDENTIFIERS.emberOutpost,
-  origin: { x: 72, y: 151, z: -10 },
-  size: { x: 25, y: 14, z: 21 },
-  integrityBlocks: [
-    { offset: { x: 12, y: 0, z: 10 }, typeId: "minecraft:blackstone" },
-    {
-      offset: { x: 0, y: 9, z: 10 },
-      typeId: "minecraft:polished_blackstone_bricks",
-    },
-    { offset: { x: 23, y: 9, z: 10 }, typeId: "minecraft:netherrack" },
-    { offset: { x: 12, y: 9, z: 1 }, typeId: "minecraft:netherrack" },
-    { offset: { x: 12, y: 9, z: 19 }, typeId: "minecraft:netherrack" },
-  ],
-  lootChest: { x: 84, y: 161, z: 0 },
-  encounterSpawn: { x: 84.5, y: 161, z: 4.5 },
+  id: ember.definition.id,
+  contentVersion: ember.definition.contentVersion,
+  dimensionId: ember.definition.dimensionId,
+  structureId: ember.definition.structureId,
+  origin: ember.origin,
+  size: ember.definition.size,
+  integrityBlocks: ember.definition.integrityBlocks,
+  lootChest: requiredAnchor(ember.definition, "lootChest"),
+  encounterSpawn: requiredAnchor(ember.definition, "encounterSpawn"),
 } as const;
 
 export const FROSTSPIRE = {
-  id: "frostspire",
-  contentVersion: 2,
-  dimensionId: "minecraft:overworld",
-  structureId: IDENTIFIERS.frostspire,
-  origin: { x: 240, y: 150, z: -11 },
-  size: { x: 27, y: 15, z: 23 },
-  integrityBlocks: [
-    { offset: { x: 13, y: 0, z: 11 }, typeId: "minecraft:stone" },
-    {
-      offset: { x: 0, y: 10, z: 11 },
-      typeId: "minecraft:spruce_planks",
-    },
-    { offset: { x: 25, y: 10, z: 11 }, typeId: "minecraft:snow_block" },
-    { offset: { x: 13, y: 10, z: 1 }, typeId: "minecraft:snow_block" },
-    { offset: { x: 13, y: 10, z: 21 }, typeId: "minecraft:snow_block" },
-  ],
-  lootChest: { x: 253, y: 161, z: 0 },
-  encounterSpawn: { x: 253.5, y: 161, z: 4.5 },
+  id: frost.definition.id,
+  contentVersion: frost.definition.contentVersion,
+  dimensionId: frost.definition.dimensionId,
+  structureId: frost.definition.structureId,
+  origin: frost.origin,
+  size: frost.definition.size,
+  integrityBlocks: frost.definition.integrityBlocks,
+  lootChest: requiredAnchor(frost.definition, "lootChest"),
+  encounterSpawn: requiredAnchor(frost.definition, "encounterSpawn"),
 } as const;
 
 export const REQUIRED_ISLANDS = [

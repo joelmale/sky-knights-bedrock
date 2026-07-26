@@ -22,6 +22,10 @@ Status meanings:
 | 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0` | `npm audit --audit-level=high` | Passed — zero vulnerabilities |
 | 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0` | Local stable pack deployment | Passed |
 | 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0` | Focused Minecraft hands-on plan | Pending |
+| 2026-07-26 | Phase 3 deterministic-realm foundation | `npm run verify` | Passed — 138 tests, production add-on, and both profiles |
+| 2026-07-26 | Phase 3 deterministic-realm foundation | `npm audit --audit-level=high` | Passed — zero vulnerabilities |
+| 2026-07-26 | Phase 3 deterministic-realm foundation | Independent read-only integration review | Passed — no source stop-ship finding |
+| 2026-07-26 | Phase 3 deterministic-realm foundation | Focused Minecraft hands-on plan | Pending |
 
 ## Hands-on development evidence
 
@@ -87,6 +91,39 @@ found 0 vulnerabilities
 The accepted dependency policy and eliminated deprecated packages are recorded
 in [`DEVELOPMENT_ENVIRONMENT.md`](DEVELOPMENT_ENVIRONMENT.md).
 
+## Automated Phase 3 foundation evidence
+
+Command:
+
+```powershell
+npm run verify
+npm audit --audit-level=high
+```
+
+Results:
+
+| Stage | Result |
+| --- | --- |
+| Non-mutating comparison of eight island structures and GameTest platform | Passed |
+| Prettier/lint | 63 files passed |
+| TypeScript/stable bundle | Passed |
+| Vitest | 138 tests passed across 14 files |
+| Production `.mcaddon` | Built |
+| Experimental custom-dimension profile | Built |
+| GameTest profile | Built |
+| High-severity dependency audit | Passed — zero vulnerabilities |
+
+The host suite covers deterministic placement across 512 seeds, pinned-origin
+compatibility, schema migrations through world schema 5, persistent layout
+records, player-modified flags, destination readiness/activation, executable
+content identifiers, localization, progression closure, and negative soft-lock
+cases.
+
+This is repository and packaging evidence only. The schema-4 migration,
+player-modified terrain, interruption recovery, and stable-API behavior still
+require the
+[`Phase 3 Stabilization Hands-On Test Plan`](PHASE_3_STABILIZATION_TEST_PLAN.md).
+
 ### Local deployment
 
 Command:
@@ -104,12 +141,17 @@ Result: stable scripts built and both `0.2.0` packs deployed to:
 
 ## Current manual acceptance state
 
-The repository is ready for the
-[`0.2.0` focused plan](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md), but those results
-have not yet been recorded.
+The repository is ready for both the
+[`Phase 3 stabilization plan`](PHASE_3_STABILIZATION_TEST_PLAN.md) and the
+remaining [`0.2.0` focused plan](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md), but those
+results have not yet been recorded.
 
 | Manual area | State |
 | --- | --- |
+| Schema-4 → schema-5 migration and deterministic layout persistence | Pending |
+| Player-modified island protection | Pending |
+| Structure-only island activation isolation | Pending |
+| Interrupted registry-backed generation | Pending |
 | Pack load and Content Log on `0.2.0` | Pending |
 | Existing-world schema/content migration | Pending |
 | Fresh full Survival progression | Pending |

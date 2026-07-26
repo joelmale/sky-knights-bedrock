@@ -1,6 +1,7 @@
 import { EntityTypes, ItemTypes, world } from "@minecraft/server";
 
 import { IDENTIFIERS } from "../config/constants";
+import { shippedIslandStructureIds } from "../config/islands";
 import { Logger } from "../diagnostics/logger";
 
 export interface ValidationResult {
@@ -17,11 +18,9 @@ export function validateRegistries(logger: Logger): ValidationResult {
     IDENTIFIERS.dockmaster,
     IDENTIFIERS.skyRaider,
   ];
-  const requiredStructures = [
-    IDENTIFIERS.starterIsland,
-    IDENTIFIERS.emberOutpost,
-    IDENTIFIERS.frostspire,
-  ];
+  // Structure-only Phase 3 islands must still have their packaged structure;
+  // that validation is intentionally independent from gameplay activation.
+  const requiredStructures = shippedIslandStructureIds();
   const requiredItems = [
     IDENTIFIERS.shipCore,
     IDENTIFIERS.canvasBundle,

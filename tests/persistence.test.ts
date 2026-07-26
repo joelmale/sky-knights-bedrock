@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { LAYOUT } from "../scripts/config/islands";
+import { deriveWorldSeed } from "../scripts/config/profiles";
 import {
   DynamicPropertyHost,
   WorldStateRepository,
@@ -34,22 +36,26 @@ class FakeDynamicPropertyHost implements DynamicPropertyHost {
 }
 
 describe("WorldStateRepository", () => {
-  it("creates and persists a v4 world state", () => {
+  it("creates and persists a v5 world state", () => {
     const host = new FakeDynamicPropertyHost();
     const repository = new WorldStateRepository(host, () => 42);
 
     expect(repository.load()).toEqual({
-      schemaVersion: 4,
+      schemaVersion: 5,
       seed: 42,
+      worldSeed: deriveWorldSeed(42, "standard"),
+      worldProfile: "standard",
+      layoutVersion: LAYOUT.layoutVersion,
       generatedIslandIds: [],
       islandVersions: {},
+      islandLayout: {},
       skyRaiderEncounter: { status: "dormant" },
       migrations: [],
     });
     expect(repository.load().seed).toBe(42);
   });
 
-  it("migrates a v1 world through v4 once", () => {
+  it("migrates a v1 world through v5 once", () => {
     const host = new FakeDynamicPropertyHost();
     host.setDynamicProperty(
       "skyknights:world_state",
@@ -62,17 +68,27 @@ describe("WorldStateRepository", () => {
     const repository = new WorldStateRepository(host, () => 99);
 
     expect(repository.load()).toEqual({
-      schemaVersion: 4,
+      schemaVersion: 5,
       seed: 7,
+      worldSeed: deriveWorldSeed(7, "standard"),
+      worldProfile: "standard",
+      layoutVersion: LAYOUT.layoutVersion,
       generatedIslandIds: ["starter_island"],
       islandVersions: {},
+      islandLayout: {},
       skyRaiderEncounter: { status: "dormant" },
-      migrations: ["world:v1->v2", "world:v2->v3", "world:v3->v4"],
+      migrations: [
+        "world:v1->v2",
+        "world:v2->v3",
+        "world:v3->v4",
+        "world:v4->v5",
+      ],
     });
     expect(repository.load().migrations).toEqual([
       "world:v1->v2",
       "world:v2->v3",
       "world:v3->v4",
+      "world:v4->v5",
     ]);
   });
 
@@ -90,13 +106,22 @@ describe("WorldStateRepository", () => {
     const repository = new WorldStateRepository(host, () => 99);
 
     expect(repository.load()).toEqual({
-      schemaVersion: 4,
+      schemaVersion: 5,
       seed: 8,
+      worldSeed: deriveWorldSeed(8, "standard"),
+      worldProfile: "standard",
+      layoutVersion: LAYOUT.layoutVersion,
       generatedIslandIds: ["starter_island"],
       islandVersions: {},
+      islandLayout: {},
       activeGeneration: undefined,
       skyRaiderEncounter: { status: "dormant" },
-      migrations: ["world:v1->v2", "world:v2->v3", "world:v3->v4"],
+      migrations: [
+        "world:v1->v2",
+        "world:v2->v3",
+        "world:v3->v4",
+        "world:v4->v5",
+      ],
     });
   });
 
@@ -115,11 +140,12 @@ describe("WorldStateRepository", () => {
     const repository = new WorldStateRepository(host, () => 99);
 
     expect(repository.load()).toMatchObject({
-      schemaVersion: 4,
+      schemaVersion: 5,
       seed: 12,
+      worldSeed: deriveWorldSeed(12, "standard"),
       islandVersions: { starter_island: 3, frostspire: 1 },
       skyRaiderEncounter: { status: "dormant" },
-      migrations: ["world:v2->v3", "world:v3->v4"],
+      migrations: ["world:v2->v3", "world:v3->v4", "world:v4->v5"],
     });
   });
 });

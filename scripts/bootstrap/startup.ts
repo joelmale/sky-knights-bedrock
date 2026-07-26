@@ -11,6 +11,7 @@ import {
   ensureRequiredIslandsQueued,
   resumeGeneration,
 } from "../generation/service";
+import { registerIslandModificationTracking } from "../generation/modification-tracking";
 import {
   ensureDockmaster,
   registerDockyardInteractions,
@@ -39,10 +40,15 @@ const logger = new Logger("runtime", undefined, () => system.currentTick);
 const worldRepository = new WorldStateRepository(world, () =>
   fnv1a32(`${WORLD_STATE_SEED_SALT}:${Math.random()}`),
 );
+let runtimeStatus: "pending" | "ready" | "failed" = "pending";
 
 registerDockyardInteractions(logger.child("dockyard"));
 registerShipEvents(logger.child("ships"));
 registerSkyRaiderEvents(worldRepository, logger.child("sky-raider"));
+registerIslandModificationTracking(
+  worldRepository,
+  logger.child("island-modifications"),
+);
 
 system.beforeEvents.startup.subscribe(
   ({ customCommandRegistry, itemComponentRegistry }) => {
@@ -67,7 +73,17 @@ world.afterEvents.worldLoad.subscribe(() => {
       migrations: state.migrations,
     });
 
-    validateRegistries(logger.child("validation"));
+    const validation = validateRegistries(logger.child("validation"));
+
+    if (!validation.ok) {
+      runtimeStatus = "failed";
+      logger.error(
+        "Runtime startup stopped because packaged content is incomplete.",
+      );
+      return;
+    }
+
+    runtimeStatus = "ready";
     ensureRequiredIslandsQueued(worldRepository, logger.child("generation"));
     resumeGeneration(worldRepository, logger.child("generation"));
     system.runInterval(() => {
@@ -97,6 +113,33 @@ world.afterEvents.entityLoad.subscribe(({ entity }) => {
 });
 
 world.afterEvents.playerSpawn.subscribe(({ initialSpawn, player }) => {
+  preparePlayerAfterStartup(player, initialSpawn, 0);
+});
+
+function preparePlayerAfterStartup(
+  player: Player,
+  initialSpawn: boolean,
+  attempt: number,
+): void {
+  if (!player.isValid) {
+    return;
+  }
+
+  if (runtimeStatus === "pending" && attempt < 120) {
+    system.runTimeout(
+      () => preparePlayerAfterStartup(player, initialSpawn, attempt + 1),
+      1,
+    );
+    return;
+  }
+
+  if (runtimeStatus !== "ready") {
+    player.sendMessage(
+      "§cSky Knights startup validation failed. Check the Content Log before continuing.§r",
+    );
+    return;
+  }
+
   prepareDockmaster(0);
 
   if (!initialSpawn) {
@@ -104,7 +147,7 @@ world.afterEvents.playerSpawn.subscribe(({ initialSpawn, player }) => {
   }
 
   prepareInitialPlayer(player, 0);
-});
+}
 
 function prepareInitialPlayer(player: Player, attempt: number): void {
   if (!player.isValid) {

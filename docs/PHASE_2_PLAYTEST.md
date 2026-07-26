@@ -30,7 +30,7 @@ Pass when:
   lines.
 - There are no holes through the ordinary walking surface.
 - The player starts and recovers safely at the dock.
-- Debug reports schema `3`, `activeJob=none`, `starter_island:v3`,
+- Debug reports schema `5`, `activeJob=none`, `starter_island:v3`,
   `ember_outpost:v3`, and `frostspire:v1`.
 - The Content Log contains no script, registry, structure, recipe, or texture
   errors.

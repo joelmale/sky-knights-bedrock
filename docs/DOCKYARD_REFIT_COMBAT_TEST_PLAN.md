@@ -66,7 +66,7 @@ Before each session:
 Pass when:
 
 - the command is recognized;
-- the report shows `schema=4`;
+- the report shows `schema=5`;
 - `raiderEncounter` is `dormant`, `active`, or `defeated`;
 - all required entity/item registry validation passes in the Content Log;
 - there are no JSON, Molang, texture, custom component, or Script API errors.
@@ -91,7 +91,7 @@ Pass when:
 - Dockmaster Elian appears at the starter dock;
 - the existing owned ship is still present or can be recalled;
 - the existing Skycutter retains its original four-module loadout;
-- world/player/ship data migrate to schemas `4`, `3`, and `3`;
+- world/player/ship data migrate to schemas `5`, `3`, and `3`;
 - a formerly completed Crystal-to-Cutter player receives the
   `craft_combat_refit` objective;
 - Ember Outpost upgrades to `v4` and Frostspire upgrades to `v2` without

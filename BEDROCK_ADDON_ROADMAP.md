@@ -1,7 +1,8 @@
 # Sky Knights — Minecraft Bedrock Add-On Plan and Roadmap
 
-> Status: implementation in progress; `0.2.0` Dockyard Refit and Airship Combat
-> built and automatically verified; focused hands-on acceptance pending
+> Status: implementation in progress; `0.2.0` Dockyard Refit/Airship Combat and
+> the Phase 3 deterministic-realm foundation are built; hands-on acceptance
+> pending
 > Last updated: 2026-07-26
 > Working title: **Sky Knights: Bedrock**
 > Namespace: `skyknights`
@@ -19,8 +20,10 @@ target.
 - Phases 0–1 infrastructure is substantially implemented.
 - The Phase 2 starter-island, skiff, expedition, recovery, and persistence loop
   has been built and exercised.
-- Phase 3 has three authored, deterministic, content-versioned islands; the
-  broader four-biome/hybrid realm remains.
+- Phase 3 has a schema-5 world profile and deterministic layout registry, three
+  pinned gameplay-ready islands, and five packaged seeded structures. The five
+  new islands remain intentionally structure-only until their content and
+  progression ship.
 - Phase 4 has guaranteed Crystal/Froststeel progression, the Dockmaster,
   tutorial, island guards, and the Ashwing Raider; the full content roster
   remains.

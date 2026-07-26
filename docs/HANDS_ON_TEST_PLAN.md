@@ -67,7 +67,7 @@ Expected:
 - The authored island is centered around `0, 160, 0`.
 - The player arrives on the safe dock without falling.
 - Island generation causes no visible hitch longer than one second.
-- Debug output reports schema `3`, islands `starter_island,ember_outpost`,
+- Debug output reports schema `5`, islands `starter_island,ember_outpost`,
   versions `starter_island:v3,ember_outpost:v2`, `activeJob=none`, a saved
   seed, a dynamic-property byte count, and the detected control scheme.
 

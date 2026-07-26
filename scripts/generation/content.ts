@@ -1,138 +1,177 @@
-import {
-  BlockComponentTypes,
-  BlockInventoryComponent,
-  Dimension,
-  ItemStack,
-} from "@minecraft/server";
+// Table-driven guaranteed island content: guaranteed loot, guard encounters,
+// and NPCs. Behavior for the shipped islands (ember_outpost, frostspire) is
+// byte-for-byte equivalent to the previous hardcoded if/else implementation;
+// the table itself lives in `content-table.ts` so it can be unit tested
+// without the @minecraft/server runtime.
 
-import { EMBER_OUTPOST, FROSTSPIRE, IDENTIFIERS } from "../config/constants";
+import { ItemStack } from "@minecraft/server";
+import type { BlockInventoryComponent, Dimension } from "@minecraft/server";
+
+import { IslandAnchors, islandDefinition } from "../config/islands";
 import { Logger } from "../diagnostics/logger";
+import { BlockVector } from "./bounds";
+import {
+  IslandContentAnchor,
+  LootChestContent,
+  TaggedEntityContent,
+  islandContentDefinition,
+  resolveAnchorLocation,
+  resolveIslandOrigin,
+  shouldSpawnTaggedEntity,
+  shouldStockLootChest,
+} from "./content-table";
 
-const EMBER_GUARD_TAG = "skyknights.ember_guard";
-const FROST_GUARD_TAG = "skyknights.frost_guard";
-
+/**
+ * Prepares an island's guaranteed loot, encounters, and NPCs. Re-running
+ * preserves a chest that still carries its marker item and never duplicates a
+ * tagged encounter/NPC. A deliberately emptied guaranteed chest is restored
+ * if a content repair or version upgrade runs.
+ *
+ * `origin` is required for seeded (non-pinned) islands; pinned islands fall
+ * back to their shipped origin automatically.
+ */
 export function prepareIslandContent(
   islandId: string,
   dimension: Dimension,
   logger: Logger,
+  origin?: BlockVector,
 ): void {
-  if (islandId === EMBER_OUTPOST.id) {
-    prepareEmberLoot(dimension, logger);
-    prepareEmberEncounter(dimension, logger);
-  }
+  const content = islandContentDefinition(islandId);
 
-  if (islandId === FROSTSPIRE.id) {
-    prepareFrostspireLoot(dimension, logger);
-    prepareFrostspireEncounter(dimension, logger);
-  }
-}
-
-function prepareEmberLoot(dimension: Dimension, logger: Logger): void {
-  const block = dimension.getBlock(EMBER_OUTPOST.lootChest);
-
-  if (block === undefined) {
-    throw new Error("Ember Outpost loot chest block is unavailable.");
-  }
-
-  block.setType("minecraft:chest");
-  const inventory = block.getComponent(BlockComponentTypes.Inventory) as
-    BlockInventoryComponent | undefined;
-  const container = inventory?.container;
-
-  if (container === undefined) {
-    throw new Error("Ember Outpost loot chest has no inventory.");
-  }
-
-  if (container.getItem(0)?.typeId === IDENTIFIERS.aetherCrystal) {
+  if (content === undefined) {
     return;
   }
 
-  container.clearAll();
-  container.setItem(0, new ItemStack(IDENTIFIERS.aetherCrystal));
-  container.setItem(1, new ItemStack("minecraft:emerald", 3));
-  container.setItem(2, new ItemStack("minecraft:iron_ingot", 24));
-  container.setItem(3, new ItemStack("minecraft:cooked_beef", 8));
-  container.setItem(4, new ItemStack("minecraft:redstone", 8));
-  logger.info("Ember Outpost guaranteed loot prepared.", {
-    location: EMBER_OUTPOST.lootChest,
-  });
+  const resolvedOrigin = resolveIslandOrigin(islandId, origin);
+  const anchors = islandDefinition(islandId).anchors;
+
+  if (content.lootChest !== undefined) {
+    prepareLootChest(
+      islandId,
+      content.lootChest,
+      resolvedOrigin,
+      anchors,
+      dimension,
+      logger,
+    );
+  }
+
+  for (const encounter of content.encounters ?? []) {
+    prepareTaggedEntity(
+      islandId,
+      encounter,
+      resolvedOrigin,
+      anchors,
+      dimension,
+      logger,
+    );
+  }
+
+  for (const npc of content.npcs ?? []) {
+    prepareTaggedEntity(
+      islandId,
+      npc,
+      resolvedOrigin,
+      anchors,
+      dimension,
+      logger,
+    );
+  }
 }
 
-function prepareEmberEncounter(dimension: Dimension, logger: Logger): void {
-  const existing = dimension.getEntities({
-    location: EMBER_OUTPOST.encounterSpawn,
-    maxDistance: 12,
-    tags: [EMBER_GUARD_TAG],
-  });
+function anchorLocationOrThrow(
+  islandId: string,
+  origin: BlockVector,
+  anchors: IslandAnchors,
+  anchor: IslandContentAnchor,
+): BlockVector {
+  const location = resolveAnchorLocation(origin, anchors, anchor);
 
-  if (existing.length > 0) {
-    return;
+  if (location === undefined) {
+    throw new Error(`${islandId} has no ${anchor} anchor.`);
   }
 
-  const guard = dimension.spawnEntity(
-    "minecraft:husk",
-    EMBER_OUTPOST.encounterSpawn,
-    { initialPersistence: true },
-  );
-  guard.nameTag = "Ember Outpost Guardian";
-  guard.addTag(EMBER_GUARD_TAG);
-  logger.info("Ember Outpost encounter prepared.", {
-    entityId: guard.id,
-  });
+  return location;
 }
 
-function prepareFrostspireLoot(dimension: Dimension, logger: Logger): void {
-  const block = dimension.getBlock(FROSTSPIRE.lootChest);
-
-  if (block === undefined) {
-    throw new Error("Frostspire loot chest block is unavailable.");
-  }
-
-  block.setType("minecraft:chest");
-  const inventory = block.getComponent(BlockComponentTypes.Inventory) as
-    BlockInventoryComponent | undefined;
-  const container = inventory?.container;
-
-  if (container === undefined) {
-    throw new Error("Frostspire loot chest has no inventory.");
-  }
-
-  if (container.getItem(0)?.typeId === IDENTIFIERS.froststeelIngot) {
-    return;
-  }
-
-  container.clearAll();
-  container.setItem(0, new ItemStack(IDENTIFIERS.froststeelIngot, 16));
-  container.setItem(1, new ItemStack("minecraft:diamond", 2));
-  container.setItem(2, new ItemStack("minecraft:arrow", 24));
-  container.setItem(3, new ItemStack("minecraft:cooked_salmon", 8));
-  logger.info("Frostspire guaranteed cargo prepared.", {
-    location: FROSTSPIRE.lootChest,
-  });
-}
-
-function prepareFrostspireEncounter(
+function prepareLootChest(
+  islandId: string,
+  content: LootChestContent,
+  origin: BlockVector,
+  anchors: IslandAnchors,
   dimension: Dimension,
   logger: Logger,
 ): void {
-  const existing = dimension.getEntities({
-    location: FROSTSPIRE.encounterSpawn,
-    maxDistance: 12,
-    tags: [FROST_GUARD_TAG],
-  });
+  const location = anchorLocationOrThrow(
+    islandId,
+    origin,
+    anchors,
+    content.anchor,
+  );
+  const block = dimension.getBlock(location);
 
-  if (existing.length > 0) {
+  if (block === undefined) {
+    throw new Error(`${islandId} loot chest block is unavailable.`);
+  }
+
+  if (block.typeId !== "minecraft:chest") {
+    block.setType("minecraft:chest");
+  }
+  const inventory = block.getComponent("minecraft:inventory") as
+    BlockInventoryComponent | undefined;
+  const container = inventory?.container;
+
+  if (container === undefined) {
+    throw new Error(`${islandId} loot chest has no inventory.`);
+  }
+
+  const idempotencyItem = container.getItem(content.idempotencySlot);
+
+  if (!shouldStockLootChest(idempotencyItem?.typeId, content)) {
     return;
   }
 
-  const guard = dimension.spawnEntity(
-    "minecraft:stray",
-    FROSTSPIRE.encounterSpawn,
-    { initialPersistence: true },
+  container.clearAll();
+
+  for (const item of content.items) {
+    container.setItem(item.slot, new ItemStack(item.itemId, item.count));
+  }
+
+  logger.info(`${islandId} guaranteed loot prepared.`, { location });
+}
+
+function prepareTaggedEntity(
+  islandId: string,
+  content: TaggedEntityContent,
+  origin: BlockVector,
+  anchors: IslandAnchors,
+  dimension: Dimension,
+  logger: Logger,
+): void {
+  const location = anchorLocationOrThrow(
+    islandId,
+    origin,
+    anchors,
+    content.anchor,
   );
-  guard.nameTag = "Frostspire Warden";
-  guard.addTag(FROST_GUARD_TAG);
-  logger.info("Frostspire encounter prepared.", {
-    entityId: guard.id,
+  const existing = dimension.getEntities({
+    location,
+    maxDistance: content.discoveryRadius,
+    tags: [content.tag],
   });
+
+  if (!shouldSpawnTaggedEntity(existing.length)) {
+    return;
+  }
+
+  const entity = dimension.spawnEntity(content.entityId, location, {
+    initialPersistence: true,
+  });
+
+  if (content.nameTag !== undefined) {
+    entity.nameTag = content.nameTag;
+  }
+
+  entity.addTag(content.tag);
+  logger.info(`${islandId} ${content.tag} prepared.`, { entityId: entity.id });
 }

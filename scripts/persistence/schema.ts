@@ -1,4 +1,12 @@
-export const CURRENT_WORLD_SCHEMA_VERSION = 4;
+import { IslandPlacementMode } from "../config/islands";
+import {
+  DEFAULT_WORLD_PROFILE_ID,
+  deriveWorldSeed,
+  worldProfile,
+} from "../config/profiles";
+import { BlockVector, StructureBounds } from "../generation/bounds";
+
+export const CURRENT_WORLD_SCHEMA_VERSION = 5;
 export const CURRENT_PLAYER_SCHEMA_VERSION = 3;
 export const CURRENT_SHIP_SCHEMA_VERSION = 3;
 
@@ -56,11 +64,60 @@ export interface SkyRaiderEncounterState {
   lastKnownLocation?: DockLocation;
 }
 
-export interface WorldState {
-  schemaVersion: typeof CURRENT_WORLD_SCHEMA_VERSION;
+/**
+ * Where a planned island physically lives and how much space it reserved.
+ *
+ * `scripts/config/islands.ts` plans this from `(worldSeed, layoutVersion)`; the
+ * world document remembers the result so a later `layoutVersion` bump can only
+ * relocate terrain through an explicit, logged decision instead of silently
+ * moving an island a player already visited.
+ */
+export interface IslandLayoutRecord {
+  id: string;
+  structureId: string;
+  dimensionId: string;
+  placement: IslandPlacementMode;
+  origin: BlockVector;
+  size: BlockVector;
+  /** Structure bounds expanded by the layout registry's reserved padding. */
+  reserved: StructureBounds;
+  /**
+   * ADR-007: once a player has edited authored terrain the island is never
+   * regenerated merely because its content version changed. Sticky by design —
+   * re-recording a layout can set the flag but never clears it.
+   */
+  playerModified: boolean;
+}
+
+interface WorldStateV4 {
+  schemaVersion: 4;
   seed: number;
   generatedIslandIds: string[];
   islandVersions: Record<string, number>;
+  activeGeneration?: GenerationJob;
+  skyRaiderEncounter: SkyRaiderEncounterState;
+  migrations: string[];
+}
+
+export interface WorldState {
+  schemaVersion: typeof CURRENT_WORLD_SCHEMA_VERSION;
+  /**
+   * The raw world seed as first rolled. Preserved verbatim across every
+   * migration; existing gameplay code keeps reading it.
+   */
+  seed: number;
+  /**
+   * The layout seed handed to the island registry. Derived from `seed` and the
+   * profile salt, so an upgraded world keeps a stable realm.
+   */
+  worldSeed: number;
+  worldProfile: string;
+  /** Layout planner version `islandLayout` was planned at. */
+  layoutVersion: number;
+  generatedIslandIds: string[];
+  islandVersions: Record<string, number>;
+  /** Per-island layout and reservation records, keyed and written sorted by id. */
+  islandLayout: Record<string, IslandLayoutRecord>;
   activeGeneration?: GenerationJob;
   skyRaiderEncounter: SkyRaiderEncounterState;
   migrations: string[];
@@ -196,6 +253,19 @@ function numberRecord(value: unknown): Record<string, number> {
 
 function finiteNumber(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+/**
+ * The stored seed, or a freshly rolled one. `createSeed` is invoked lazily so a
+ * world that already carries a seed never rolls a throwaway replacement while
+ * migrating.
+ */
+function persistedSeed(value: unknown, createSeed: () => number): number {
+  return (
+    (typeof value === "number" && Number.isFinite(value)
+      ? value
+      : createSeed()) >>> 0
+  );
 }
 
 function dockLocation(
@@ -344,6 +414,107 @@ function shipCombat(value: unknown): ShipCombatState {
   };
 }
 
+const ZERO_VECTOR: BlockVector = { x: 0, y: 0, z: 0 };
+const UNIT_VECTOR: BlockVector = { x: 1, y: 1, z: 1 };
+
+function blockVector(value: unknown, fallback: BlockVector): BlockVector {
+  if (!isRecord(value)) {
+    return { x: fallback.x, y: fallback.y, z: fallback.z };
+  }
+
+  return {
+    x: Math.trunc(finiteNumber(value.x, fallback.x)),
+    y: Math.trunc(finiteNumber(value.y, fallback.y)),
+    z: Math.trunc(finiteNumber(value.z, fallback.z)),
+  };
+}
+
+function reservedBounds(
+  value: unknown,
+  origin: BlockVector,
+  size: BlockVector,
+): StructureBounds {
+  const fallback: StructureBounds = {
+    from: { x: origin.x, y: origin.y, z: origin.z },
+    to: {
+      x: origin.x + size.x - 1,
+      y: origin.y + size.y - 1,
+      z: origin.z + size.z - 1,
+    },
+  };
+
+  if (!isRecord(value)) {
+    return fallback;
+  }
+
+  return {
+    from: blockVector(value.from, fallback.from),
+    to: blockVector(value.to, fallback.to),
+  };
+}
+
+function parseIslandLayoutRecord(
+  id: string,
+  value: unknown,
+): IslandLayoutRecord | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const origin = blockVector(value.origin, ZERO_VECTOR);
+  const size = blockVector(value.size, UNIT_VECTOR);
+
+  return {
+    id,
+    structureId:
+      typeof value.structureId === "string"
+        ? value.structureId
+        : `skyknights:${id}`,
+    dimensionId:
+      typeof value.dimensionId === "string"
+        ? value.dimensionId
+        : "minecraft:overworld",
+    placement: value.placement === "pinned" ? "pinned" : "seeded",
+    origin,
+    size,
+    reserved: reservedBounds(value.reserved, origin, size),
+    playerModified: value.playerModified === true,
+  };
+}
+
+/** Rebuilds the map with sorted keys so serialization is byte-stable. */
+function sortedLayoutRecords(
+  records: Record<string, IslandLayoutRecord>,
+): Record<string, IslandLayoutRecord> {
+  const result: Record<string, IslandLayoutRecord> = {};
+
+  for (const id of Object.keys(records).sort()) {
+    result[id] = records[id];
+  }
+
+  return result;
+}
+
+function islandLayoutRecords(
+  value: unknown,
+): Record<string, IslandLayoutRecord> {
+  if (!isRecord(value)) {
+    return {};
+  }
+
+  const result: Record<string, IslandLayoutRecord> = {};
+
+  for (const id of Object.keys(value).sort()) {
+    const record = parseIslandLayoutRecord(id, value[id]);
+
+    if (record !== undefined) {
+      result[id] = record;
+    }
+  }
+
+  return result;
+}
+
 function generationJob(value: unknown): GenerationJob | undefined {
   if (!isRecord(value)) {
     return undefined;
@@ -380,68 +551,133 @@ function generationJob(value: unknown): GenerationJob | undefined {
   };
 }
 
-export function createWorldState(seed: number): WorldState {
+export function createWorldState(
+  seed: number,
+  profileId: string = DEFAULT_WORLD_PROFILE_ID,
+): WorldState {
+  const profile = worldProfile(profileId);
+  const base = seed >>> 0;
+
   return {
     schemaVersion: CURRENT_WORLD_SCHEMA_VERSION,
-    seed: seed >>> 0,
+    seed: base,
+    worldSeed: deriveWorldSeed(base, profile.id),
+    worldProfile: profile.id,
+    layoutVersion: profile.layoutVersion,
     generatedIslandIds: [],
     islandVersions: {},
+    islandLayout: {},
     skyRaiderEncounter: { status: "dormant" },
     migrations: [],
+  };
+}
+
+/**
+ * Schema 4 -> 5.
+ *
+ * Non-destructive and idempotent: every schema-4 field is carried across
+ * untouched, the new fields are derived from data the document already has, and
+ * the island layout starts empty so the layout registry records the placements
+ * it plans on the next load. Nothing here can drop a generated island id, an
+ * island content version, an in-flight generation job, or the shared encounter.
+ */
+function upgradeWorldStateV4(
+  legacy: WorldStateV4,
+  profileId: string,
+): WorldState {
+  const profile = worldProfile(profileId);
+
+  return {
+    schemaVersion: CURRENT_WORLD_SCHEMA_VERSION,
+    seed: legacy.seed,
+    worldSeed: deriveWorldSeed(legacy.seed, profile.id),
+    worldProfile: profile.id,
+    layoutVersion: profile.layoutVersion,
+    generatedIslandIds: legacy.generatedIslandIds,
+    islandVersions: legacy.islandVersions,
+    islandLayout: {},
+    activeGeneration: legacy.activeGeneration,
+    skyRaiderEncounter: legacy.skyRaiderEncounter,
+    migrations: [...legacy.migrations, "world:v4->v5"],
   };
 }
 
 export function migrateWorldState(
   value: unknown,
   createSeed: () => number,
+  profileId: string = DEFAULT_WORLD_PROFILE_ID,
 ): WorldState {
   if (!isRecord(value)) {
-    return createWorldState(createSeed());
+    return createWorldState(createSeed(), profileId);
   }
 
   if (value.schemaVersion === 1) {
     const legacy = value as unknown as WorldStateV1;
 
-    return {
-      schemaVersion: CURRENT_WORLD_SCHEMA_VERSION,
-      seed: finiteNumber(legacy.seed, createSeed()) >>> 0,
-      generatedIslandIds: stringArray(legacy.generatedIslandIds),
-      islandVersions: {},
-      skyRaiderEncounter: { status: "dormant" },
-      migrations: ["world:v1->v2", "world:v2->v3", "world:v3->v4"],
-    };
+    return upgradeWorldStateV4(
+      {
+        schemaVersion: 4,
+        seed: persistedSeed(legacy.seed, createSeed),
+        generatedIslandIds: stringArray(legacy.generatedIslandIds),
+        islandVersions: {},
+        skyRaiderEncounter: { status: "dormant" },
+        migrations: ["world:v1->v2", "world:v2->v3", "world:v3->v4"],
+      },
+      profileId,
+    );
   }
 
   if (value.schemaVersion === 2) {
     const legacy = value as unknown as WorldStateV2;
 
-    return {
-      schemaVersion: CURRENT_WORLD_SCHEMA_VERSION,
-      seed: finiteNumber(legacy.seed, createSeed()) >>> 0,
-      generatedIslandIds: stringArray(legacy.generatedIslandIds),
-      islandVersions: {},
-      activeGeneration: generationJob(legacy.activeGeneration),
-      skyRaiderEncounter: { status: "dormant" },
-      migrations: [
-        ...stringArray(legacy.migrations),
-        "world:v2->v3",
-        "world:v3->v4",
-      ],
-    };
+    return upgradeWorldStateV4(
+      {
+        schemaVersion: 4,
+        seed: persistedSeed(legacy.seed, createSeed),
+        generatedIslandIds: stringArray(legacy.generatedIslandIds),
+        islandVersions: {},
+        activeGeneration: generationJob(legacy.activeGeneration),
+        skyRaiderEncounter: { status: "dormant" },
+        migrations: [
+          ...stringArray(legacy.migrations),
+          "world:v2->v3",
+          "world:v3->v4",
+        ],
+      },
+      profileId,
+    );
   }
 
   if (value.schemaVersion === 3) {
     const legacy = value as unknown as WorldStateV3;
 
-    return {
-      schemaVersion: CURRENT_WORLD_SCHEMA_VERSION,
-      seed: finiteNumber(legacy.seed, createSeed()) >>> 0,
-      generatedIslandIds: stringArray(legacy.generatedIslandIds),
-      islandVersions: numberRecord(legacy.islandVersions),
-      activeGeneration: generationJob(legacy.activeGeneration),
-      skyRaiderEncounter: { status: "dormant" },
-      migrations: [...stringArray(legacy.migrations), "world:v3->v4"],
-    };
+    return upgradeWorldStateV4(
+      {
+        schemaVersion: 4,
+        seed: persistedSeed(legacy.seed, createSeed),
+        generatedIslandIds: stringArray(legacy.generatedIslandIds),
+        islandVersions: numberRecord(legacy.islandVersions),
+        activeGeneration: generationJob(legacy.activeGeneration),
+        skyRaiderEncounter: { status: "dormant" },
+        migrations: [...stringArray(legacy.migrations), "world:v3->v4"],
+      },
+      profileId,
+    );
+  }
+
+  if (value.schemaVersion === 4) {
+    return upgradeWorldStateV4(
+      {
+        schemaVersion: 4,
+        seed: persistedSeed(value.seed, createSeed),
+        generatedIslandIds: stringArray(value.generatedIslandIds),
+        islandVersions: numberRecord(value.islandVersions),
+        activeGeneration: generationJob(value.activeGeneration),
+        skyRaiderEncounter: skyRaiderEncounter(value.skyRaiderEncounter),
+        migrations: stringArray(value.migrations),
+      },
+      profileId,
+    );
   }
 
   if (value.schemaVersion !== CURRENT_WORLD_SCHEMA_VERSION) {
@@ -450,14 +686,102 @@ export function migrateWorldState(
     );
   }
 
+  const seed = persistedSeed(value.seed, createSeed);
+  // The stored profile wins; an id this build no longer ships falls back to the
+  // default without disturbing the realm the world was already generated with.
+  const profile = worldProfile(value.worldProfile);
+  const storedWorldSeed = value.worldSeed;
+
   return {
     schemaVersion: CURRENT_WORLD_SCHEMA_VERSION,
-    seed: finiteNumber(value.seed, createSeed()) >>> 0,
+    seed,
+    worldSeed:
+      typeof storedWorldSeed === "number" && Number.isFinite(storedWorldSeed)
+        ? storedWorldSeed >>> 0
+        : deriveWorldSeed(seed, profile.id),
+    worldProfile: profile.id,
+    layoutVersion: Math.max(
+      0,
+      Math.trunc(finiteNumber(value.layoutVersion, profile.layoutVersion)),
+    ),
     generatedIslandIds: stringArray(value.generatedIslandIds),
     islandVersions: numberRecord(value.islandVersions),
+    islandLayout: islandLayoutRecords(value.islandLayout),
     activeGeneration: generationJob(value.activeGeneration),
     skyRaiderEncounter: skyRaiderEncounter(value.skyRaiderEncounter),
     migrations: stringArray(value.migrations),
+  };
+}
+
+/** The recorded layout for an island, or `undefined` if none is planned yet. */
+export function islandLayoutRecord(
+  state: WorldState,
+  islandId: string,
+): IslandLayoutRecord | undefined {
+  return state.islandLayout[islandId];
+}
+
+/**
+ * Merges planned layout records into the world document. Existing
+ * `playerModified` flags survive re-planning; the flag is never cleared here.
+ */
+export function recordIslandLayout(
+  state: WorldState,
+  records: readonly IslandLayoutRecord[],
+): WorldState {
+  if (records.length === 0) {
+    return state;
+  }
+
+  const merged: Record<string, IslandLayoutRecord> = { ...state.islandLayout };
+  let changed = false;
+
+  for (const record of records) {
+    const existing: IslandLayoutRecord | undefined = merged[record.id];
+
+    // A persisted origin is the source of truth for a live world. In
+    // particular, a planner-version upgrade must not quietly move an island
+    // a player has already reached (and potentially edited). New records are
+    // still normalized and saved deterministically; existing ones are never
+    // rewritten by an automatic plan.
+    if (existing !== undefined) {
+      continue;
+    }
+
+    merged[record.id] = record;
+    changed = true;
+  }
+
+  if (!changed) {
+    return state;
+  }
+
+  return {
+    ...state,
+    islandLayout: sortedLayoutRecords(merged),
+  };
+}
+
+/**
+ * Marks an island as player-modified so no content-version bump can regenerate
+ * it (ADR-007). A no-op when the island has no record or is already marked.
+ */
+export function markIslandPlayerModified(
+  state: WorldState,
+  islandId: string,
+): WorldState {
+  const existing: IslandLayoutRecord | undefined = state.islandLayout[islandId];
+
+  if (existing === undefined || existing.playerModified) {
+    return state;
+  }
+
+  return {
+    ...state,
+    islandLayout: sortedLayoutRecords({
+      ...state.islandLayout,
+      [islandId]: { ...existing, playerModified: true },
+    }),
   };
 }
 
