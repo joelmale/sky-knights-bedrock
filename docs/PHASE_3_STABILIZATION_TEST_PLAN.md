@@ -7,18 +7,18 @@ are implemented.
 
 ## Test record
 
-| Field | Value |
-| --- | --- |
-| Add-on commit | |
-| Package version | `0.2.0` development checkpoint |
-| Minecraft build | |
-| Platform/input | |
-| Fresh-world name | |
-| Upgraded schema-4 world name | |
-| Tester/date | |
+| Field                        | Value                                     |
+| ---------------------------- | ----------------------------------------- |
+| Add-on commit                |                                           |
+| Package version              | `0.3.0` bootstrap-recovery playtest build |
+| Minecraft build              |                                           |
+| Platform/input               |                                           |
+| Fresh-world name             |                                           |
+| Upgraded schema-4 world name |                                           |
+| Tester/date                  |                                           |
 
 Back up the upgraded world before opening it with this build. Do not use a
-valued world as the interruption or forced-regeneration test world.
+valued world as the interruption test world.
 
 ## Automated prerequisite
 
@@ -75,10 +75,21 @@ Expected:
 
 ## Session C — Fresh-world bootstrap
 
-1. Create a fresh supported Sky Knights world.
-2. Wait for initial placement to finish.
-3. Run `/skyknights:debug`.
-4. Inspect the starter island, Dockmaster, Ember Outpost, and Frostspire.
+Create three fresh, disposable supported Sky Knights worlds. Do not run
+`/skyknights:island`, `/skyknights:recover`, `/skyknights:skiff`, or any item,
+teleport, or generation shortcut to establish the route. `/skyknights:debug` is
+evidence only and must not be used to repair or advance bootstrap.
+
+For each world:
+
+1. Record the entry time, initial location, and the Content Log from entry.
+2. Enter normally and wait for automatic first-player arrival at the safe dock.
+3. Record `/skyknights:debug` after arrival and while generation progresses.
+4. Wait for the automatic sequence to finish, then inspect the starter island,
+   Dockmaster, Ember Outpost, and Frostspire.
+5. Complete the released route without developer shortcuts: gather starter
+   materials, build the skiff, obtain Ember's Aether Crystal, assemble the
+   Skycutter, and obtain Frostspire Froststeel.
 
 Expected:
 
@@ -86,8 +97,18 @@ Expected:
 - Dockmaster appears and remains available after reload;
 - the original three islands generate in their established locations with
   their guaranteed content;
+- debug shows the single persisted job progressing in order through
+  `starter_island`, `ember_outpost`, and `frostspire`, then `activeJob=none`;
+- final debug reports exactly `starter_island,ember_outpost,frostspire` as the
+  generated released islands and records all eight layout records;
 - `activeJob=none` after generation finishes;
 - none of the five structure-only islands is automatically placed.
+
+Fail this session if the starter appears only after `/skyknights:island`, the
+player must use `/skyknights:recover` to reach the dock, Ember or Frostspire is
+absent after the bootstrap wait, or the progression route requires a developer
+shortcut. Record the exact command use, location, debug output, and Content Log
+excerpt; do not record a recovered run as a pass.
 
 ## Session D — Player-modified island protection
 
@@ -104,8 +125,8 @@ Expected:
 - the distinctive block and the broken-block change survive both reloads;
 - normal startup does not queue a content-version restamp over that island.
 
-The developer `/skyknights:island` command is an explicit forced recovery and
-is allowed to replace terrain; do not use it in this protection test.
+`/skyknights:island` is a safe bootstrap-resume command. It must not replace
+player-modified terrain; do not use it in this protection test.
 
 ## Session E — Structure-only activation gate
 
@@ -126,10 +147,12 @@ Expected:
 
 Use a disposable world without valued building:
 
-1. Start an explicit starter-island recovery with `/skyknights:island`.
-2. Exit while `activeJob` reports `queued` or `structure_placed`.
-3. Reopen the world and wait for recovery.
-4. Run `/skyknights:debug` and inspect the island.
+1. Create a fresh disposable world and allow automatic bootstrap to begin; do
+   not invoke `/skyknights:island`.
+2. Exit while the automatically created job reports `queued` or
+   `structure_placed`.
+3. Reopen the world and wait for automatic recovery.
+4. Run `/skyknights:debug` only to record state and inspect the island.
 
 Expected:
 
@@ -137,6 +160,7 @@ Expected:
 - `activeJob` eventually returns to `none`;
 - integrity checks pass;
 - the guaranteed chest and tagged entities are not duplicated.
+- Ember Outpost and Frostspire automatically continue after starter completion.
 
 ## Session G — Existing gameplay regression
 
@@ -165,6 +189,9 @@ loop.
 - [ ] Five structure-only islands remain inactive.
 - [ ] Interrupted placement resumes safely.
 - [ ] Existing progression regression passes.
+
+`0.3.0` status: automated verification is recorded separately; all Minecraft
+hands-on rows above remain pending until this plan is executed and evidenced.
 
 For a failure, record the exact commit, world provenance, debug output,
 Content Log excerpt, reproduction steps, and whether the world was fresh,

@@ -4,13 +4,13 @@
 
 Checked 2026-07-25:
 
-| Tool | Detected |
-|---|---|
-| Git | 2.55.0 |
-| Node.js | 26.5.0 |
-| npm | 11.17.0 |
-| Visual Studio Code | 1.129.1 |
-| Minecraft Bedrock | 1.26.33 app package |
+| Tool                            | Detected                                                    |
+| ------------------------------- | ----------------------------------------------------------- |
+| Git                             | 2.55.0                                                      |
+| Node.js                         | 26.5.0                                                      |
+| npm                             | 11.17.0                                                     |
+| Visual Studio Code              | 1.129.1                                                     |
+| Minecraft Bedrock               | 1.26.33 app package                                         |
 | Minecraft development pack root | `%APPDATA%\Minecraft Bedrock\Users\Shared\games\com.mojang` |
 
 Node 26 is newer than the current LTS line. It passed this repository's verification when the environment was created, but Node 24 LTS is the recommended baseline if a future build dependency behaves differently.
@@ -43,7 +43,9 @@ The npm type packages, Behavior Pack dependencies, and minimum engine version mu
 
 ## Local deployment
 
-The build uses `MINECRAFT_PRODUCT="BedrockGDK"` from `.env`.
+The build uses `MINECRAFT_PRODUCT="BedrockGDK"` by default. An optional `.env`
+file may override that product or other documented local settings; copy
+`.env.example` only when an override is needed.
 
 Run:
 

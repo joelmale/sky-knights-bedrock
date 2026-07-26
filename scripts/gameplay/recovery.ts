@@ -9,6 +9,7 @@ import { Logger } from "../diagnostics/logger";
 import {
   PlayerStateRepository,
   ShipStateRepository,
+  WorldStateRepository,
 } from "../persistence/repositories";
 import { DockLocation } from "../persistence/schema";
 
@@ -24,7 +25,21 @@ function teleportToDock(entity: Entity, dock: DockLocation): void {
   );
 }
 
-export function recoverPlayer(player: Player, logger: Logger): void {
+export function recoverPlayer(
+  player: Player,
+  worldRepository: WorldStateRepository,
+  logger: Logger,
+): void {
+  if (!worldRepository.load().generatedIslandIds.includes(STARTER_ISLAND.id)) {
+    player.sendMessage(
+      "§eThe starter dock is still being prepared. Sky Knights will move you there automatically when it is safe.§r",
+    );
+    logger.warn("Player recovery deferred until the starter island is ready.", {
+      playerId: player.id,
+    });
+    return;
+  }
+
   const repository = new PlayerStateRepository(player, STARTER_ISLAND.safeDock);
   const state = repository.load();
   teleportToDock(player, state.lastSafeDock);
@@ -38,7 +53,14 @@ export function recoverPlayer(player: Player, logger: Logger): void {
   });
 }
 
-export function runRecoverySweep(logger: Logger): void {
+export function runRecoverySweep(
+  worldRepository: WorldStateRepository,
+  logger: Logger,
+): void {
+  if (!worldRepository.load().generatedIslandIds.includes(STARTER_ISLAND.id)) {
+    return;
+  }
+
   for (const player of world.getAllPlayers()) {
     const state = new PlayerStateRepository(
       player,
@@ -46,7 +68,7 @@ export function runRecoverySweep(logger: Logger): void {
     ).load();
 
     if (state.recoveryEnabled && player.location.y < VOID_RESCUE_Y) {
-      recoverPlayer(player, logger);
+      recoverPlayer(player, worldRepository, logger);
     }
   }
 

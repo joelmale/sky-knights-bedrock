@@ -308,11 +308,7 @@ async function createMcaddon(isProduction) {
   await mkdir(packagesOutput, { recursive: true });
 
   const environment = await readEnvironment(path.join(root, ".env"));
-  const projectName = environment.PROJECT_NAME;
-
-  if (!projectName) {
-    throw new Error("PROJECT_NAME is required in .env.");
-  }
+  const projectName = environment.PROJECT_NAME || "sky_knights";
 
   const behaviorEntries = await zipEntries(behaviorPackSource);
   Object.assign(behaviorEntries, await zipEntries(scriptsOutput, "scripts"));
@@ -353,12 +349,14 @@ async function resolveDeploymentRoot() {
     BedrockGDK: "Minecraft Bedrock",
     PreviewGDK: "Minecraft Bedrock Preview",
   };
-  const productDirectory = products[environment.MINECRAFT_PRODUCT];
+  const product =
+    environment.MINECRAFT_PRODUCT === undefined
+      ? "BedrockGDK"
+      : environment.MINECRAFT_PRODUCT;
+  const productDirectory = products[product];
 
   if (!productDirectory) {
-    throw new Error(
-      `Unsupported MINECRAFT_PRODUCT: ${environment.MINECRAFT_PRODUCT}`,
-    );
+    throw new Error(`Unsupported MINECRAFT_PRODUCT: ${product}`);
   }
 
   return path.join(
@@ -430,7 +428,17 @@ async function zipEntries(directory, prefix = "") {
 
 async function readEnvironment(file) {
   const values = {};
-  const contents = await readFile(file, "utf8");
+  let contents;
+
+  try {
+    contents = await readFile(file, "utf8");
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      return values;
+    }
+
+    throw error;
+  }
 
   for (const rawLine of contents.split(/\r?\n/u)) {
     const line = rawLine.trim();

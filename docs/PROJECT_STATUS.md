@@ -2,13 +2,13 @@
 
 > Last updated: 2026-07-26
 >
-> Current playtest version: `0.2.0`
+> Current playtest version: `0.3.0`
 >
 > Stable API baseline: Minecraft Bedrock 1.26.30+, `@minecraft/server` 2.8.0,
 > `@minecraft/server-ui` 2.1.0
 >
-> Current state: `0.2.0` gameplay plus the Phase 3 deterministic-realm
-> foundation implemented; Phase 3 hands-on validation pending
+> Current state: `0.2.0` gameplay plus the `0.3.0` Phase 3 deterministic-realm
+> bootstrap recovery implemented; Phase 3 hands-on validation pending
 
 This is the authoritative implementation tracker. The roadmap describes the
 target product; this document records what the repository currently delivers.
@@ -17,15 +17,15 @@ in [`VALIDATION_LOG.md`](VALIDATION_LOG.md).
 
 ## Milestone status
 
-| Roadmap milestone | Status | Evidence and remaining work |
-| --- | --- | --- |
-| Phase 0 — capability proofs | Substantially implemented | Stable packs, entity flight, authored structures, persistence, GameTest, world-template packager, and experimental dimension profile exist. Controller/touch, clean-client template import, and the complete experimental matrix remain manual gates. |
-| Phase 1 — production scaffold | Implemented | Repeatable lint/build/test/deploy/package commands, startup registry validation, structured logging, diagnostics, CI, and fixed dynamic-property repositories are present. |
-| Phase 2 — gray-box vertical loop | Implemented and hands-on exercised | Solid home island, Dockmaster, crafting, Ember expedition, starter skiff, rescue, persistence, and safe return were exercised during development. Full multiplayer/input matrix remains open. |
-| Phase 3 — deterministic sky realm | Foundation implemented; content activation pending | Schema 5, world profile/seed derivation, four-family registry, three pinned islands, five seeded structure-only islands, persistent placements, clear-lane checks, origin-aware resumable placement, activation gates, and progression closure exist. New-island creatures, rewards, reveal UI, and gameplay activation remain. |
-| Phase 4 — progression/combat/NPC depth | Partially implemented | Guaranteed Crystal/Froststeel progression, tutorial, Dockmaster, Frostspire Warden, and Ashwing Raider exist. Full tool ladder, four NPC roles, structure set, creature roster, and named weapons remain. |
-| Phase 5 — ship builder depth | First substantial slice implemented | Skiff and Skycutter frames, four module slots, atomic refits, variants, seats, ownership, cargo, hull, cannon, shield, docking, recall, and reconstruction exist. `0.2.0` hands-on and device/multiplayer gates remain. |
-| Phases 6–7 — content complete and hardening | Not started as milestones | Packaging infrastructure exists, but final art/content, balance, localization breadth, performance, device matrix, migrations from public builds, and release-candidate checks remain. |
+| Roadmap milestone                           | Status                                           | Evidence and remaining work                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 0 — capability proofs                 | Substantially implemented                        | Stable packs, entity flight, authored structures, persistence, GameTest, world-template packager, and experimental dimension profile exist. Controller/touch, clean-client template import, and the complete experimental matrix remain manual gates.                                                                                                                                                      |
+| Phase 1 — production scaffold               | Implemented                                      | Repeatable lint/build/test/deploy/package commands, startup registry validation, structured logging, diagnostics, CI, and fixed dynamic-property repositories are present.                                                                                                                                                                                                                                 |
+| Phase 2 — gray-box vertical loop            | Implemented and hands-on exercised               | Solid home island, Dockmaster, crafting, Ember expedition, starter skiff, rescue, persistence, and safe return were exercised during development. Full multiplayer/input matrix remains open.                                                                                                                                                                                                              |
+| Phase 3 — deterministic sky realm           | Bootstrap recovery implemented; hands-on pending | Schema 5, deterministic default seed, world profile/seed derivation, four-family registry, three pinned islands, five seeded structure-only islands, persistent placements, clear-lane checks, origin-aware resumable placement, automatic retry/backoff, safe initial arrival, activation gates, and progression closure exist. New-island creatures, rewards, reveal UI, and gameplay activation remain. |
+| Phase 4 — progression/combat/NPC depth      | Partially implemented                            | Guaranteed Crystal/Froststeel progression, tutorial, Dockmaster, Frostspire Warden, and Ashwing Raider exist. Full tool ladder, four NPC roles, structure set, creature roster, and named weapons remain.                                                                                                                                                                                                  |
+| Phase 5 — ship builder depth                | First substantial slice implemented              | Skiff and Skycutter frames, four module slots, atomic refits, variants, seats, ownership, cargo, hull, cannon, shield, docking, recall, and reconstruction exist. `0.2.0` hands-on and device/multiplayer gates remain.                                                                                                                                                                                    |
+| Phases 6–7 — content complete and hardening | Not started as milestones                        | Packaging infrastructure exists, but final art/content, balance, localization breadth, performance, device matrix, migrations from public builds, and release-candidate checks remain.                                                                                                                                                                                                                     |
 
 ## Implemented gameplay path
 
@@ -50,20 +50,20 @@ not require them.
 
 ## Current content inventory
 
-| Content type | Implemented |
-| --- | --- |
-| Authored islands | 8 packaged: 3 gameplay-ready and 5 structure-only |
-| Custom entities | Dockmaster, starter skiff, Skycutter, Ashwing Raider |
-| Custom items | 18 |
-| Custom recipes | 12 |
-| Ship frames | Starter skiff, Skycutter |
-| Skycutter slots | Hull, Engine, Cargo, Utility |
-| Standard modules | Reinforced Hull, Aether Engine, Cargo Hold, Navigator Module |
-| Advanced modules | Armored Hull, Frostfire Engine, Expanded Cargo Hold, Aether Cannon, Shield Projector |
-| Encounters | Ember Guardian, Frostspire Warden, Ashwing Raider |
-| GameTests | 4 registered in-engine tests |
-| Host tests | 138 tests across 14 files |
-| Developer commands | `debug`, `skiff`, `skycutter`, `island`, `raider`, `recover` |
+| Content type       | Implemented                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| Authored islands   | 8 packaged: 3 gameplay-ready and 5 structure-only                                    |
+| Custom entities    | Dockmaster, starter skiff, Skycutter, Ashwing Raider                                 |
+| Custom items       | 18                                                                                   |
+| Custom recipes     | 12                                                                                   |
+| Ship frames        | Starter skiff, Skycutter                                                             |
+| Skycutter slots    | Hull, Engine, Cargo, Utility                                                         |
+| Standard modules   | Reinforced Hull, Aether Engine, Cargo Hold, Navigator Module                         |
+| Advanced modules   | Armored Hull, Frostfire Engine, Expanded Cargo Hold, Aether Cannon, Shield Projector |
+| Encounters         | Ember Guardian, Frostspire Warden, Ashwing Raider                                    |
+| GameTests          | 4 registered in-engine tests                                                         |
+| Host tests         | 147 tests across 17 files                                                            |
+| Developer commands | `debug`, `skiff`, `skycutter`, `island`, `raider`, `recover`                         |
 
 ## Systems implemented
 
@@ -89,6 +89,10 @@ not require them.
 - New-island activation fails closed at `structure_only`; incomplete content
   cannot enter the generation queue.
 - Per-island content versions and integrity checks.
+- Automatic starter → Ember → Frostspire bootstrap with ticking-area readiness,
+  integrity polling, persisted recovery, and retry backoff.
+- Indefinite automatic first-player safe-dock arrival while the starter island
+  is being prepared.
 - Deterministic rebuilding of corrected islands.
 - Solid starter-island surface and safe dock.
 - Guaranteed progression chests and persistent island encounters.
@@ -97,11 +101,11 @@ not require them.
 
 ### Persistence
 
-| Document | Schema | Tracks |
-| --- | --- | --- |
-| World | 5 | base/derived seed, profile, deterministic island layout, player-modified protection, generated islands, content versions, active job, shared Raider encounter, migrations |
-| Player | 3 | initialization, recovery, discoveries, safe dock, objectives, Skycutter unlock, owned ship |
-| Ship | 3 | identity, owner, home dock, docked state, frame, named modules, combat counters |
+| Document | Schema | Tracks                                                                                                                                                                    |
+| -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| World    | 5      | base/derived seed, profile, deterministic island layout, player-modified protection, generated islands, content versions, active job, shared Raider encounter, migrations |
+| Player   | 3      | initialization, recovery, discoveries, safe dock, objectives, Skycutter unlock, owned ship                                                                                |
+| Ship     | 3      | identity, owner, home dock, docked state, frame, named modules, combat counters                                                                                           |
 
 Supported migrations cover world schemas 1–4, player schemas 1–2, and ship
 schemas 1–2.
@@ -145,7 +149,7 @@ Results:
 - non-mutating generated-structure verification: passed;
 - formatting/lint: passed;
 - TypeScript/stable bundle: passed;
-- host tests: 138 passed across 14 files;
+- host tests: 147 passed across 17 files;
 - production `.mcaddon`: built;
 - experimental profile: built;
 - GameTest profile: built;
@@ -157,22 +161,22 @@ Minecraft validation is explicitly tracked below.
 
 ## Open validation gates
 
-| Gate | Status | Test source |
-| --- | --- | --- |
-| Phase 3 fresh/schema-4 migration and layout safety | Pending | [`PHASE_3_STABILIZATION_TEST_PLAN.md`](PHASE_3_STABILIZATION_TEST_PLAN.md) |
-| Phase 3 player-modified terrain protection | Pending | Phase 3 stabilization plan, Session D |
-| Phase 3 structure-only activation isolation | Pending | Phase 3 stabilization plan, Session E |
-| `0.2.0` fresh Survival progression | Pending | [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md) |
-| `0.1.0` → `0.2.0` world migration | Pending | Dockyard test plan, Session A |
-| All refit effects and visuals | Pending | Dockyard test plan, Sessions D–E |
-| Cannon negative cases and Raider battle | Pending | Dockyard test plan, Sessions F–G |
-| Core delivery and Shield Projector | Pending | Dockyard test plan, Session H |
-| Reload/recovery matrix | Pending | Dockyard test plan, Session I |
-| Two-player owner/gunner/refit behavior | Pending | Dockyard test plan, Session J |
-| Controller and touch | Pending | Dockyard test plan, Session K |
-| Clean-client `.mcaddon` import | Pending | [`HANDS_ON_TEST_PLAN.md`](HANDS_ON_TEST_PLAN.md) |
-| World-template import | Pending | Hands-on plan, Session 11 |
-| Experimental custom dimension | Pending/non-blocking | Hands-on plan, Session 10 |
+| Gate                                                                 | Status               | Test source                                                                                                                 |
+| -------------------------------------------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `0.3.0` Phase 3 fresh bootstrap/schema-4 migration and layout safety | Pending              | [`PHASE_3_STABILIZATION_TEST_PLAN.md`](PHASE_3_STABILIZATION_TEST_PLAN.md); Session C previously failed and requires retest |
+| Phase 3 player-modified terrain protection                           | Pending              | Phase 3 stabilization plan, Session D                                                                                       |
+| Phase 3 structure-only activation isolation                          | Pending              | Phase 3 stabilization plan, Session E                                                                                       |
+| `0.2.0` fresh Survival progression                                   | Pending              | [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md)                                                  |
+| `0.1.0` → `0.2.0` world migration                                    | Pending              | Dockyard test plan, Session A                                                                                               |
+| All refit effects and visuals                                        | Pending              | Dockyard test plan, Sessions D–E                                                                                            |
+| Cannon negative cases and Raider battle                              | Pending              | Dockyard test plan, Sessions F–G                                                                                            |
+| Core delivery and Shield Projector                                   | Pending              | Dockyard test plan, Session H                                                                                               |
+| Reload/recovery matrix                                               | Pending              | Dockyard test plan, Session I                                                                                               |
+| Two-player owner/gunner/refit behavior                               | Pending              | Dockyard test plan, Session J                                                                                               |
+| Controller and touch                                                 | Pending              | Dockyard test plan, Session K                                                                                               |
+| Clean-client `.mcaddon` import                                       | Pending              | [`HANDS_ON_TEST_PLAN.md`](HANDS_ON_TEST_PLAN.md)                                                                            |
+| World-template import                                                | Pending              | Hands-on plan, Session 11                                                                                                   |
+| Experimental custom dimension                                        | Pending/non-blocking | Hands-on plan, Session 10                                                                                                   |
 
 ## Known scope boundaries
 
@@ -202,20 +206,20 @@ Minecraft validation is explicitly tracked below.
 
 ## Documentation map
 
-| Document | Purpose |
-| --- | --- |
-| [`CHANGELOG.md`](../CHANGELOG.md) | Version-by-version implementation history |
-| [`PROJECT_STATUS.md`](PROJECT_STATUS.md) | Current authoritative implementation and remaining work |
-| [`VALIDATION_LOG.md`](VALIDATION_LOG.md) | Automated and hands-on evidence ledger |
-| [`DECISIONS.md`](DECISIONS.md) | Accepted architecture decisions |
-| [`MULTI_AGENT_WORKFLOW.md`](MULTI_AGENT_WORKFLOW.md) | Vendor-neutral central/specialist/QA workflow |
-| [`BEDROCK_ADDON_ROADMAP.md`](../BEDROCK_ADDON_ROADMAP.md) | Product target and phased roadmap |
-| [`DEVELOPMENT_ENVIRONMENT.md`](DEVELOPMENT_ENVIRONMENT.md) | Tooling, deployment, audit, and debugging |
-| [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md) | Current `0.2.0` acceptance plan |
-| [`PHASE_3_STABILIZATION_TEST_PLAN.md`](PHASE_3_STABILIZATION_TEST_PLAN.md) | Schema-5, layout, activation, and migration acceptance |
-| [`CRYSTAL_TO_CUTTER_TEST_PLAN.md`](CRYSTAL_TO_CUTTER_TEST_PLAN.md) | Base Skycutter progression regression |
-| [`PHASE_2_PLAYTEST.md`](PHASE_2_PLAYTEST.md) | Short starter-island/skiff regression |
-| [`HANDS_ON_TEST_PLAN.md`](HANDS_ON_TEST_PLAN.md) | Broad platform, input, multiplayer, profile, and packaging matrix |
+| Document                                                                   | Purpose                                                           |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| [`CHANGELOG.md`](../CHANGELOG.md)                                          | Version-by-version implementation history                         |
+| [`PROJECT_STATUS.md`](PROJECT_STATUS.md)                                   | Current authoritative implementation and remaining work           |
+| [`VALIDATION_LOG.md`](VALIDATION_LOG.md)                                   | Automated and hands-on evidence ledger                            |
+| [`DECISIONS.md`](DECISIONS.md)                                             | Accepted architecture decisions                                   |
+| [`MULTI_AGENT_WORKFLOW.md`](MULTI_AGENT_WORKFLOW.md)                       | Vendor-neutral central/specialist/QA workflow                     |
+| [`BEDROCK_ADDON_ROADMAP.md`](../BEDROCK_ADDON_ROADMAP.md)                  | Product target and phased roadmap                                 |
+| [`DEVELOPMENT_ENVIRONMENT.md`](DEVELOPMENT_ENVIRONMENT.md)                 | Tooling, deployment, audit, and debugging                         |
+| [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md) | Current `0.2.0` acceptance plan                                   |
+| [`PHASE_3_STABILIZATION_TEST_PLAN.md`](PHASE_3_STABILIZATION_TEST_PLAN.md) | Schema-5, layout, activation, and migration acceptance            |
+| [`CRYSTAL_TO_CUTTER_TEST_PLAN.md`](CRYSTAL_TO_CUTTER_TEST_PLAN.md)         | Base Skycutter progression regression                             |
+| [`PHASE_2_PLAYTEST.md`](PHASE_2_PLAYTEST.md)                               | Short starter-island/skiff regression                             |
+| [`HANDS_ON_TEST_PLAN.md`](HANDS_ON_TEST_PLAN.md)                           | Broad platform, input, multiplayer, profile, and packaging matrix |
 
 ## Tracker maintenance
 

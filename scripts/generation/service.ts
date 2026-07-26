@@ -1,13 +1,11 @@
 import { Dimension, system, world } from "@minecraft/server";
 
-import { REQUIRED_ISLANDS, STARTER_ISLAND } from "../config/constants";
 import { IslandDefinition, islandDefinition } from "../config/islands";
 import { Logger } from "../diagnostics/logger";
 import { WorldStateRepository } from "../persistence/repositories";
 import {
   GenerationJob,
   WorldState,
-  islandLayoutRecord,
   recordIslandLayout,
 } from "../persistence/schema";
 import { addBlockVectors, structureBounds } from "./bounds";
@@ -16,15 +14,16 @@ import {
   DestinationDiscoveryOutcome,
   discoverDestination,
   plannedIslandLayoutRecords,
-  worldIncludesIsland,
 } from "./discovery";
-import {
-  completeGeneration,
-  markStructurePlaced,
-  queueGeneration,
-} from "./state";
+import { completeGeneration, markStructurePlaced } from "./state";
+import { generationRetryDelayTicks } from "./retry";
+import { queueNextRequiredIsland } from "./required-islands";
 
 let activeGenerationTask: Promise<void> | undefined;
+const generationRetryCounts = new Map<string, number>();
+const TICKING_AREA_LOAD_TIMEOUT_TICKS = 20 * 30;
+const INTEGRITY_RETRY_INTERVAL_TICKS = 5;
+const INTEGRITY_TIMEOUT_TICKS = 20 * 10;
 
 /**
  * Persists the deterministic registry layout before any generation job can be
@@ -71,42 +70,6 @@ export function prepareDestinationGeneration(
   return outcome;
 }
 
-export function ensureStarterIslandQueued(
-  repository: WorldStateRepository,
-  logger: Logger,
-  force = false,
-): void {
-  const current = ensureIslandLayoutRecorded(repository);
-
-  if (current.activeGeneration !== undefined) {
-    logger.warn("Starter-island regeneration skipped while a job is active.", {
-      activeJobId: current.activeGeneration.id,
-    });
-    return;
-  }
-
-  if (!worldIncludesIsland(current, STARTER_ISLAND.id)) {
-    logger.warn("Starter island is excluded by the active world profile.");
-    return;
-  }
-
-  const starter = registeredIsland(STARTER_ISLAND.id);
-  const next = queueGeneration(
-    current,
-    {
-      ...generationRequest(current, starter),
-    },
-    force,
-  );
-
-  if (next === current && current.activeGeneration === undefined) {
-    return;
-  }
-
-  repository.save(next);
-  resumeGeneration(repository, logger);
-}
-
 export function ensureRequiredIslandsQueued(
   repository: WorldStateRepository,
   logger: Logger,
@@ -143,9 +106,22 @@ async function monitorGeneration(
   try {
     await runGeneration(repository, logger);
   } catch (error) {
-    logger.error("Generation job paused after an error.", {
-      error: error instanceof Error ? error.message : String(error),
+    const message = error instanceof Error ? error.message : String(error);
+    const job = repository.load().activeGeneration;
+
+    logger.error("Generation job failed.", {
+      error: message,
+      jobId: job?.id,
     });
+
+    if (job !== undefined && isRetryableGenerationError(message)) {
+      scheduleGenerationRetry(repository, logger, job);
+    } else {
+      logger.error("Generation job paused after a non-retryable error.", {
+        error: message,
+        jobId: job?.id,
+      });
+    }
   } finally {
     activeGenerationTask = undefined;
   }
@@ -184,7 +160,11 @@ async function runGeneration(
         await system.waitTicks(5);
       }
 
-      const failures = verifyIslandIntegrity(island, job.origin, dimension);
+      const failures = await waitForIslandIntegrity(
+        island,
+        job.origin,
+        dimension,
+      );
 
       if (failures.length > 0) {
         throw new Error(
@@ -214,6 +194,7 @@ async function runGeneration(
 
       state = completeGeneration(repository.load());
       repository.save(state);
+      generationRetryCounts.delete(generationRetryKey(job));
       logger.info("Generation job completed after loaded-chunk verification.", {
         jobId: job.id,
         generatedIslandIds: state.generatedIslandIds,
@@ -233,6 +214,35 @@ async function runGeneration(
       jobId: next.activeGeneration?.id,
     });
   }
+}
+
+function scheduleGenerationRetry(
+  repository: WorldStateRepository,
+  logger: Logger,
+  job: GenerationJob,
+): void {
+  const key = generationRetryKey(job);
+  const retryCount = (generationRetryCounts.get(key) ?? 0) + 1;
+  const delayTicks = generationRetryDelayTicks(retryCount);
+
+  generationRetryCounts.set(key, retryCount);
+  logger.warn("Generation job will retry automatically.", {
+    jobId: job.id,
+    retryCount,
+    delayTicks,
+  });
+  system.runTimeout(() => resumeGeneration(repository, logger), delayTicks);
+}
+
+function generationRetryKey(job: GenerationJob): string {
+  return `${job.id}:${job.dimensionId}:${job.origin.x},${job.origin.y},${job.origin.z}:${job.contentVersion}`;
+}
+
+function isRetryableGenerationError(message: string): boolean {
+  return !(
+    message.startsWith("Generation job references unknown island") ||
+    message.startsWith("Active generation job changed while placing")
+  );
 }
 
 function registeredIsland(id: string): IslandDefinition {
@@ -274,6 +284,7 @@ async function loadIslandChunks(
 
   try {
     await manager.createTickingArea(identifier, options);
+    await waitForTickingArea(identifier, island.id);
   } catch (error) {
     if (manager.hasTickingArea(identifier)) {
       manager.removeTickingArea(identifier);
@@ -283,6 +294,29 @@ async function loadIslandChunks(
   }
 
   return identifier;
+}
+
+async function waitForTickingArea(
+  identifier: string,
+  islandId: string,
+): Promise<void> {
+  const manager = world.tickingAreaManager;
+
+  for (
+    let waitedTicks = 0;
+    waitedTicks <= TICKING_AREA_LOAD_TIMEOUT_TICKS;
+    waitedTicks += INTEGRITY_RETRY_INTERVAL_TICKS
+  ) {
+    if (manager.getTickingArea(identifier)?.isFullyLoaded === true) {
+      return;
+    }
+
+    await system.waitTicks(INTEGRITY_RETRY_INTERVAL_TICKS);
+  }
+
+  throw new Error(
+    `Ticking area did not fully load for ${islandId} within ${TICKING_AREA_LOAD_TIMEOUT_TICKS} ticks.`,
+  );
 }
 
 function releaseTickingArea(identifier: string, logger: Logger): void {
@@ -323,59 +357,21 @@ function verifyIslandIntegrity(
   return failures;
 }
 
-function queueNextRequiredIsland(state: WorldState): WorldState {
-  if (state.activeGeneration !== undefined) {
-    return state;
-  }
-
-  const island = REQUIRED_ISLANDS.map((legacy) =>
-    registeredIsland(legacy.id),
-  ).find((candidate) => {
-    if (!worldIncludesIsland(state, candidate.id)) {
-      return false;
-    }
-
-    const generated = state.generatedIslandIds.includes(candidate.id);
-    const playerModified =
-      islandLayoutRecord(state, candidate.id)?.playerModified === true;
-
-    return (
-      !generated ||
-      (!playerModified &&
-        state.islandVersions[candidate.id] !== candidate.contentVersion)
-    );
-  });
-
-  if (island === undefined) {
-    return state;
-  }
-
-  const job: Omit<GenerationJob, "stage" | "attempts"> = generationRequest(
-    state,
-    island,
-  );
-  return queueGeneration(
-    state,
-    job,
-    state.generatedIslandIds.includes(island.id),
-  );
-}
-
-function generationRequest(
-  state: WorldState,
+async function waitForIslandIntegrity(
   island: IslandDefinition,
-): Omit<GenerationJob, "stage" | "attempts"> {
-  const origin = islandLayoutRecord(state, island.id)?.origin;
+  origin: GenerationJob["origin"],
+  dimension: Dimension,
+): Promise<string[]> {
+  let failures = verifyIslandIntegrity(island, origin, dimension);
 
-  if (origin === undefined) {
-    throw new Error(`Island ${island.id} has no persisted layout record.`);
+  for (
+    let waitedTicks = 0;
+    failures.length > 0 && waitedTicks < INTEGRITY_TIMEOUT_TICKS;
+    waitedTicks += INTEGRITY_RETRY_INTERVAL_TICKS
+  ) {
+    await system.waitTicks(INTEGRITY_RETRY_INTERVAL_TICKS);
+    failures = verifyIslandIntegrity(island, origin, dimension);
   }
 
-  return {
-    id: island.id,
-    contentVersion: island.contentVersion,
-    structureId: island.structureId,
-    dimensionId: island.dimensionId,
-    origin,
-  };
+  return failures;
 }

@@ -150,3 +150,20 @@ formatting, generation, staging, and commits remain central responsibilities.
 The vendor-neutral operating contract is
 [`MULTI_AGENT_WORKFLOW.md`](MULTI_AGENT_WORKFLOW.md), with discoverable
 instructions in [`../AGENTS.md`](../AGENTS.md).
+
+## ADR-012 — Self-healing released-island bootstrap
+
+Status: accepted for the `0.3.0` playtest build.
+
+The three released islands are a required sequential bootstrap, not developer
+setup. Startup persists and resumes one job at a time in the order starter
+island, Ember Outpost, Frostspire. A job waits for its ticking area to be fully
+loaded and for integrity probes to succeed before it is checkpointed and marked
+generated. Transient runtime failures retain the persisted job and retry with
+backoff; an initial player remains eligible for automatic safe-dock arrival
+until the starter is complete.
+
+`/skyknights:island` is a safe resume aid, not a force-restamp command. Normal
+startup must not overwrite player-modified authored terrain. The default fresh
+world seed is deterministic so equivalent default bootstrap worlds do not
+depend on runtime randomness.

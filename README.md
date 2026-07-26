@@ -26,7 +26,7 @@ npm run check
 npm run local-deploy
 ```
 
-`local-deploy` builds the TypeScript and copies the Behavior and Resource Packs to the development pack folders for the Minecraft product selected in `.env`. Leave it running to rebuild on file changes.
+`local-deploy` builds the TypeScript and copies the Behavior and Resource Packs to the development pack folders. `.env` may override the Minecraft product; when absent, the repository uses its documented GDK default. Leave it running to rebuild on file changes.
 
 This machine uses the GDK Bedrock location:
 
@@ -124,7 +124,7 @@ evidence, and focused test plan together for each feature slice.
 
 ## Playable Dockyard Refit and Airship Combat slice
 
-The stable `0.2.0` pack extends the two-expedition survival progression into
+The `0.3.0` playtest build extends the `0.2.0` two-expedition survival progression into
 dockyard refitting and airship combat:
 
 1. Start on a solid Verdant home island and assemble a two-seat starter skiff.
@@ -153,13 +153,20 @@ planned, but remain explicitly `structure_only`. They cannot be discovered or
 generated through gameplay until their creatures, items, guaranteed rewards,
 and progression paths are implemented and validated.
 
+On a fresh supported world, the three released islands generate automatically
+in order: starter island, Ember Outpost, then Frostspire. The initial player is
+held until the starter island passes its readiness and integrity checks, then is
+moved to the safe dock automatically. Transient generation failures retry with
+backoff. This behavior is covered by automated verification but remains pending
+Minecraft hands-on acceptance for `0.3.0`.
+
 Development commands:
 
 ```text
 /skyknights:skiff       Developer shortcut: spawn a test skiff
 /skyknights:skycutter   Developer shortcut: spawn a configured Skycutter
 /skyknights:debug       Show schema, generation, input, and entity state
-/skyknights:island      Requeue starter-island placement
+/skyknights:island      Safely resume required-island bootstrap when needed
 /skyknights:raider      Reset and spawn the Ashwing Raider for development
 /skyknights:recover     Return to the last safe dock
 ```

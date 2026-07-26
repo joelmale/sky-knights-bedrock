@@ -7,8 +7,12 @@ import {
   world,
 } from "@minecraft/server";
 
-import { IDENTIFIERS, STARTER_ISLAND } from "../config/constants";
-import { ensureStarterIslandQueued } from "../generation/service";
+import {
+  ADDON_VERSION,
+  IDENTIFIERS,
+  STARTER_ISLAND,
+} from "../config/constants";
+import { ensureRequiredIslandsQueued } from "../generation/service";
 import { recoverPlayer } from "../gameplay/recovery";
 import { spawnSkyRaiderForPlayer } from "../gameplay/sky-raider";
 import {
@@ -127,7 +131,9 @@ export function registerDevelopmentCommands(
         };
       }
 
-      system.run(() => recoverPlayer(player, logger.child("recovery")));
+      system.run(() =>
+        recoverPlayer(player, worldRepository, logger.child("recovery")),
+      );
       return { status: CustomCommandStatus.Success };
     },
   );
@@ -135,21 +141,20 @@ export function registerDevelopmentCommands(
   registry.registerCommand(
     {
       name: "skyknights:island",
-      description: "Requeue the starter-island generation proof.",
+      description: "Resume required-island generation.",
       permissionLevel: CommandPermissionLevel.GameDirectors,
       cheatsRequired: true,
     },
     () => {
       system.run(() =>
-        ensureStarterIslandQueued(
+        ensureRequiredIslandsQueued(
           worldRepository,
           logger.child("generation"),
-          true,
         ),
       );
       return {
         status: CustomCommandStatus.Success,
-        message: "Starter-island generation queued.",
+        message: "Required-island generation resumed.",
       };
     },
   );
@@ -221,7 +226,7 @@ function sendDebugReport(
     .filter((record) => record.playerModified)
     .map((record) => record.id);
 
-  player.sendMessage("§bSky Knights debug§r");
+  player.sendMessage(`§bSky Knights debug v${ADDON_VERSION}§r`);
   player.sendMessage(
     `schema=${state.schemaVersion} seed=${state.seed} worldSeed=${state.worldSeed} profile=${state.worldProfile} layoutVersion=${state.layoutVersion} control=${player.getControlScheme()}`,
   );

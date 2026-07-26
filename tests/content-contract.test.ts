@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { ADDON_VERSION } from "../scripts/config/constants";
 import { ISLAND_DEFINITIONS } from "../scripts/config/islands";
 import { ISLAND_CONTENT_TABLE } from "../scripts/generation/content-table";
 
@@ -24,6 +25,30 @@ const STRUCTURE_URLS: Record<string, string> = import.meta.glob(
 // @ts-expect-error Vite injects import.meta.glob; there is no @types/node here.
 const LANGUAGE_SOURCES: Record<string, string> = import.meta.glob(
   "../resource_packs/sk_rp/texts/en_US.lang",
+  { eager: true, query: "?raw", import: "default" },
+);
+
+// @ts-expect-error Vite injects import.meta.glob; there is no @types/node here.
+const PACKAGE_SOURCES: Record<string, string> = import.meta.glob(
+  "../package.json",
+  { eager: true, query: "?raw", import: "default" },
+);
+
+// @ts-expect-error Vite injects import.meta.glob; there is no @types/node here.
+const BEHAVIOR_MANIFEST_SOURCES: Record<string, string> = import.meta.glob(
+  "../behavior_packs/sk_bp/manifest.json",
+  { eager: true, query: "?raw", import: "default" },
+);
+
+// @ts-expect-error Vite injects import.meta.glob; there is no @types/node here.
+const RESOURCE_MANIFEST_SOURCES: Record<string, string> = import.meta.glob(
+  "../resource_packs/sk_rp/manifest.json",
+  { eager: true, query: "?raw", import: "default" },
+);
+
+// @ts-expect-error Vite injects import.meta.glob; there is no @types/node here.
+const GAMETEST_MANIFEST_SOURCES: Record<string, string> = import.meta.glob(
+  "../profiles/gametest/behavior_pack/manifest.json",
   { eager: true, query: "?raw", import: "default" },
 );
 
@@ -108,5 +133,47 @@ describe("packaged content contract", () => {
         }
       }
     }
+  });
+});
+
+describe("playtest build identity", () => {
+  interface Manifest {
+    header: { uuid: string; version: number[] };
+    modules: { version: number[] }[];
+    dependencies?: { uuid?: string; version?: number[] }[];
+  }
+
+  const packageVersion = (
+    JSON.parse(onlyValue(PACKAGE_SOURCES)) as { version: string }
+  ).version;
+  const behavior = JSON.parse(onlyValue(BEHAVIOR_MANIFEST_SOURCES)) as Manifest;
+  const resource = JSON.parse(onlyValue(RESOURCE_MANIFEST_SOURCES)) as Manifest;
+  const gametest = JSON.parse(onlyValue(GAMETEST_MANIFEST_SOURCES)) as Manifest;
+
+  it("keeps package, runtime diagnostics, and stable manifests on one version", () => {
+    expect(ADDON_VERSION).toBe(packageVersion);
+    expect(behavior.header.version.join(".")).toBe(packageVersion);
+    expect(resource.header.version.join(".")).toBe(packageVersion);
+
+    for (const module of [
+      ...behavior.modules,
+      ...resource.modules,
+      ...gametest.modules,
+    ]) {
+      expect(module.version.join(".")).toBe(packageVersion);
+    }
+  });
+
+  it("keeps cross-pack and GameTest dependencies aligned", () => {
+    const resourceDependency = behavior.dependencies?.find(
+      (dependency) => dependency.uuid === resource.header.uuid,
+    );
+    const behaviorDependency = gametest.dependencies?.find(
+      (dependency) => dependency.uuid === behavior.header.uuid,
+    );
+
+    expect(resourceDependency?.version?.join(".")).toBe(packageVersion);
+    expect(gametest.header.version.join(".")).toBe(packageVersion);
+    expect(behaviorDependency?.version?.join(".")).toBe(packageVersion);
   });
 });

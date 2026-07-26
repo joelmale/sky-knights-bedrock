@@ -1,8 +1,8 @@
 # Sky Knights — Minecraft Bedrock Add-On Plan and Roadmap
 
-> Status: implementation in progress; `0.2.0` Dockyard Refit/Airship Combat and
-> the Phase 3 deterministic-realm foundation are built; hands-on acceptance
-> pending
+> Status: implementation in progress; `0.2.0` Dockyard Refit/Airship Combat,
+> the Phase 3 deterministic-realm foundation, and the `0.3.0`
+> bootstrap-recovery implementation are built; hands-on acceptance pending
 > Last updated: 2026-07-26
 > Working title: **Sky Knights: Bedrock**
 > Namespace: `skyknights`
@@ -30,7 +30,8 @@ target.
 - Phase 5 now has two entity ship frames, four atomic module slots, ownership,
   seats, cargo, health, repair, recall, reconstruction, advanced variants,
   aimed cannon combat, and a shield choice.
-- The next gate is the focused `0.2.0` Minecraft test plan, followed by
+- The next gate is the focused `0.3.0` Phase 3 bootstrap-recovery Minecraft
+  test plan, followed by
   multiplayer, controller/touch, and clean-client packaging checks.
 
 ## 1. Purpose
@@ -211,25 +212,25 @@ If any gate fails, use Strategy A without delaying the vertical slice.
 
 ## 5. Unity-to-Bedrock translation
 
-| Sky Knights mechanic | Existing intent | Bedrock implementation | Fidelity target |
-|---|---|---|---|
-| Floating island world | Distinct islands separated by meaningful flight | Void world/dimension plus deterministic island layout and `.mcstructure` or scripted generation | High |
-| Four biomes | Verdant, Desert, Tundra, Volcanic with different resources and silhouettes | Island families with vanilla/custom block palettes, particles, fog where available, features, structures, and mobs | High |
-| Voxel mining/building | Everything important participates in the block loop | Reuse vanilla block breaking, placement, drops, tools, enchantments, and inventory | Native substitution |
-| Tool tiers | Wood → stone → gold → diamond gates | Prefer vanilla tiers and recipes; add custom tags/components only for Sky Knights ores | High |
-| Ore veins | Clustered, biome-flavored, depth-gated resources | Pre-generated/script-generated clusters inside islands; no uniform speckle | High |
-| Harvestable trees | Renewable wood economy with regrowth | Vanilla trees/saplings or custom tree structures with vanilla log drops | Native substitution |
-| Crafting and smelting | Mine → smelt → craft closes progression | JSON recipes and furnaces; custom UI only for ship assembly or special forging | Native substitution |
-| Structures and chests | Exploration sites with tiered, guaranteed loot | `.mcstructure` templates, loot tables, structure placement APIs | High |
-| Combat | Readable melee, enemies fight back, reward on kill | Bedrock damage, AI goals/components, animations, loot tables, optional item custom components | High |
-| NPC dialogue | Safe, non-combat townsfolk who guide the player | Custom NPC entities plus interaction event and Action/Message forms | Medium-high |
-| Five fluids | Water/lava gameplay plus deferred exotic fluids | Vanilla water/lava for 1.0; exotic fluids deferred | Intent-first |
-| Airship flight | Earned flight, helm control, shared ship space | Rideable flying entity using `minecraft:input_air_controlled`; entity variants and seat definitions | High fantasy, medium physics |
-| Ship builder | Assemble components and improve the craft | Dockyard slot/blueprint builder that converts crafted modules into an entity configuration | Medium-high |
-| Four prebuilt ships | Increasing size/capability | Skiff, fighter, sailing ship, blimp variants or upgrade tiers | High |
-| World presets/lobby | Choose world style before generation | World-template variants or first-join setup form; defer advanced sliders | Medium |
-| Determinism | Same seed/config gives same content | Seeded TypeScript PRNG, stable island IDs, versioned layout registry | High |
-| Persistence | World/player/ship state survives safely | World, player, and entity dynamic properties with schema version and migration | High |
+| Sky Knights mechanic  | Existing intent                                                            | Bedrock implementation                                                                                             | Fidelity target              |
+| --------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
+| Floating island world | Distinct islands separated by meaningful flight                            | Void world/dimension plus deterministic island layout and `.mcstructure` or scripted generation                    | High                         |
+| Four biomes           | Verdant, Desert, Tundra, Volcanic with different resources and silhouettes | Island families with vanilla/custom block palettes, particles, fog where available, features, structures, and mobs | High                         |
+| Voxel mining/building | Everything important participates in the block loop                        | Reuse vanilla block breaking, placement, drops, tools, enchantments, and inventory                                 | Native substitution          |
+| Tool tiers            | Wood → stone → gold → diamond gates                                        | Prefer vanilla tiers and recipes; add custom tags/components only for Sky Knights ores                             | High                         |
+| Ore veins             | Clustered, biome-flavored, depth-gated resources                           | Pre-generated/script-generated clusters inside islands; no uniform speckle                                         | High                         |
+| Harvestable trees     | Renewable wood economy with regrowth                                       | Vanilla trees/saplings or custom tree structures with vanilla log drops                                            | Native substitution          |
+| Crafting and smelting | Mine → smelt → craft closes progression                                    | JSON recipes and furnaces; custom UI only for ship assembly or special forging                                     | Native substitution          |
+| Structures and chests | Exploration sites with tiered, guaranteed loot                             | `.mcstructure` templates, loot tables, structure placement APIs                                                    | High                         |
+| Combat                | Readable melee, enemies fight back, reward on kill                         | Bedrock damage, AI goals/components, animations, loot tables, optional item custom components                      | High                         |
+| NPC dialogue          | Safe, non-combat townsfolk who guide the player                            | Custom NPC entities plus interaction event and Action/Message forms                                                | Medium-high                  |
+| Five fluids           | Water/lava gameplay plus deferred exotic fluids                            | Vanilla water/lava for 1.0; exotic fluids deferred                                                                 | Intent-first                 |
+| Airship flight        | Earned flight, helm control, shared ship space                             | Rideable flying entity using `minecraft:input_air_controlled`; entity variants and seat definitions                | High fantasy, medium physics |
+| Ship builder          | Assemble components and improve the craft                                  | Dockyard slot/blueprint builder that converts crafted modules into an entity configuration                         | Medium-high                  |
+| Four prebuilt ships   | Increasing size/capability                                                 | Skiff, fighter, sailing ship, blimp variants or upgrade tiers                                                      | High                         |
+| World presets/lobby   | Choose world style before generation                                       | World-template variants or first-join setup form; defer advanced sliders                                           | Medium                       |
+| Determinism           | Same seed/config gives same content                                        | Seeded TypeScript PRNG, stable island IDs, versioned layout registry                                               | High                         |
+| Persistence           | World/player/ship state survives safely                                    | World, player, and entity dynamic properties with schema version and migration                                     | High                         |
 
 ## 6. Architecture
 
@@ -445,13 +446,13 @@ Recommended initial special items:
 
 Recommended ladder:
 
-| Tier | Primary source | Unlocks | Shortcut |
-|---|---|---|---|
-| Wood | home-island trees | starter tools, dock repairs | hut loot |
-| Stone | home-island stone/ruin | furnace access, basic ship parts | hostile drop |
-| Gold/metal | Desert or Volcanic ore | faster ship frame, stronger weapons | watchtower loot |
-| Diamond | deep Tundra/Volcanic pocket | final tools, obsidian/relic access | boss-class loot |
-| Aether | relic sites/bosses | advanced ship and endgame destination | none guaranteed outside intended path |
+| Tier       | Primary source              | Unlocks                               | Shortcut                              |
+| ---------- | --------------------------- | ------------------------------------- | ------------------------------------- |
+| Wood       | home-island trees           | starter tools, dock repairs           | hut loot                              |
+| Stone      | home-island stone/ruin      | furnace access, basic ship parts      | hostile drop                          |
+| Gold/metal | Desert or Volcanic ore      | faster ship frame, stronger weapons   | watchtower loot                       |
+| Diamond    | deep Tundra/Volcanic pocket | final tools, obsidian/relic access    | boss-class loot                       |
+| Aether     | relic sites/bosses          | advanced ship and endgame destination | none guaranteed outside intended path |
 
 Add a host-side reachability test that starts with only the intended spawn resources, repeatedly applies mining/loot/recipe/unlock rules, and asserts that every required 1.0 item becomes reachable.
 
@@ -918,18 +919,18 @@ Milestone: **1.0 release candidate**.
 
 ## 13. Risk register
 
-| Risk | Likelihood/impact | Mitigation | Trigger |
-|---|---|---|---|
-| Custom dimensions remain experimental or change | High/high | Phase 0 gate; stable world-template fallback; isolate beta imports | Registration or upgrade test fails |
-| Arbitrary block ships are not viable | High/high | Commit to entity ships and slot-based dockyard building for 1.0 | Gray-box ship cannot represent a freeform hull |
-| Runtime island generation causes tick stalls | Medium/high | Templates first; resumable measured queue; pre-generate destinations | Watchdog/content log warnings or visible tick loss |
-| Experimental APIs block intended distribution | Medium/high | Stable release profile; document required experiments; package template | Target device cannot enable required API |
-| Asset rights do not permit a Bedrock port | Medium/high | Treat Unity assets as references until license audit; make original replacements | First external playtest/package share |
-| Updates break manifests or script APIs | High/medium | Pin versions; test Preview separately; schema/version matrix | Engine update or module bump |
-| Touch/controller flight feels poor | Medium/high | Test in Phase 0 and Phase 5; use native air-controlled input | Cannot ascend/descend reliably |
-| Multiplayer duplicates loot or ship ownership | Medium/high | Server-authoritative atomic services and explicit loot rules | Concurrent interaction test fails |
-| Lost ships or void deaths soft-lock players | Medium/high | Bound docks, recovery cost, last-safe-dock state | Player has no reachable ship/material path |
-| Scope expands to the full Unity content count | High/medium | Enforce vertical-slice and 1.0 matrices; move variants to P2 | Feature does not support a design pillar or exit criterion |
+| Risk                                            | Likelihood/impact | Mitigation                                                                       | Trigger                                                    |
+| ----------------------------------------------- | ----------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Custom dimensions remain experimental or change | High/high         | Phase 0 gate; stable world-template fallback; isolate beta imports               | Registration or upgrade test fails                         |
+| Arbitrary block ships are not viable            | High/high         | Commit to entity ships and slot-based dockyard building for 1.0                  | Gray-box ship cannot represent a freeform hull             |
+| Runtime island generation causes tick stalls    | Medium/high       | Templates first; resumable measured queue; pre-generate destinations             | Watchdog/content log warnings or visible tick loss         |
+| Experimental APIs block intended distribution   | Medium/high       | Stable release profile; document required experiments; package template          | Target device cannot enable required API                   |
+| Asset rights do not permit a Bedrock port       | Medium/high       | Treat Unity assets as references until license audit; make original replacements | First external playtest/package share                      |
+| Updates break manifests or script APIs          | High/medium       | Pin versions; test Preview separately; schema/version matrix                     | Engine update or module bump                               |
+| Touch/controller flight feels poor              | Medium/high       | Test in Phase 0 and Phase 5; use native air-controlled input                     | Cannot ascend/descend reliably                             |
+| Multiplayer duplicates loot or ship ownership   | Medium/high       | Server-authoritative atomic services and explicit loot rules                     | Concurrent interaction test fails                          |
+| Lost ships or void deaths soft-lock players     | Medium/high       | Bound docks, recovery cost, last-safe-dock state                                 | Player has no reachable ship/material path                 |
+| Scope expands to the full Unity content count   | High/medium       | Enforce vertical-slice and 1.0 matrices; move variants to P2                     | Feature does not support a design pillar or exit criterion |
 
 ## 14. Initial decisions to record
 

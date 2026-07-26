@@ -4,9 +4,16 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
-## [Unreleased]
+## [0.3.0] — 2026-07-26
 
 ### Added
+
+- Automatic sequential bootstrap for the released starter island, Ember
+  Outpost, and Frostspire.
+- Ticking-area readiness polling and post-placement integrity polling before an
+  island is marked generated.
+- Automatic generation retry with backoff for transient runtime failures, and
+  indefinite safe first-player arrival retry until the starter island is ready.
 
 - Deterministic four-family island registry with purpose-separated seeded
   random streams, reserved bounds, travel-lane checks, and pinned migration
@@ -34,6 +41,10 @@ Validation evidence and pending hands-on gates are maintained in
 - `npm run verify` checks generated structures without rewriting the worktree.
 - Debug output reports schema-5 seed/profile/layout data and every persisted
   island origin.
+- Fresh world-state creation uses the deterministic default seed rather than a
+  runtime-random seed; local deployment accepts optional `.env` defaults.
+- `/skyknights:island` now safely resumes starter-island bootstrap when needed;
+  it does not force a terrain-restamping recovery.
 
 ### Fixed
 
@@ -44,11 +55,21 @@ Validation evidence and pending hands-on gates are maintained in
 - Replaced duplicate island registry fragments with one typed source of truth.
 - Updated the progression test to inspect the declarative content table instead
   of regex-scanning the old effectful implementation.
+- Addressed the reported Phase 3 fresh-world failure where the starter island
+  appeared only after `/skyknights:island`, the initial player required manual
+  recovery, and Ember Outpost and Frostspire never generated.
+
+### Automated evidence
+
+- `npm run verify` passed with 147 host tests across 17 files.
+- `npm audit --audit-level=high` reported zero vulnerabilities.
 
 ### Pending validation
 
-- Complete the Phase 3 schema-5, deterministic-layout, inactive-content, and
-  player-modification hands-on plan.
+- Complete the `0.3.0` Phase 3 bootstrap, schema-5, deterministic-layout,
+  inactive-content, and player-modification hands-on plan. The reported
+  fresh-world Session C failure is fixed in code but has not yet been retested
+  in Minecraft.
 - Complete the `0.2.0` hands-on Dockyard Refit and Airship Combat plan.
 - Complete controller, touch, multiplayer, clean-client import, and
   world-template import gates.

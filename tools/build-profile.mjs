@@ -149,7 +149,17 @@ async function zipEntries(directory, prefix = "") {
 
 async function readEnvironment(filePath) {
   const values = {};
-  const contents = await readFile(filePath, "utf8");
+  let contents;
+
+  try {
+    contents = await readFile(filePath, "utf8");
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      return values;
+    }
+
+    throw error;
+  }
 
   for (const rawLine of contents.split(/\r?\n/u)) {
     const line = rawLine.trim();
