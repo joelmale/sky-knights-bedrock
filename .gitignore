@@ -1,14 +1,41 @@
+# Dependencies and generated build output
 node_modules/
 dist/
 lib/
 coverage/
+.nyc_output/
+.vitest/
+*.tsbuildinfo
 
+# Logs and process diagnostics
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local environment and machine-specific configuration
+.env
+.env.*
+!.env.example
+
+# Generated Minecraft packages and world exports
 *.mcaddon
 *.mcpack
 *.mcworld
 *.mctemplate
 
+# Editor, operating-system, and scratch files
+.idea/
+.vs/
+.cache/
+.tmp/
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*~
 .DS_Store
 Thumbs.db
-.env.local
+Desktop.ini
