@@ -1,0 +1,67 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "skyknights:dockmaster",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "spawn_category": "creature"
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": ["skyknights_dockmaster", "npc"]
+      },
+      "minecraft:collision_box": {
+        "width": 0.7,
+        "height": 1.9
+      },
+      "minecraft:health": {
+        "value": 100,
+        "max": 100
+      },
+      "minecraft:physics": {
+        "has_gravity": true,
+        "has_collision": true
+      },
+      "minecraft:movement": {
+        "value": 0
+      },
+      "minecraft:knockback_resistance": {
+        "value": 1
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:persistent": {},
+      "minecraft:nameable": {},
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "deals_damage": "no"
+          }
+        ]
+      },
+      "minecraft:interact": {
+        "interactions": [
+          {
+            "interact_text": "action.interact.skyknights.shipyard",
+            "on_interact": {
+              "event": "skyknights:open_shipyard",
+              "target": "self"
+            },
+            "swing": false
+          }
+        ]
+      },
+      "minecraft:behavior.look_at_player": {
+        "priority": 1,
+        "look_distance": 8,
+        "probability": 1
+      }
+    },
+    "events": {
+      "skyknights:open_shipyard": {}
+    }
+  }
+}

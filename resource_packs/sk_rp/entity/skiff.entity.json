@@ -1,0 +1,22 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "skyknights:skiff",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/boat/oak"
+      },
+      "geometry": {
+        "default": "geometry.skyknights.skiff"
+      },
+      "render_controllers": ["controller.render.default"],
+      "spawn_egg": {
+        "base_color": "#6B4423",
+        "overlay_color": "#69C7E5"
+      }
+    }
+  }
+}

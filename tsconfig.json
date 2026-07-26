@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES6",
+    "lib": ["ES2016", "DOM"],
     "moduleResolution": "Node",
     "module": "ES2020",
     "declaration": false,
@@ -24,14 +25,7 @@
     "noEmitHelpers": true,
     "skipLibCheck": true
   },
-  "include": [
-    "scripts/**/*",
-    "tests/**/*"
-  ],
-  "exclude": [
-    "lib",
-    "dist",
-    "node_modules"
-  ],
+  "include": ["scripts/**/*", "tests/**/*", "profiles/**/*.ts"],
+  "exclude": ["lib", "dist", "node_modules"],
   "compileOnSave": false
 }

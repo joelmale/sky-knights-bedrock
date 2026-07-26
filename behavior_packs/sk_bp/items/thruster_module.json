@@ -1,0 +1,19 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "skyknights:thruster_module",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "item.skyknights:thruster_module.name"
+      },
+      "minecraft:icon": "skyknights_thruster_module",
+      "minecraft:max_stack_size": 16,
+      "minecraft:rarity": "uncommon"
+    }
+  }
+}

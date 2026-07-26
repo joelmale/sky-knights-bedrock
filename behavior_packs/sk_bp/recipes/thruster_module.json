@@ -1,0 +1,29 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "skyknights:thruster_module"
+    },
+    "tags": ["crafting_table"],
+    "pattern": [" C ", "ISI", " I "],
+    "key": {
+      "I": {
+        "item": "minecraft:iron_ingot"
+      },
+      "C": {
+        "item": "minecraft:coal"
+      },
+      "S": {
+        "item": "minecraft:cobblestone"
+      }
+    },
+    "result": {
+      "item": "skyknights:thruster_module"
+    },
+    "unlock": [
+      {
+        "context": "AlwaysUnlocked"
+      }
+    ]
+  }
+}

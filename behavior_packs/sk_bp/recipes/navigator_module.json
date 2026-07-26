@@ -1,0 +1,26 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "skyknights:navigator_module"
+    },
+    "tags": ["crafting_table"],
+    "pattern": [" E ", "ECE", "   "],
+    "key": {
+      "E": {
+        "item": "minecraft:emerald"
+      },
+      "C": {
+        "item": "minecraft:compass"
+      }
+    },
+    "result": {
+      "item": "skyknights:navigator_module"
+    },
+    "unlock": [
+      {
+        "context": "AlwaysUnlocked"
+      }
+    ]
+  }
+}

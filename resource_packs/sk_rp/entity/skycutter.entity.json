@@ -1,0 +1,22 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "skyknights:skycutter",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/boat/oak"
+      },
+      "geometry": {
+        "default": "geometry.skyknights.skycutter"
+      },
+      "render_controllers": ["controller.render.default"],
+      "spawn_egg": {
+        "base_color": "#4A2E1C",
+        "overlay_color": "#88E6FF"
+      }
+    }
+  }
+}

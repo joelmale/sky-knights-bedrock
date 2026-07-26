@@ -62,7 +62,15 @@ Do not edit deployed copies. They are build output and are replaced by the next 
 
 ## Dependency audit note
 
-`npm audit --omit=dev` reports zero production vulnerabilities. The full audit currently reports high-severity advisories in transitive development-only packages used by Mojang's latest `@minecraft/core-build-tasks` and lint tooling. These packages are not bundled into the `.mcaddon`. Do not run `npm audit fix --force`; monitor upstream build-tool releases and upgrade deliberately.
+The repository-owned build commands use Node.js, TypeScript, esbuild, Prettier,
+and fflate directly. This avoids the deprecated `inflight`, `glob@7`,
+`rimraf@3`, and stub `@types/chokidar` packages formerly inherited through the
+Mojang task runner. Both the production-only and full `npm audit` must report
+zero vulnerabilities before a dependency change is accepted.
+
+esbuild is the only approved dependency install script. Its exact approved
+version is pinned in the `allowScripts` section of `package.json`; review and
+update that entry deliberately when upgrading esbuild.
 
 ## Content logging
 

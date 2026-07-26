@@ -1,0 +1,18 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "skyknights:canvas_bundle",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "item.skyknights:canvas_bundle.name"
+      },
+      "minecraft:icon": "skyknights_canvas_bundle",
+      "minecraft:max_stack_size": 64
+    }
+  }
+}

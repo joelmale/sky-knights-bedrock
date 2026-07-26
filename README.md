@@ -79,8 +79,14 @@ npm run lint                  Lint TypeScript
 npm test                      Run host-side unit tests
 npm run check                 Lint, build, and test
 npm run local-deploy          Build/deploy and watch for changes
+npm run build:profiles        Build opt-in experimental and GameTest packs
+npm run local-deploy:experimental
+                              Deploy the custom-dimension proof
+npm run local-deploy:gametest Deploy the in-engine GameTest pack
 npm run mcaddon               Build an importable development .mcaddon
 npm run mcaddon:production    Build a production .mcaddon
+npm run world-template -- --world "<path>"
+                              Package a copy of a void source world
 npm run verify                Run all checks and package production output
 ```
 
@@ -101,6 +107,50 @@ docs/                   Decisions and environment notes
 ```
 
 See [BEDROCK_ADDON_ROADMAP.md](BEDROCK_ADDON_ROADMAP.md) for the full implementation plan.
+
+## Playable Crystal-to-Cutter slice
+
+The stable pack now provides a two-expedition survival and ship-progression
+loop:
+
+1. Start on a solid Verdant home island and assemble a two-seat starter skiff.
+2. Fly to Ember Outpost and return its guaranteed Aether Crystal to Dockmaster
+   Elian.
+3. Craft Hull, Cargo, and Navigator modules around the awarded Aether Engine.
+4. Assemble a persistent four-seat Skycutter with an 18-slot cargo hold.
+5. Cross the starter craft's range boundary, raid Frostspire, and return
+   Froststeel in the ship's cargo.
+6. Use dock recall, repair, and reconstruction to maintain the owned ship.
+
+World schema 3 records an independent content version for every island. Player
+and ship schemas are version 2. Opening an older test world upgrades the solid
+`starter_island:v3`, replenishes progression-safe `ember_outpost:v3`, and
+generates `frostspire:v1`. Dockmaster Elian also self-heals if an older reload
+left the starter dock without its NPC.
+
+Development commands:
+
+```text
+/skyknights:skiff       Developer shortcut: spawn a test skiff
+/skyknights:skycutter   Developer shortcut: spawn a configured Skycutter
+/skyknights:debug       Show schema, generation, input, and entity state
+/skyknights:island      Requeue starter-island placement
+/skyknights:recover     Return to the last safe dock
+```
+
+Run the focused
+[Crystal-to-Cutter test plan](docs/CRYSTAL_TO_CUTTER_TEST_PLAN.md) before
+treating the complete survival and ship-progression loop as accepted in-engine.
+The earlier [Phase 2 Playtest](docs/PHASE_2_PLAYTEST.md) remains the shorter
+starter-skiff regression pass.
+
+The custom-dimension and GameTest packs are opt-in because those capabilities
+still require experimental APIs. See
+[docs/HANDS_ON_TEST_PLAN.md](docs/HANDS_ON_TEST_PLAN.md) for the complete
+keyboard, controller, touch, reload, multiplayer, GameTest, experimental
+dimension, and world-template validation sessions. The shorter
+[docs/PHASE_0_VALIDATION.md](docs/PHASE_0_VALIDATION.md) remains the acceptance
+checklist.
 
 ## API policy
 

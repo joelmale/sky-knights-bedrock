@@ -1,0 +1,36 @@
+{
+  "resource_pack_name": "sky_knights",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "skyknights_ship_core": {
+      "textures": "textures/items/compass_item"
+    },
+    "skyknights_canvas_bundle": {
+      "textures": "textures/items/paper"
+    },
+    "skyknights_thruster_module": {
+      "textures": "textures/items/blaze_powder"
+    },
+    "skyknights_aether_crystal": {
+      "textures": "textures/items/amethyst_shard"
+    },
+    "skyknights_reinforced_hull": {
+      "textures": "textures/items/iron_ingot"
+    },
+    "skyknights_aether_engine": {
+      "textures": "textures/items/ender_eye"
+    },
+    "skyknights_cargo_hold": {
+      "textures": "textures/items/chest"
+    },
+    "skyknights_navigator_module": {
+      "textures": "textures/items/compass_item"
+    },
+    "skyknights_repair_kit": {
+      "textures": "textures/items/leather"
+    },
+    "skyknights_froststeel_ingot": {
+      "textures": "textures/items/diamond"
+    }
+  }
+}

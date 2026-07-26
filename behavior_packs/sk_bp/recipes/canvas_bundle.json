@@ -1,0 +1,27 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "skyknights:canvas_bundle"
+    },
+    "tags": ["crafting_table"],
+    "pattern": ["PPP", "S S", "PPP"],
+    "key": {
+      "P": {
+        "tag": "minecraft:planks"
+      },
+      "S": {
+        "item": "minecraft:stick"
+      }
+    },
+    "result": {
+      "item": "skyknights:canvas_bundle",
+      "count": 2
+    },
+    "unlock": [
+      {
+        "context": "AlwaysUnlocked"
+      }
+    ]
+  }
+}

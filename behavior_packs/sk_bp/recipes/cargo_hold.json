@@ -1,0 +1,26 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "skyknights:cargo_hold"
+    },
+    "tags": ["crafting_table"],
+    "pattern": ["I I", " C ", "   "],
+    "key": {
+      "I": {
+        "item": "minecraft:iron_ingot"
+      },
+      "C": {
+        "item": "minecraft:chest"
+      }
+    },
+    "result": {
+      "item": "skyknights:cargo_hold"
+    },
+    "unlock": [
+      {
+        "context": "AlwaysUnlocked"
+      }
+    ]
+  }
+}

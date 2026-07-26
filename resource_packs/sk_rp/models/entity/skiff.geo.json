@@ -1,0 +1,48 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.skyknights.skiff",
+        "texture_width": 128,
+        "texture_height": 64,
+        "visible_bounds_width": 4,
+        "visible_bounds_height": 3,
+        "visible_bounds_offset": [0, 1, 0]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [0, 0, 0],
+          "cubes": [
+            {
+              "origin": [-16, 4, -8],
+              "size": [32, 3, 16],
+              "uv": [0, 0]
+            },
+            {
+              "origin": [-14, 7, -7],
+              "size": [3, 5, 14],
+              "uv": [0, 20]
+            },
+            {
+              "origin": [11, 7, -7],
+              "size": [3, 5, 14],
+              "uv": [36, 20]
+            },
+            {
+              "origin": [-1, 7, -5],
+              "size": [2, 18, 2],
+              "uv": [72, 0]
+            },
+            {
+              "origin": [1, 14, -4],
+              "size": [1, 10, 12],
+              "uv": [80, 0]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

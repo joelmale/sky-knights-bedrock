@@ -1,2 +1,16 @@
 pack.name=Sky Knights: Bedrock
 pack.description=Explore floating islands, craft an airship, and become a Sky Knight.
+entity.skyknights:skiff.name=Sky Knights Skiff
+entity.skyknights:dockmaster.name=Dockmaster
+entity.skyknights:skycutter.name=Skycutter
+item.skyknights:ship_core.name=Ship Core
+item.skyknights:canvas_bundle.name=Canvas Bundle
+item.skyknights:thruster_module.name=Thruster Module
+item.skyknights:aether_crystal.name=Aether Crystal
+item.skyknights:reinforced_hull.name=Reinforced Hull
+item.skyknights:aether_engine.name=Aether Engine
+item.skyknights:cargo_hold.name=Cargo Hold
+item.skyknights:navigator_module.name=Navigator Module
+item.skyknights:repair_kit.name=Repair Kit
+item.skyknights:froststeel_ingot.name=Froststeel Ingot
+action.interact.skyknights.shipyard=Open Shipyard

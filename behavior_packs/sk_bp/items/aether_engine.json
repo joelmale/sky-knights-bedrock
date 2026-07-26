@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "skyknights:aether_engine",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "item.skyknights:aether_engine.name"
+      },
+      "minecraft:icon": "skyknights_aether_engine",
+      "minecraft:max_stack_size": 1,
+      "minecraft:rarity": "rare",
+      "minecraft:glint": true
+    }
+  }
+}

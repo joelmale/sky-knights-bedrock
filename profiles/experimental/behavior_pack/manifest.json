@@ -1,0 +1,48 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Sky Knights Custom Dimension Proof",
+    "description": "Experimental, opt-in custom dimension capability proof.",
+    "uuid": "797dbbab-e630-4f8e-ae54-edb8ddc5089c",
+    "version": [
+      0,
+      1,
+      0
+    ],
+    "min_engine_version": [
+      1,
+      26,
+      30
+    ]
+  },
+  "modules": [
+    {
+      "description": "Experimental proof data",
+      "type": "data",
+      "uuid": "2ae343f7-385f-47ed-955c-af1abc623ba3",
+      "version": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "description": "Experimental custom dimension script",
+      "type": "script",
+      "language": "javascript",
+      "uuid": "3c08d168-513c-4541-ad94-b06ebc8ab464",
+      "version": [
+        0,
+        1,
+        0
+      ],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "beta"
+    }
+  ]
+}

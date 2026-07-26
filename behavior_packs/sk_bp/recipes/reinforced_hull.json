@@ -1,0 +1,26 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "skyknights:reinforced_hull"
+    },
+    "tags": ["crafting_table"],
+    "pattern": ["ICI", "I I", " C "],
+    "key": {
+      "I": {
+        "item": "minecraft:iron_ingot"
+      },
+      "C": {
+        "item": "skyknights:canvas_bundle"
+      }
+    },
+    "result": {
+      "item": "skyknights:reinforced_hull"
+    },
+    "unlock": [
+      {
+        "context": "AlwaysUnlocked"
+      }
+    ]
+  }
+}

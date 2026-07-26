@@ -1,7 +1,7 @@
 # Sky Knights — Minecraft Bedrock Add-On Plan and Roadmap
 
-> Status: proposed starter plan
-> Last updated: 2026-07-25
+> Status: implementation in progress; Phase 2 complete and first Phase 5 ship-progression slice built
+> Last updated: 2026-07-26
 > Working title: **Sky Knights: Bedrock**
 > Namespace: `skyknights`
 > Recommended implementation: Bedrock Behavior Pack + Resource Pack + TypeScript, optionally bundled with a world template

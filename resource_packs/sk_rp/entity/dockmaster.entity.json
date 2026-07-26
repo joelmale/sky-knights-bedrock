@@ -1,0 +1,22 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "skyknights:dockmaster",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/villager/villager"
+      },
+      "geometry": {
+        "default": "geometry.skyknights.dockmaster"
+      },
+      "render_controllers": ["controller.render.default"],
+      "spawn_egg": {
+        "base_color": "#69452C",
+        "overlay_color": "#69C7E5"
+      }
+    }
+  }
+}

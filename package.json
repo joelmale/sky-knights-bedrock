@@ -8,20 +8,30 @@
     "node": ">=20"
   },
   "scripts": {
-    "lint": "just-scripts lint",
-    "lint:fix": "just-scripts lint --fix",
-    "build": "just-scripts build",
-    "build:production": "just-scripts build --production",
-    "clean": "just-scripts clean",
+    "lint": "node tools/project.mjs lint",
+    "lint:fix": "node tools/project.mjs lint --fix",
+    "build": "node tools/project.mjs build",
+    "build:production": "node tools/project.mjs build --production",
+    "build:profiles": "node tools/build-profile.mjs --all",
+    "build:experimental": "node tools/build-profile.mjs --profile experimental",
+    "build:gametest": "node tools/build-profile.mjs --profile gametest",
+    "clean": "node tools/project.mjs clean",
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "npm run lint && npm run build && npm test",
-    "local-deploy": "just-scripts local-deploy",
-    "mcaddon": "just-scripts mcaddon",
-    "mcaddon:production": "just-scripts mcaddon --production",
-    "verify": "npm run check && npm run mcaddon:production",
+    "local-deploy": "node tools/project.mjs local-deploy",
+    "local-deploy:experimental": "node tools/build-profile.mjs --profile experimental --deploy",
+    "local-deploy:gametest": "node tools/build-profile.mjs --profile gametest --deploy",
+    "mcaddon": "node tools/project.mjs mcaddon",
+    "mcaddon:production": "node tools/project.mjs mcaddon --production",
+    "structures:generate": "node tools/generate-structures.mjs",
+    "world-template": "npm run build && node tools/package-world-template.mjs",
+    "verify": "npm run structures:generate && npm run check && npm run mcaddon:production && npm run build:profiles",
     "enablemcloopback": "CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-1958404141-86561845-1752920682-3514627264-368642714-62675701-733520436",
     "enablemcpreviewloopback": "CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-424268864-5579737-879501358-346833251-474568803-887069379-4040235476"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
   },
   "dependencies": {
     "@minecraft/math": "2.2.11",
@@ -30,12 +40,10 @@
     "@minecraft/vanilla-data": "1.26.33"
   },
   "devDependencies": {
-    "@minecraft/core-build-tasks": "5.7.0",
-    "@typescript-eslint/eslint-plugin": "8.65.0",
-    "@typescript-eslint/parser": "8.65.0",
-    "eslint-plugin-minecraft-linting": "2.0.10",
-    "source-map": "0.7.4",
-    "ts-node": "10.9.1",
+    "@minecraft/server-gametest": "1.0.0-beta.1.26.33-stable",
+    "esbuild": "0.28.1",
+    "fflate": "0.8.3",
+    "prettier": "3.9.6",
     "typescript": "5.5.4",
     "vitest": "4.1.10"
   }
