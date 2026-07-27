@@ -1,6 +1,6 @@
 # Player-Built Skycraft Hands-On Test Plan
 
-> Build under test: `0.3.3`
+> Build under test: `0.3.4`
 >
 > Scope: integrated Skycraft prototype and every activation gate defined by
 > [`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md).
@@ -28,7 +28,7 @@ For an importable package instead:
 npm run mcaddon:production
 ```
 
-Confirm the behavior-pack description or `/skyknights:debug` reports `0.3.3`.
+Confirm the behavior-pack description or `/skyknights:debug` reports `0.3.4`.
 For script-only local-deploy changes, `/reload` may reload the pack, but use a
 full world exit/reopen for entity, block, recipe, resource-pack, manifest, or
 recovery testing.
@@ -139,22 +139,22 @@ Time the session from first arrival to first successful launch. Target:
 
 Try each invalid build separately:
 
-| Case                                     | Expected result                                      |
-| ---------------------------------------- | ---------------------------------------------------- |
-| Missing Helm                             | No scan action exists                                |
-| Two connected Helms                      | Launch refused with exact duplicate-Helm diagnostic |
-| Missing Core                             | Launch refused with exact missing-Core diagnostic   |
-| Two connected Cores                      | Launch refused with exact duplicate-Core diagnostic |
-| Disconnected decoration                 | Decoration remains and is not consumed              |
-| Forbidden chest, TNT, sand, or redstone  | Exact unsupported-block diagnostic                   |
-| Block outside the berth                  | Outside block remains untouched                      |
-| Too many blocks                          | Report shows count and cap                           |
-| Excess mass                              | Report shows mass deficit                            |
-| Insufficient lift                        | Report shows missing lift                            |
-| No aft-facing propulsion                 | Report shows no forward thrust                       |
-| Obstructed dock destination              | Dock refused without deleting proxy                  |
-| Modify a certified block before launch   | Launch refuses stale blueprint or requires recertify |
-| Outstanding persisted repair bill        | Launch refuses until repaired                        |
+| Case                                    | Expected result                                      |
+| --------------------------------------- | ---------------------------------------------------- |
+| Missing Helm                            | No scan action exists                                |
+| Two connected Helms                     | Launch refused with exact duplicate-Helm diagnostic  |
+| Missing Core                            | Launch refused with exact missing-Core diagnostic    |
+| Two connected Cores                     | Launch refused with exact duplicate-Core diagnostic  |
+| Disconnected decoration                 | Decoration remains and is not consumed               |
+| Forbidden chest, TNT, sand, or redstone | Exact unsupported-block diagnostic                   |
+| Block outside the berth                 | Outside block remains untouched                      |
+| Too many blocks                         | Report shows count and cap                           |
+| Excess mass                             | Report shows mass deficit                            |
+| Insufficient lift                       | Report shows missing lift                            |
+| No aft-facing propulsion                | Report shows no forward thrust                       |
+| Obstructed dock destination             | Dock refused without deleting proxy                  |
+| Modify a certified block before launch  | Launch refuses stale blueprint or requires recertify |
+| Outstanding persisted repair bill       | Launch refuses until repaired                        |
 
 After every refusal, compare the world and inventory with the pre-test state.
 There must be no partial clear, material consumption, duplicate, or unrelated
@@ -173,14 +173,14 @@ Build one Apprentice craft containing a mix of:
 
 Run this matrix:
 
-| Checkpoint                  | Action                              | Expected authority after reopen |
-| --------------------------- | ----------------------------------- | ------------------------------- |
-| Docked                      | Save/quit and reopen                | Exact dock build                |
-| Immediately after Launch    | Save/quit as soon as proxy appears  | One proxy or one restored build |
-| In flight                   | Travel, save/quit, and reopen       | One proxy, no dock copy         |
-| Immediately after Dock      | Save/quit during restoration        | One exact dock build            |
-| Missing/destroyed proxy     | Destroy proxy, wait for sweep       | Recovered dock build plus bill  |
-| Obstructed recovery berth   | Place unrelated block before retry  | Fail closed; block untouched    |
+| Checkpoint                | Action                             | Expected authority after reopen |
+| ------------------------- | ---------------------------------- | ------------------------------- |
+| Docked                    | Save/quit and reopen               | Exact dock build                |
+| Immediately after Launch  | Save/quit as soon as proxy appears | One proxy or one restored build |
+| In flight                 | Travel, save/quit, and reopen      | One proxy, no dock copy         |
+| Immediately after Dock    | Save/quit during restoration       | One exact dock build            |
+| Missing/destroyed proxy   | Destroy proxy, wait for sweep      | Recovered dock build plus bill  |
+| Obstructed recovery berth | Place unrelated block before retry | Fail closed; block untouched    |
 
 Pass only if every outcome has one authority. Seeing both a flight proxy and a
 complete dock build is a stop-ship failure. Missing both without a recoverable
@@ -217,16 +217,16 @@ Pass:
 
 With the experimental tag enabled, test every fixture:
 
-| Certification | Reference craft                         | Primary observation                    |
-| ------------- | --------------------------------------- | -------------------------------------- |
-| Apprentice    | Minnow                                  | Small readable raft                    |
-| Ember         | Dart                                    | Compact, faster cutter                 |
-| Ember         | Cargo Punt                              | Reserved cargo tradeoff                |
-| Specialist    | Cloudwhale                              | Airbag/propeller dirigible silhouette  |
-| Specialist    | Aether Disc                             | Compact downward-lift/UFO silhouette   |
-| Specialist    | Frostwing                               | Frostfire combat profile               |
-| Expedition    | Surveyor                                | Crew/repair/utility profile            |
-| Masterwork    | Grand Cruiser                           | Highest provisional cap                |
+| Certification | Reference craft | Primary observation                   |
+| ------------- | --------------- | ------------------------------------- |
+| Apprentice    | Minnow          | Small readable raft                   |
+| Ember         | Dart            | Compact, faster cutter                |
+| Ember         | Cargo Punt      | Reserved cargo tradeoff               |
+| Specialist    | Cloudwhale      | Airbag/propeller dirigible silhouette |
+| Specialist    | Aether Disc     | Compact downward-lift/UFO silhouette  |
+| Specialist    | Frostwing       | Frostfire combat profile              |
+| Expedition    | Surveyor        | Crew/repair/utility profile           |
+| Masterwork    | Grand Cruiser   | Highest provisional cap               |
 
 For each fixture:
 
@@ -281,13 +281,13 @@ Use two players first, then four:
 | Role      | Must be able to                              | Must not be able to                 |
 | --------- | -------------------------------------------- | ----------------------------------- |
 | Owner     | Edit, certify, launch, dock, recover, assign | —                                   |
-| Builder   | Use Helm while docked editing is unlocked   | Launch, recover, manage crew        |
-| Pilot     | Occupy pilot seat and dock                  | Edit, manage crew, gun by default   |
-| Navigator | Occupy assigned seat                        | Pilot, gun, edit                    |
-| Gunner    | Occupy assigned seat and fire hardpoint     | Pilot, edit, manage crew            |
-| Mechanic  | Repair at dock                              | Pilot, gun, manage crew             |
-| Passenger | Occupy a certified passenger seat           | Consequential controls              |
-| Guest     | Observe                                     | Retain unauthorized seat or control |
+| Builder   | Use Helm while docked editing is unlocked    | Launch, recover, manage crew        |
+| Pilot     | Occupy pilot seat and dock                   | Edit, manage crew, gun by default   |
+| Navigator | Occupy assigned seat                         | Pilot, gun, edit                    |
+| Gunner    | Occupy assigned seat and fire hardpoint      | Pilot, edit, manage crew            |
+| Mechanic  | Repair at dock                               | Pilot, gun, manage crew             |
+| Passenger | Occupy a certified passenger seat            | Consequential controls              |
+| Guest     | Observe                                      | Retain unauthorized seat or control |
 
 Also test:
 

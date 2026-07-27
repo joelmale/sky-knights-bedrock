@@ -71,7 +71,7 @@ The custom-dimension pack is intentionally separate from production:
 npm run local-deploy:experimental
 ```
 
-Enable **Beta APIs**, activate **Sky Knights Custom Dimension Proof**, then run:
+Activate **Sky Knights Custom Dimension Proof** in a disposable world, then run:
 
 ```text
 /skyknights:enter_sky_realm

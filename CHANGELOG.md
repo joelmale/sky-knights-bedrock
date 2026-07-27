@@ -4,6 +4,55 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
+## [0.3.4] — 2026-07-27
+
+### Added
+
+- Added a deterministic, bounded ambient archipelago with more than 900
+  possible planned locations across a roughly 5,376-block field and a
+  persistence/performance cap of 384 generated outcomes.
+- Added four compact solid `.mcstructure` templates for Verdant, Desert,
+  Tundra, and Volcanic island families.
+- Added lazy player-proximity generation, compact rederivable `a1` IDs,
+  family clustering, central-realm protection, fixed altitude bands, and a
+  single restart-safe generation transaction.
+- Added occupied-volume protection so ambient generation skips rather than
+  overwrites player builds, vanilla terrain, or an incomplete unknown
+  structure.
+- Added startup registry validation for every ambient template and debug output
+  for generated count, cap, and the next nearby planned island.
+- Added the procedural archipelago architecture guide and focused Minecraft
+  hands-on test plan.
+
+### Architecture
+
+- Adopted a hybrid void-world + authored-template + deterministic Script API
+  planner. Bedrock feature rules are retained as a later experimental
+  decoration comparison, not the authoritative progression generator.
+- Corrected the proposed custom-biome syntax: custom tags belong in
+  `minecraft:tags`, and custom structures are connected through
+  `minecraft:structure_template_feature` plus `minecraft:feature_rules`.
+- Moved the opt-in custom-dimension proof to the stable
+  `@minecraft/server` 2.8.0 dependency while retaining it as an isolated,
+  unaccepted gameplay/migration strategy.
+- Kept the stable target in `minecraft:overworld` for existing-world
+  compatibility. Sky-only presentation still requires a new void source world
+  and packaged `.mctemplate`.
+
+### Validation
+
+- `npm run verify` passed with 224 tests across 39 files, deterministic
+  structures, TypeScript, NBT, the production `.mcaddon`, and both opt-in
+  profiles.
+- `npm audit --audit-level=high` reported zero vulnerabilities.
+- BDS `1.26.34.3` loaded the packs without content errors and passed the
+  existing named skiff-seat smoke test.
+- Independent QA returned GO after player/entity placement races, global
+  starvation, noncanonical IDs, unbounded diagnostics, and hands-on test
+  reproducibility were corrected.
+- Minecraft family clustering, restart behavior, occupied-volume protection,
+  performance, and void-template presentation remain hands-on gates.
+
 ## [0.3.3] — 2026-07-27
 
 ### Fixed

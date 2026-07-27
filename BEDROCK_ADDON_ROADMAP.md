@@ -176,15 +176,21 @@ Use the Bedrock term **Add-On**, even if the project is informally called a mod.
 - TypeScript compiled to JavaScript for the Script API.
 - Minimum content format/engine target: **1.21.90**, because `minecraft:input_air_controlled` requires at least that format version.
 - Stable Script API dependencies wherever possible.
-- Beta API isolated behind a build profile if the custom-dimension route is selected.
+- Beta APIs isolated behind a build profile only for capabilities that still
+  require them, such as GameTest or an experimental biome feature.
 - Short deployed pack folder names such as `sk_bp` and `sk_rp` to remain friendly to world-template and console path constraints.
 - Windows Bedrock client as the primary development target; controller and touch input remain release gates.
 
-Pin exact module and engine versions when the scaffold is created. Do not leave dependencies on floating `"beta"` versions except in the explicitly experimental build profile.
+Pin exact module and engine versions when the scaffold is created. Do not leave
+dependencies on floating `"beta"` versions except in an explicitly isolated
+capability profile.
 
 ### Critical dimension choice
 
-As of this plan, scripted custom dimensions are documented as experimental and use a void generator. The project therefore needs two supported strategies:
+At the current `@minecraft/server` 2.8.0 baseline, scripted custom dimensions
+are exposed in the stable API and use a void generator. They still create a
+separate dimension rather than replacing the Overworld, so the project retains
+two supported strategies:
 
 #### Strategy A — world-template sky realm, recommended for the stable release
 
@@ -204,7 +210,7 @@ Costs:
 - players start from the supplied world/template instead of adding the full experience cleanly to any existing world;
 - the world and packs must be versioned and tested together.
 
-#### Strategy B — custom `skyknights:sky_realm`, experimental profile
+#### Strategy B — custom `skyknights:sky_realm`, isolated capability profile
 
 - Register a void custom dimension during the startup event.
 - Generate the starter platform and islands through script/structures.
@@ -218,9 +224,9 @@ Benefits:
 
 Costs:
 
-- currently requires Beta APIs;
-- subject to signature, behavior, and distribution changes;
-- needs stronger migration and compatibility testing.
+- does not replace the Overworld or automatically migrate existing gameplay;
+- custom-biome feature-pass behavior remains unproven for the void generator;
+- needs stronger spawn, recovery, migration, upgrade, and multiplayer testing.
 
 #### Gate
 
@@ -413,7 +419,13 @@ Apply deterministic variation after placement:
 - place vegetation and particles;
 - record the completed generation stages.
 
-### Later implementation: hybrid procedural islands
+### Hybrid procedural islands
+
+The `0.3.4` slice implements the first bounded template-placement layer:
+deterministic cells, protected space, four clustered visual families, lazy
+near-player placement, restart-safe jobs, and occupied-volume protection.
+Algorithmically generated bodies, palette strata, ores, decorations, and
+encounters remain later layers.
 
 After the vertical slice, add generated island bodies in bounded cells:
 
@@ -716,7 +728,7 @@ Estimated effort: 3–5 days.
 Deliver four disposable proofs:
 
 1. **Dimension proof**
-   - Build both a world-template void world and an experimental custom dimension.
+   - Build both a world-template void world and an opt-in custom dimension.
    - Enter, leave, reload, copy, upgrade, and join with a second player.
 2. **Flight proof**
    - Create a gray-box rideable flying entity with pilot and passenger seats.
@@ -745,7 +757,8 @@ Deliver:
 - `BedrockSkyKnights/` project structure;
 - Behavior and Resource Pack manifests with fixed UUIDs;
 - TypeScript build, watch deploy, lint, tests, and package commands;
-- stable/beta build profiles if Strategy B remains alive;
+- stable and isolated capability profiles, including beta only where the
+  capability still requires it;
 - `skyknights` registries and startup validation;
 - structured logging and a `/skyknights:debug` or equivalent development command;
 - one automated GameTest;
@@ -973,25 +986,25 @@ Milestone: **1.0 release candidate**.
 
 ## 13. Risk register
 
-| Risk                                            | Likelihood/impact | Mitigation                                                                       | Trigger                                                    |
-| ----------------------------------------------- | ----------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| Custom dimensions remain experimental or change | High/high         | Phase 0 gate; stable world-template fallback; isolate beta imports               | Registration or upgrade test fails                         |
-| Arbitrary block ships are not viable            | High/high         | Commit to entity ships and slot-based dockyard building for 1.0                  | Gray-box ship cannot represent a freeform hull             |
-| Runtime island generation causes tick stalls    | Medium/high       | Templates first; resumable measured queue; pre-generate destinations             | Watchdog/content log warnings or visible tick loss         |
-| Experimental APIs block intended distribution   | Medium/high       | Stable release profile; document required experiments; package template          | Target device cannot enable required API                   |
-| Asset rights do not permit a Bedrock port       | Medium/high       | Treat Unity assets as references until license audit; make original replacements | First external playtest/package share                      |
-| Updates break manifests or script APIs          | High/medium       | Pin versions; test Preview separately; schema/version matrix                     | Engine update or module bump                               |
-| Touch/controller flight feels poor              | Medium/high       | Test in Phase 0 and Phase 5; use native air-controlled input                     | Cannot ascend/descend reliably                             |
-| Multiplayer duplicates loot or ship ownership   | Medium/high       | Server-authoritative atomic services and explicit loot rules                     | Concurrent interaction test fails                          |
-| Lost ships or void deaths soft-lock players     | Medium/high       | Bound docks, recovery cost, last-safe-dock state                                 | Player has no reachable ship/material path                 |
-| Scope expands to the full Unity content count   | High/medium       | Enforce vertical-slice and 1.0 matrices; move variants to P2                     | Feature does not support a design pillar or exit criterion |
+| Risk                                            | Likelihood/impact | Mitigation                                                                           | Trigger                                                    |
+| ----------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| Custom-dimension contracts or APIs change       | High/high         | Phase 0 gate; stable world-template fallback; isolate the capability profile         | Registration, travel, recovery, or upgrade test fails      |
+| Arbitrary block ships are not viable            | High/high         | Commit to entity ships and slot-based dockyard building for 1.0                      | Gray-box ship cannot represent a freeform hull             |
+| Runtime island generation causes tick stalls    | Medium/high       | Templates first; resumable measured queue; pre-generate destinations                 | Watchdog/content log warnings or visible tick loss         |
+| Experimental supporting APIs block distribution | Medium/high       | Stable gameplay profile; isolate GameTest/custom-biome experiments; package template | Target device cannot enable a required supporting API      |
+| Asset rights do not permit a Bedrock port       | Medium/high       | Treat Unity assets as references until license audit; make original replacements     | First external playtest/package share                      |
+| Updates break manifests or script APIs          | High/medium       | Pin versions; test Preview separately; schema/version matrix                         | Engine update or module bump                               |
+| Touch/controller flight feels poor              | Medium/high       | Test in Phase 0 and Phase 5; use native air-controlled input                         | Cannot ascend/descend reliably                             |
+| Multiplayer duplicates loot or ship ownership   | Medium/high       | Server-authoritative atomic services and explicit loot rules                         | Concurrent interaction test fails                          |
+| Lost ships or void deaths soft-lock players     | Medium/high       | Bound docks, recovery cost, last-safe-dock state                                     | Player has no reachable ship/material path                 |
+| Scope expands to the full Unity content count   | High/medium       | Enforce vertical-slice and 1.0 matrices; move variants to P2                         | Feature does not support a design pillar or exit criterion |
 
 ## 14. Initial decisions to record
 
 Create these as short ADR-style entries in `docs/DECISIONS.md`:
 
 1. Add-On, not native-code mod.
-2. World-template versus experimental custom dimension.
+2. World-template versus isolated custom dimension.
 3. Minimum supported Bedrock version and pinned Script API modules.
 4. Entity-based airships with dockyard module construction.
 5. Authored, procedural, or hybrid islands.
@@ -1040,7 +1053,7 @@ Do not start broad content production before tickets 1–10 pass their exit scen
 These links were checked while preparing this plan on 2026-07-25:
 
 - [TypeScript scripting starter](https://learn.microsoft.com/en-us/minecraft/creator/documents/scripting/next-steps?view=minecraft-bedrock-stable)
-- [Custom Dimension API tutorial — currently experimental](https://learn.microsoft.com/en-us/minecraft/creator/documents/scripting/custom-dimension-api-tutorial?view=minecraft-bedrock-stable)
+- [Custom Dimension API and void-generator dimension registration](https://learn.microsoft.com/en-us/minecraft/creator/scriptapi/minecraft/server/dimensionregistry?view=minecraft-bedrock-stable)
 - [Official custom-dimensions sample](https://learn.microsoft.com/en-us/samples/microsoft/minecraft-samples/custom-dimensions-sample/)
 - [`minecraft:input_air_controlled`](https://learn.microsoft.com/en-us/minecraft/creator/reference/content/entityreference/examples/entitycomponents/minecraftcomponent_input_air_controlled?view=minecraft-bedrock-stable)
 - [Entity components guide, including rideable entities](https://learn.microsoft.com/en-us/minecraft/creator/documents/entitycomponentsguide?view=minecraft-bedrock-stable)

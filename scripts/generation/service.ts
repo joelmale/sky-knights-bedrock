@@ -15,6 +15,10 @@ import {
   discoverDestination,
   plannedIslandLayoutRecords,
 } from "./discovery";
+import {
+  archipelagoGenerationJobForId,
+  archipelagoIslandDefinition,
+} from "./archipelago-runtime";
 import { completeGeneration, markStructurePlaced } from "./state";
 import { generationRetryDelayTicks } from "./retry";
 import { queueNextRequiredIsland } from "./required-islands";
@@ -139,7 +143,8 @@ async function runGeneration(
       return;
     }
 
-    const island = registeredIsland(job.id);
+    const registered = registeredIsland(state, job);
+    const island = registered.definition;
     const dimension = world.getDimension(job.dimensionId);
     const tickingAreaId = await loadIslandChunks(
       island,
@@ -154,8 +159,61 @@ async function runGeneration(
         job.origin,
         dimension,
       );
+      let shouldPlace = job.stage === "queued" || beforePlacement.length > 0;
 
-      if (job.stage === "queued" || beforePlacement.length > 0) {
+      if (registered.ambient) {
+        if (beforePlacement.length === 0) {
+          // A crash can leave a complete structure with a queued checkpoint.
+          // Accept it without stamping over any blocks.
+          shouldPlace = false;
+        } else if (job.stage === "structure_placed") {
+          completeAmbientGenerationWithoutPlacement(
+            repository,
+            logger,
+            job,
+            "Ambient island changed after its placement checkpoint; preserving the current blocks.",
+          );
+          continue;
+        } else {
+          const obstruction = firstStructureObstruction(
+            island,
+            job.origin,
+            dimension,
+          );
+
+          if (obstruction !== undefined) {
+            completeAmbientGenerationWithoutPlacement(
+              repository,
+              logger,
+              job,
+              "Ambient island skipped to preserve an occupied volume.",
+              { obstruction },
+            );
+            continue;
+          }
+        }
+      }
+
+      if (shouldPlace) {
+        if (registered.ambient) {
+          const occupant = firstStructureOccupant(
+            island,
+            job.origin,
+            dimension,
+          );
+
+          if (occupant !== undefined) {
+            completeAmbientGenerationWithoutPlacement(
+              repository,
+              logger,
+              job,
+              "Ambient island skipped to preserve an entity-occupied volume.",
+              { occupant },
+            );
+            continue;
+          }
+        }
+
         world.structureManager.place(job.structureId, dimension, job.origin);
         await system.waitTicks(5);
       }
@@ -197,7 +255,8 @@ async function runGeneration(
       generationRetryCounts.delete(generationRetryKey(job));
       logger.info("Generation job completed after loaded-chunk verification.", {
         jobId: job.id,
-        generatedIslandIds: state.generatedIslandIds,
+        ambient: registered.ambient,
+        generatedIslandCount: state.generatedIslandIds.length,
       });
     } finally {
       releaseTickingArea(tickingAreaId, logger);
@@ -241,16 +300,138 @@ function generationRetryKey(job: GenerationJob): string {
 function isRetryableGenerationError(message: string): boolean {
   return !(
     message.startsWith("Generation job references unknown island") ||
+    message.startsWith(
+      "Generation job does not match deterministic archipelago plan",
+    ) ||
     message.startsWith("Active generation job changed while placing")
   );
 }
 
-function registeredIsland(id: string): IslandDefinition {
-  try {
-    return islandDefinition(id);
-  } catch {
-    throw new Error(`Generation job references unknown island ${id}.`);
+function completeAmbientGenerationWithoutPlacement(
+  repository: WorldStateRepository,
+  logger: Logger,
+  job: GenerationJob,
+  message: string,
+  details?: Readonly<Record<string, unknown>>,
+): void {
+  let state = repository.load();
+
+  if (state.activeGeneration?.id !== job.id) {
+    throw new Error(`Active generation job changed while checking ${job.id}.`);
   }
+
+  if (state.activeGeneration.stage === "queued") {
+    state = markStructurePlaced(state);
+    repository.save(state);
+  }
+
+  state = completeGeneration(state);
+  repository.save(state);
+  generationRetryCounts.delete(generationRetryKey(job));
+  logger.warn(message, {
+    jobId: job.id,
+    ...details,
+  });
+}
+
+function registeredIsland(
+  state: WorldState,
+  job: GenerationJob,
+): { definition: IslandDefinition; ambient: boolean } {
+  try {
+    return { definition: islandDefinition(job.id), ambient: false };
+  } catch {
+    const definition = archipelagoIslandDefinition(
+      state,
+      job.id,
+      job.dimensionId,
+    );
+    const expected = archipelagoGenerationJobForId(
+      state,
+      job.id,
+      job.dimensionId,
+    );
+
+    if (definition === undefined || expected === undefined) {
+      throw new Error(`Generation job references unknown island ${job.id}.`);
+    }
+
+    if (
+      expected.contentVersion !== job.contentVersion ||
+      expected.structureId !== job.structureId ||
+      expected.dimensionId !== job.dimensionId ||
+      expected.origin.x !== job.origin.x ||
+      expected.origin.y !== job.origin.y ||
+      expected.origin.z !== job.origin.z
+    ) {
+      throw new Error(
+        `Generation job does not match deterministic archipelago plan for ${job.id}.`,
+      );
+    }
+
+    return { definition, ambient: true };
+  }
+}
+
+function firstStructureObstruction(
+  island: IslandDefinition,
+  origin: GenerationJob["origin"],
+  dimension: Dimension,
+): { x: number; y: number; z: number; typeId: string } | undefined {
+  const bounds = structureBounds(origin, island.size);
+
+  for (let x = bounds.from.x; x <= bounds.to.x; x += 1) {
+    for (let y = bounds.from.y; y <= bounds.to.y; y += 1) {
+      for (let z = bounds.from.z; z <= bounds.to.z; z += 1) {
+        const block = dimension.getBlock({ x, y, z });
+
+        if (block === undefined) {
+          return { x, y, z, typeId: "unavailable" };
+        }
+
+        if (block.typeId !== "minecraft:air") {
+          return { x, y, z, typeId: block.typeId };
+        }
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function firstStructureOccupant(
+  island: IslandDefinition,
+  origin: GenerationJob["origin"],
+  dimension: Dimension,
+): { id: string; typeId: string } | undefined {
+  const bounds = structureBounds(origin, island.size);
+  const center = {
+    x: (bounds.from.x + bounds.to.x + 1) / 2,
+    y: (bounds.from.y + bounds.to.y + 1) / 2,
+    z: (bounds.from.z + bounds.to.z + 1) / 2,
+  };
+  const maxDistance = Math.ceil(
+    Math.sqrt(
+      (island.size.x + 4) ** 2 +
+        (island.size.y + 4) ** 2 +
+        (island.size.z + 4) ** 2,
+    ) / 2,
+  );
+
+  return dimension
+    .getEntities({ location: center, maxDistance })
+    .find(({ location }) => {
+      const padding = 2;
+
+      return (
+        location.x >= bounds.from.x - padding &&
+        location.x <= bounds.to.x + 1 + padding &&
+        location.y >= bounds.from.y - padding &&
+        location.y <= bounds.to.y + 1 + padding &&
+        location.z >= bounds.from.z - padding &&
+        location.z <= bounds.to.z + 1 + padding
+      );
+    });
 }
 
 async function loadIslandChunks(

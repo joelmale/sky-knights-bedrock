@@ -37,7 +37,7 @@ export const IDENTIFIERS = {
   airshipFlight: "skyknights:airship_flight",
 } as const;
 
-export const ADDON_VERSION = "0.3.3";
+export const ADDON_VERSION = "0.3.4";
 
 function pinnedIsland(id: string): {
   definition: IslandDefinition;

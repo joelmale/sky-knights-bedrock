@@ -79,15 +79,16 @@ share enemy health or loot families.
 
 ## Structures
 
-| Structure             | Contents                                                 | Placement                      | Status  |
-| --------------------- | -------------------------------------------------------- | ------------------------------ | ------- |
-| Starter dock/workshop | dock, Dockmaster, launch berths, crafting table, furnace | starter_island                 | built   |
-| Small ruin            | loot chest, guardian                                     | ember_outpost                  | built   |
-| Frost tower           | loot chest, warden                                       | frostspire                     | built   |
-| Wood hut              | geometry built; tier-1 chest content inactive            | sunspire_reach, verdant_hollow | partial |
-| Watchtower            | geometry built; encounter and chest content inactive     | glacier_vault                  | partial |
-| Biome shrine          | geometry built; relic and ambient content inactive       | ashfall_crater                 | partial |
-| Boss arena            | geometry built; Giant and completion objective inactive  | aether_sanctum                 | partial |
+| Structure             | Contents                                                                   | Placement                      | Status  |
+| --------------------- | -------------------------------------------------------------------------- | ------------------------------ | ------- |
+| Starter dock/workshop | dock, Dockmaster, launch berths, crafting table, furnace                   | starter_island                 | built   |
+| Small ruin            | loot chest, guardian                                                       | ember_outpost                  | built   |
+| Frost tower           | loot chest, warden                                                         | frostspire                     | built   |
+| Wood hut              | geometry built; tier-1 chest content inactive                              | sunspire_reach, verdant_hollow | partial |
+| Watchtower            | geometry built; encounter and chest content inactive                       | glacier_vault                  | partial |
+| Biome shrine          | geometry built; relic and ambient content inactive                         | ashfall_crater                 | partial |
+| Boss arena            | geometry built; Giant and completion objective inactive                    | aether_sanctum                 | partial |
+| Ambient island bodies | four solid palette-specific templates without progression loot or entities | bounded procedural archipelago | built   |
 
 ## Skycraft construction and technology
 
@@ -104,8 +105,8 @@ open; those rows therefore stay `partial`.
 | Canonical block blueprint         | Dock validation and persistence                        | partial |
 | Mass, lift, thrust, and control   | Apprentice engineering rules                           | partial |
 | Downward/aft engine orientation   | Starter and Ember propulsion                           | partial |
-| Dockmaster reference blueprints   | Eight gated plans and exact construction orders         | partial |
-| Player-saved personal blueprints  | Owner library, revision checks, exact materialization    | partial |
+| Dockmaster reference blueprints   | Eight gated plans and exact construction orders        | partial |
+| Player-saved personal blueprints  | Owner library, revision checks, exact materialization  | partial |
 | Ember custom cutter               | Aether Crystal, iron, and redstone                     | partial |
 | Balloonwright/dirigible branch    | Sunspire gold/copper and Verdant renewable fabric/wood | partial |
 | Frostwright compact-lift branch   | Frostspire Froststeel and diamond                      | partial |

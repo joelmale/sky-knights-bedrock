@@ -11,6 +11,11 @@ import {
   ensureRequiredIslandsQueued,
   resumeGeneration,
 } from "../generation/service";
+import {
+  STABLE_ARCHIPELAGO_DIMENSION,
+  queueNextArchipelagoIsland,
+} from "../generation/archipelago-runtime";
+import { isArchipelagoGenerationPaused } from "../generation/archipelago-control";
 import { registerIslandModificationTracking } from "../generation/modification-tracking";
 import {
   ensureDockmaster,
@@ -116,6 +121,7 @@ function initializeRuntime(validationAttempt: number): void {
       runTutorialSweep();
     }, RECOVERY_INTERVAL_TICKS);
     system.runInterval(() => runSkycraftSweep(logger.child("skycraft")), 20);
+    system.runInterval(runArchipelagoGenerationSweep, 40);
     system.runInterval(() => {
       try {
         ensureDockmaster(worldRepository, logger.child("dockyard"));
@@ -326,4 +332,34 @@ function prepareSkycraftBerth(attempt: number): void {
   }
 
   system.runTimeout(() => prepareSkycraftBerth(attempt + 1), 5);
+}
+
+function runArchipelagoGenerationSweep(): void {
+  try {
+    if (isArchipelagoGenerationPaused()) {
+      return;
+    }
+
+    const state = worldRepository.load();
+    const next = queueNextArchipelagoIsland(
+      state,
+      world.getAllPlayers().map((player) => ({
+        dimensionId: player.dimension.id,
+        x: player.location.x,
+        z: player.location.z,
+      })),
+      STABLE_ARCHIPELAGO_DIMENSION,
+    );
+
+    if (next === state) {
+      return;
+    }
+
+    worldRepository.save(next);
+    resumeGeneration(worldRepository, logger.child("archipelago"));
+  } catch (error) {
+    logger.warn("Archipelago generation sweep deferred.", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 }

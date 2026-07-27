@@ -236,7 +236,7 @@ Deploy:
 npm run local-deploy:experimental
 ```
 
-In a separate Beta APIs world, activate only the custom-dimension proof and run:
+In a separate disposable world, activate only the custom-dimension proof and run:
 
 ```text
 /skyknights:enter_sky_realm
@@ -247,7 +247,7 @@ Validate first registration, starter-island placement, return to the
 Overworld, `/reload`, save/quit/reopen, world copy, and second-player entry and
 exit.
 
-A failure here confirms that the experimental dimension is not ready; it does
+A failure here confirms that the custom-dimension strategy is not ready; it does
 not block the stable Strategy A release.
 
 ### 11. World-template import

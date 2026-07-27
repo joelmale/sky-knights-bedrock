@@ -14,6 +14,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { island as aetherSanctum } from "./structures/aether_sanctum.mjs";
+import { island as ambientDesert } from "./structures/ambient_desert.mjs";
+import { island as ambientTundra } from "./structures/ambient_tundra.mjs";
+import { island as ambientVerdant } from "./structures/ambient_verdant.mjs";
+import { island as ambientVolcanic } from "./structures/ambient_volcanic.mjs";
 import { island as ashfallCrater } from "./structures/ashfall_crater.mjs";
 import { island as emberOutpost } from "./structures/ember_outpost.mjs";
 import { island as frostspire } from "./structures/frostspire.mjs";
@@ -28,6 +32,10 @@ const checkOnly = process.argv.includes("--check");
 
 const ISLAND_MODULES = [
   aetherSanctum,
+  ambientDesert,
+  ambientTundra,
+  ambientVerdant,
+  ambientVolcanic,
   ashfallCrater,
   emberOutpost,
   frostspire,

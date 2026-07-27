@@ -125,6 +125,8 @@ See [BEDROCK_ADDON_ROADMAP.md](BEDROCK_ADDON_ROADMAP.md) for the full implementa
 - [Player-built skycraft technology roadmap](docs/SKYCRAFT_TECHNOLOGY_ROADMAP.md)
 - [Skycraft implementation and gate tracker](docs/SKYCRAFT_IMPLEMENTATION_STATUS.md)
 - [Skycraft hands-on test plan](docs/SKYCRAFT_HANDS_ON_TEST_PLAN.md)
+- [Procedural archipelago architecture](docs/PROCEDURAL_ARCHIPELAGO.md)
+- [Procedural archipelago hands-on test plan](docs/ARCHIPELAGO_HANDS_ON_TEST_PLAN.md)
 
 The status tracker distinguishes implemented code, automated verification, and
 Minecraft hands-on acceptance. Update the implementation, changelog, validation
@@ -147,7 +149,7 @@ npm run test:bds:smoke
 
 ## Playable Dockyard Refit and Airship Combat slice
 
-The `0.3.3` playtest build retains the `0.2.0` two-expedition survival
+The `0.3.4` playtest build retains the `0.2.0` two-expedition survival
 progression into dockyard refitting and airship combat:
 
 1. Start on a solid Verdant home island and assemble a two-seat starter skiff.
@@ -181,7 +183,7 @@ in order: starter island, Ember Outpost, then Frostspire. The initial player is
 held until the starter island passes its readiness and integrity checks, then is
 moved to the safe dock automatically. Transient generation failures retry with
 backoff. This behavior is covered by automated verification but remains pending
-Minecraft hands-on acceptance for `0.3.3`.
+Minecraft hands-on acceptance for `0.3.4`.
 
 The starter island now visibly supplies the first-skiff route: two oak trees
 (8 logs), 12 iron ore, 8 coal ore, abundant stone, and a placed crafting table
@@ -194,12 +196,20 @@ resources; the Dockmaster does not grant ship components directly.
 The stable add-on cannot replace normal Overworld terrain generation. A
 regular world therefore continues generating vanilla land below the high
 islands. The intended sky-only presentation uses a new void-world template,
-where the authored and seeded structures are the landmass. Existing normal
-worlds are never cleared or silently converted.
+where the authored and procedural-template structures are the landmass.
+Existing normal worlds are never cleared or silently converted.
+
+`0.3.4` adds a bounded procedural archipelago around the protected authored
+realm. More than 900 possible deterministic locations are divided into
+Verdant, Desert, Tundra, and Volcanic visual clusters. Nearby islands generate
+one at a time from compact `.mcstructure` templates as players explore, with a
+first-release cap of 384 persisted outcomes and occupied-volume protection.
+See the [architecture](docs/PROCEDURAL_ARCHIPELAGO.md) and
+[hands-on plan](docs/ARCHIPELAGO_HANDS_ON_TEST_PLAN.md).
 
 ### Player-built Skycraft prototype
 
-`0.3.3` includes the integrated bounded Skycraft prototype beside the unchanged
+`0.3.4` includes the integrated bounded Skycraft prototype beside the unchanged
 legacy Skiff and Skycutter. Build an approved connected wood airframe around
 exactly one Helm and Ship Core in the east dock berth. The Helm reports mass,
 required lift, thrust, control, seats, hull, cargo reserve, hardpoints, and the
@@ -235,6 +245,10 @@ Development commands:
 /skyknights:skycutter        Developer shortcut: spawn a configured Skycutter
 /skyknights:debug            Show schema, generation, input, and entity state
 /skyknights:island           Safely resume required-island bootstrap when needed
+/skyknights:archipelago_pause
+                             Pause new ambient-island jobs for safety testing
+/skyknights:archipelago_resume
+                             Resume new ambient-island jobs
 /skyknights:raider           Reset and spawn the Ashwing Raider for development
 /skyknights:recover          Return to the last safe dock
 /skyknights:testbench        Place the stocked test-bench row on the home island
@@ -272,8 +286,10 @@ base progression regression pass, and the earlier
 [Phase 2 Playtest](docs/PHASE_2_PLAYTEST.md) remains the shorter starter-skiff
 check.
 
-The custom-dimension and GameTest packs are opt-in because those capabilities
-still require experimental APIs. See
+The custom-dimension and GameTest packs are opt-in capability profiles.
+Custom-dimension registration is stable in `@minecraft/server` 2.8.0, but its
+Sky Knights migration and gameplay contracts remain unaccepted; GameTest still
+uses its separate beta runtime module. See
 [docs/HANDS_ON_TEST_PLAN.md](docs/HANDS_ON_TEST_PLAN.md) for the complete
 keyboard, controller, touch, reload, multiplayer, GameTest, experimental
 dimension, and world-template validation sessions. The shorter

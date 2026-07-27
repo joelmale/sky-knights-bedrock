@@ -13,6 +13,16 @@ import {
   STARTER_ISLAND,
 } from "../config/constants";
 import { ensureRequiredIslandsQueued } from "../generation/service";
+import { ARCHIPELAGO_CONFIG } from "../generation/archipelago";
+import {
+  isArchipelagoIslandId,
+  nextArchipelagoGenerationJob,
+} from "../generation/archipelago-runtime";
+import {
+  isArchipelagoGenerationPaused,
+  pauseArchipelagoGeneration,
+  resumeArchipelagoGeneration,
+} from "../generation/archipelago-control";
 import { recoverPlayer } from "../gameplay/recovery";
 import { spawnSkyRaiderForPlayer } from "../gameplay/sky-raider";
 import {
@@ -57,6 +67,39 @@ export function registerDevelopmentCommands(
 
       system.run(() => sendDebugReport(player, worldRepository));
       return { status: CustomCommandStatus.Success };
+    },
+  );
+
+  registry.registerCommand(
+    {
+      name: "skyknights:archipelago_pause",
+      description: "Developer aid: pause new ambient-island queueing.",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: true,
+    },
+    () => {
+      pauseArchipelagoGeneration();
+      return {
+        status: CustomCommandStatus.Success,
+        message:
+          "Ambient-island queueing paused. An already active job can still finish.",
+      };
+    },
+  );
+
+  registry.registerCommand(
+    {
+      name: "skyknights:archipelago_resume",
+      description: "Developer aid: resume ambient-island queueing.",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: true,
+    },
+    () => {
+      resumeArchipelagoGeneration();
+      return {
+        status: CustomCommandStatus.Success,
+        message: "Ambient-island queueing resumed.",
+      };
     },
   );
 
@@ -312,25 +355,49 @@ function sendDebugReport(
   const modifiedIslandIds = layoutRecords
     .filter((record) => record.playerModified)
     .map((record) => record.id);
+  const ambientIslandIds = state.generatedIslandIds.filter((id) =>
+    isArchipelagoIslandId(state, id),
+  );
+  const authoredIslandIds = state.generatedIslandIds.filter(
+    (id) => !isArchipelagoIslandId(state, id),
+  );
+  const nextAmbient = nextArchipelagoGenerationJob(state, [
+    {
+      dimensionId: player.dimension.id,
+      x: player.location.x,
+      z: player.location.z,
+    },
+  ]);
 
   player.sendMessage(`§bSky Knights debug v${ADDON_VERSION}§r`);
   player.sendMessage(
     `schema=${state.schemaVersion} seed=${state.seed} worldSeed=${state.worldSeed} profile=${state.worldProfile} layoutVersion=${state.layoutVersion} control=${player.getControlScheme()}`,
   );
   player.sendMessage(
-    `islands=${state.generatedIslandIds.join(",") || "none"} activeJob=${
+    `islands=${authoredIslandIds.join(",") || "none"} activeJob=${
       state.activeGeneration === undefined
         ? "none"
         : `${state.activeGeneration.id}:${state.activeGeneration.stage}`
     }`,
   );
+  player.sendMessage(
+    `archipelago=${ambientIslandIds.length}/${ARCHIPELAGO_CONFIG.maxGeneratedIslands} paused=${isArchipelagoGenerationPaused()} next=${
+      nextAmbient === undefined
+        ? "none"
+        : `${nextAmbient.id}@${nextAmbient.origin.x},${nextAmbient.origin.y},${nextAmbient.origin.z}`
+    }`,
+  );
   const islandVersions: string[] = [];
 
   for (const id in state.islandVersions) {
-    islandVersions.push(`${id}:v${state.islandVersions[id]}`);
+    if (!isArchipelagoIslandId(state, id)) {
+      islandVersions.push(`${id}:v${state.islandVersions[id]}`);
+    }
   }
 
-  player.sendMessage(`islandVersions=${islandVersions.join(",") || "none"}`);
+  player.sendMessage(
+    `islandVersions=${islandVersions.join(",") || "none"} ambientVersioned=${ambientIslandIds.length}`,
+  );
   player.sendMessage(
     `layoutRecords=${layoutRecords.length} playerModified=${modifiedIslandIds.join(",") || "none"}`,
   );

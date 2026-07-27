@@ -42,9 +42,15 @@ Minecraft structures and do not become moving ship geometry.
 Status: accepted for the stable vertical slice.
 
 The stable release will use a packaged void world/template. Custom dimensions
-remain an isolated experimental profile because their Script API still requires
-Beta APIs as of Bedrock 1.26.33. The experimental profile remains available to
-rerun registration, reload, copy, upgrade, travel, and multiplayer gates.
+remain an isolated capability profile. `@minecraft/server` 2.8.0 exposes
+`DimensionRegistry` in the stable API and creates a separate void-generator
+dimension, but it does not replace `minecraft:overworld`. Sky Knights has not
+yet accepted the cross-dimension spawn, recovery, migration, feature-pass,
+upgrade, and multiplayer contracts required to move the main game there.
+
+The opt-in profile remains available to rerun registration, reload, copy,
+upgrade, travel, and multiplayer gates without making those unproven contracts
+part of the stable gameplay pack.
 
 Revisit this decision only if the experimental matrix passes and installation
 into an existing world becomes a product requirement.
@@ -294,3 +300,31 @@ reserved mass and slot count to engineering, but launch and docking reject any
 runtime cargo authority other than `disabled`. A later physical-container
 implementation requires an atomic ownership transfer and restart/destruction
 no-duplication matrix before activation.
+
+## ADR-017 — Void-template, structure-template archipelago
+
+Status: accepted for the `0.3.4` procedural archipelago slice.
+
+The intended sky-only world uses a packaged void source world. Ambient island
+bodies remain deterministic `.mcstructure` templates, while a seeded Script
+API planner selects bounded cells, altitude, and one of four clustered visual
+families. Runtime generation is observer-driven, queues only one persisted job
+at a time, verifies loaded chunks and integrity probes, and refuses to stamp an
+ambient island over an occupied volume.
+
+Ambient planner IDs carry their planner version (`a1`) and are always
+rederived with that version. An authored-island layout migration cannot
+silently move an existing ambient job. The first release exposes more than 900
+possible cells but persists at most 384 ambient outcomes to stay below the
+world-document budget.
+
+Bedrock feature rules remain a complementary experiment, not the authoritative
+island transaction. The correct native chain is `.mcstructure` →
+`minecraft:structure_template_feature` → `minecraft:feature_rules` → a biome
+selected through `minecraft:biome_filter`; custom tags belong in the biome's
+`minecraft:tags` component. Feature rules may later add disposable vegetation,
+clouds, and minor ruins after an in-engine void-dimension proof. Progression
+islands and protected-space guarantees remain under the persisted planner.
+
+The detailed contract and experimental proof gate are in
+[`PROCEDURAL_ARCHIPELAGO.md`](PROCEDURAL_ARCHIPELAGO.md).
