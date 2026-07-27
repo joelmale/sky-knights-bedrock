@@ -12,26 +12,32 @@ Status meanings:
 
 ## Evidence summary
 
-| Date       | Build/state                                             | Validation                                                                   | Result                                                                                                                                                 |
-| ---------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2026-07-25 | Scaffold (`07ecfe2`)                                    | Local toolchain, stable build scaffold, fixed manifests, CI setup            | Passed                                                                                                                                                 |
-| 2026-07-26 | Dependency/tooling cleanup                              | `npm ci`, deprecated transitive dependency removal, audit remediation        | Passed — zero vulnerabilities after replacement tooling                                                                                                |
-| 2026-07-26 | Starter island/skiff development                        | Island rebuild, solidity, spawn height, mounting, movement                   | Passed for reported hands-on cases                                                                                                                     |
-| 2026-07-26 | Crystal-to-Cutter (`3a2a27e`)                           | Dockmaster, Aether Crystal, Skycutter assembly, travel, cargo, recovery loop | Partial-to-passed development playtest; user reported testing looked good                                                                              |
-| 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0`                   | `npm run verify`                                                             | Passed                                                                                                                                                 |
-| 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0`                   | `npm audit --audit-level=high`                                               | Passed — zero vulnerabilities                                                                                                                          |
-| 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0`                   | Local stable pack deployment                                                 | Passed                                                                                                                                                 |
-| 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0`                   | Focused Minecraft hands-on plan                                              | Pending                                                                                                                                                |
-| 2026-07-26 | Phase 3 deterministic-realm foundation                  | `npm run verify`                                                             | Passed — 138 tests, production add-on, and both profiles                                                                                               |
-| 2026-07-26 | Phase 3 deterministic-realm foundation                  | `npm audit --audit-level=high`                                               | Passed — zero vulnerabilities                                                                                                                          |
-| 2026-07-26 | Phase 3 deterministic-realm foundation                  | Independent read-only integration review                                     | Passed — no source stop-ship finding                                                                                                                   |
-| 2026-07-26 | Phase 3 deterministic-realm foundation                  | Focused Minecraft hands-on plan                                              | Pending                                                                                                                                                |
-| 2026-07-26 | Phase 3 Session C, pre-`0.3.0` bootstrap-recovery build | Fresh-world bootstrap                                                        | Failed — starter appeared only after `/skyknights:island`; initial arrival required `/skyknights:recover`; Ember Outpost and Frostspire did not appear |
-| 2026-07-26 | `0.3.0` bootstrap-recovery playtest build               | `npm run verify`                                                             | Passed — 147 tests across 17 files, production add-on, and both profiles                                                                               |
-| 2026-07-26 | `0.3.0` bootstrap-recovery playtest build               | `npm audit --audit-level=high`                                               | Passed — zero vulnerabilities                                                                                                                          |
-| 2026-07-26 | `0.3.0` bootstrap-recovery playtest build               | Production package and profiles with `.env` absent                           | Passed — documented defaults produced the versioned add-on and both profiles                                                                           |
-| 2026-07-26 | `0.3.0` bootstrap-recovery playtest build               | Independent read-only release review                                         | Passed — no source stop-ship finding; ready for hands-on testing                                                                                       |
-| 2026-07-26 | `0.3.0` bootstrap-recovery playtest build               | Focused Minecraft hands-on plan                                              | Pending — implementation has not yet been retested in Minecraft                                                                                        |
+| Date       | Build/state                                             | Validation                                                                   | Result                                                                                                                                                         |
+| ---------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-25 | Scaffold (`07ecfe2`)                                    | Local toolchain, stable build scaffold, fixed manifests, CI setup            | Passed                                                                                                                                                         |
+| 2026-07-26 | Dependency/tooling cleanup                              | `npm ci`, deprecated transitive dependency removal, audit remediation        | Passed — zero vulnerabilities after replacement tooling                                                                                                        |
+| 2026-07-26 | Starter island/skiff development                        | Island rebuild, solidity, spawn height, mounting, movement                   | Passed for reported hands-on cases                                                                                                                             |
+| 2026-07-26 | Crystal-to-Cutter (`3a2a27e`)                           | Dockmaster, Aether Crystal, Skycutter assembly, travel, cargo, recovery loop | Partial-to-passed development playtest; user reported testing looked good                                                                                      |
+| 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0`                   | `npm run verify`                                                             | Passed                                                                                                                                                         |
+| 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0`                   | `npm audit --audit-level=high`                                               | Passed — zero vulnerabilities                                                                                                                                  |
+| 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0`                   | Local stable pack deployment                                                 | Passed                                                                                                                                                         |
+| 2026-07-26 | Dockyard Refit/Airship Combat `0.2.0`                   | Focused Minecraft hands-on plan                                              | Pending                                                                                                                                                        |
+| 2026-07-26 | Phase 3 deterministic-realm foundation                  | `npm run verify`                                                             | Passed — 138 tests, production add-on, and both profiles                                                                                                       |
+| 2026-07-26 | Phase 3 deterministic-realm foundation                  | `npm audit --audit-level=high`                                               | Passed — zero vulnerabilities                                                                                                                                  |
+| 2026-07-26 | Phase 3 deterministic-realm foundation                  | Independent read-only integration review                                     | Passed — no source stop-ship finding                                                                                                                           |
+| 2026-07-26 | Phase 3 deterministic-realm foundation                  | Focused Minecraft hands-on plan                                              | Pending                                                                                                                                                        |
+| 2026-07-26 | Phase 3 Session C, pre-`0.3.0` bootstrap-recovery build | Fresh-world bootstrap                                                        | Failed — starter appeared only after `/skyknights:island`; initial arrival required `/skyknights:recover`; Ember Outpost and Frostspire did not appear         |
+| 2026-07-26 | `0.3.0` bootstrap-recovery playtest build               | `npm run verify`                                                             | Passed — 147 tests across 17 files, production add-on, and both profiles                                                                                       |
+| 2026-07-26 | `0.3.0` bootstrap-recovery playtest build               | `npm audit --audit-level=high`                                               | Passed — zero vulnerabilities                                                                                                                                  |
+| 2026-07-26 | `0.3.0` bootstrap-recovery playtest build               | Production package and profiles with `.env` absent                           | Passed — documented defaults produced the versioned add-on and both profiles                                                                                   |
+| 2026-07-26 | `0.3.0` bootstrap-recovery playtest build               | Independent read-only release review                                         | Passed — no source stop-ship finding; ready for hands-on testing                                                                                               |
+| 2026-07-26 | `0.3.0` bootstrap-recovery playtest build               | Focused Minecraft hands-on plan                                              | Pending — implementation has not yet been retested in Minecraft                                                                                                |
+| 2026-07-26 | `0.3.0` test 4, pre-`0.3.1` integrity corrective slice  | Fresh-world bootstrap                                                        | Failed — starter island was visibly placed but `activeJob` remained `starter_island:queued`; first-player arrival and `/skyknights:recover` correctly deferred |
+| 2026-07-26 | `0.3.1` starter-resource/integrity corrective slice     | Host tests and focused Minecraft hands-on plan                               | Host tests passed — 151 tests across 18 files; Minecraft retest pending                                                                                        |
+| 2026-07-26 | `0.3.1` integrated source                               | `npm run verify`                                                             | Passed — 153 tests across 19 files, NBT fixture tests, production add-on, and both profiles                                                                    |
+| 2026-07-26 | `0.3.1` integrated source                               | `npm audit --audit-level=high`                                               | Passed — zero vulnerabilities                                                                                                                                  |
+| 2026-07-26 | `0.3.1` BDS harness                                     | BDS `1.26.34.3` two-boot pack load and one GameTest                          | Partial development evidence — dirty worktree; no content errors; exact skiff-seat `onTestPassed` marker; not a clean-commit release result                    |
+| 2026-07-26 | `0.3.1` BDS harness                                     | Independent BDS safety/release review                                        | Partial — initial smoke evidence valid; failure-safe cleanup and stricter content/result parsing were then hardened                                            |
 
 ## Hands-on development evidence
 
@@ -131,6 +137,12 @@ player-modified terrain, interruption recovery, and stable-API behavior still
 require the
 [`Phase 3 Stabilization Hands-On Test Plan`](PHASE_3_STABILIZATION_TEST_PLAN.md).
 
+The `0.3.1` integrated automated gate is green: 153 host tests across 19 files,
+NBT fixture tests, production packaging, both profile builds, and a
+zero-vulnerability audit passed. The first BDS smoke also passed from the dirty
+development worktree, proving the exact selected server-side GameTest but not a
+clean release checkpoint. Minecraft client retesting remains pending.
+
 ### Local deployment
 
 Command:
@@ -153,24 +165,25 @@ The repository is ready for both the
 remaining [`0.2.0` focused plan](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md), but those
 results have not yet been recorded.
 
-| Manual area                                                        | State                              |
-| ------------------------------------------------------------------ | ---------------------------------- |
-| Schema-4 → schema-5 migration and deterministic layout persistence | Pending                            |
-| Player-modified island protection                                  | Pending                            |
-| Structure-only island activation isolation                         | Pending                            |
-| Interrupted registry-backed generation                             | Pending                            |
-| Pack load and Content Log on `0.3.0`                               | Pending                            |
-| `0.3.0` automatic fresh-world bootstrap without developer commands | Pending — pre-fix Session C failed |
-| Existing-world schema/content migration                            | Pending                            |
-| Fresh full Survival progression                                    | Pending                            |
-| Every refit transaction and visual                                 | Pending                            |
-| Armored hull, engine speed, cargo size, cannon, shield effects     | Pending                            |
-| Raider spawning, AI, damage, defeat, reward, and persistence       | Pending                            |
-| Owner/gunner multiplayer permissions                               | Pending                            |
-| Keyboard/mouse combat ergonomics                                   | Pending                            |
-| Controller and touch combat ergonomics                             | Pending                            |
-| Reload, recall, destruction, and reconstruction matrix             | Pending                            |
-| Clean-client import and world template                             | Pending                            |
+| Manual area                                                        | State                                      |
+| ------------------------------------------------------------------ | ------------------------------------------ |
+| Schema-4 → schema-5 migration and deterministic layout persistence | Pending                                    |
+| Player-modified island protection                                  | Pending                                    |
+| Structure-only island activation isolation                         | Pending                                    |
+| Interrupted registry-backed generation                             | Pending                                    |
+| Pack load and Content Log on `0.3.1`                               | Pending                                    |
+| `0.3.1` automatic fresh-world bootstrap without developer commands | Pending — pre-fix Sessions C/test 4 failed |
+| `0.3.1` starter-resource-to-skiff route                            | Pending                                    |
+| Existing-world schema/content migration                            | Pending                                    |
+| Fresh full Survival progression                                    | Pending                                    |
+| Every refit transaction and visual                                 | Pending                                    |
+| Armored hull, engine speed, cargo size, cannon, shield effects     | Pending                                    |
+| Raider spawning, AI, damage, defeat, reward, and persistence       | Pending                                    |
+| Owner/gunner multiplayer permissions                               | Pending                                    |
+| Keyboard/mouse combat ergonomics                                   | Pending                                    |
+| Controller and touch combat ergonomics                             | Pending                                    |
+| Reload, recall, destruction, and reconstruction matrix             | Pending                                    |
+| Clean-client import and world template                             | Pending                                    |
 
 When a session is completed, append a dated entry containing:
 

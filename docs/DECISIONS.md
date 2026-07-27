@@ -167,3 +167,45 @@ until the starter is complete.
 startup must not overwrite player-modified authored terrain. The default fresh
 world seed is deterministic so equivalent default bootstrap worlds do not
 depend on runtime randomness.
+
+## ADR-013 — Starter resource-budget and integrity contract
+
+Status: accepted for the `0.3.1` corrective slice.
+
+The fresh-world starter path ships raw vanilla resources, not direct Skiff
+components, so players exercise the intended tools, mining, smelting, recipes,
+and Dockmaster assembly loop. The authored starter island must visibly provide
+two oak trees (8 logs), 12 exposed iron ore, 8 exposed coal ore, abundant
+stone, a crafting table, and a furnace. This is deliberately buffered above the
+first skiff's 7 ingots, 2 recipe coal, 1 fuel coal, cobblestone, and wood/tool
+needs.
+
+A host-side contract verifies the structure's resource budget against the
+shipping recipes and Dockmaster requirements. Runtime integrity probes are part
+of the same authored-structure contract: they must match the placed dock and
+workshop blocks, because a false probe can leave a visibly placed island queued
+and correctly defer safe arrival.
+
+## ADR-014 — Layered BDS/GameTest validation
+
+Status: accepted for the `0.3.1` validation-infrastructure slice.
+
+Sky Knights uses three non-substitutable validation layers: host tests for pure
+and packaged contracts, opt-in BDS/GameTest automation for server-authoritative
+integration, and real-client hands-on acceptance for UI, controls, rendering,
+network behavior, and play feel. A passing lower layer never closes a higher
+layer's gate.
+
+BDS remains a manually downloaded, external, test-only dependency. The harness
+owns only fixed sentinel-guarded paths, temporarily configures authenticated
+non-discoverable test ports, restores the original server properties, retains
+version/pack/log/result evidence, and rejects unverified BDS versions. The
+GameTest npm package version supplies build-time types; the manifest declares
+the shorter runtime version actually exposed by the supported BDS build.
+
+`SimulatedPlayer` may extend bounded interaction tests, but its event behavior
+and lack of real client forms/input/rendering make it unsuitable as a
+replacement for the Minecraft hands-on plan. A BDS/GameTest Validation Engineer
+owns the harness slice, while an independent BDS Safety/Release Reviewer
+challenges its destructive paths, process lifecycle, network exposure, and
+evidence claims.

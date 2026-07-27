@@ -20,10 +20,8 @@
     "result": {
       "item": "skyknights:frostfire_engine"
     },
-    "unlock": [
-      {
-        "context": "AlwaysUnlocked"
-      }
-    ]
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
   }
 }

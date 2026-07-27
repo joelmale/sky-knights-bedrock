@@ -1,8 +1,9 @@
 # Sky Knights — Minecraft Bedrock Add-On Plan and Roadmap
 
 > Status: implementation in progress; `0.2.0` Dockyard Refit/Airship Combat,
-> the Phase 3 deterministic-realm foundation, and the `0.3.0`
-> bootstrap-recovery implementation are built; hands-on acceptance pending
+> the Phase 3 deterministic-realm foundation, the `0.3.0` bootstrap-recovery
+> implementation, and the `0.3.1` starter-resource/integrity corrective slice
+> are built; hands-on acceptance pending
 > Last updated: 2026-07-26
 > Working title: **Sky Knights: Bedrock**
 > Namespace: `skyknights`
@@ -30,7 +31,11 @@ target.
 - Phase 5 now has two entity ship frames, four atomic module slots, ownership,
   seats, cargo, health, repair, recall, reconstruction, advanced variants,
   aimed cannon combat, and a shield choice.
-- The next gate is the focused `0.3.0` Phase 3 bootstrap-recovery Minecraft
+- Validation now includes a guarded opt-in BDS `1.26.34.3` harness. It proves
+  stable/GameTest pack load and one exact component GameTest; broader
+  SimulatedPlayer and real-client coverage remain.
+- The next gate is the focused `0.3.1` Phase 3 bootstrap-recovery and
+  starter-resource Minecraft
   test plan, followed by
   multiplayer, controller/touch, and clean-client packaging checks.
 
@@ -625,7 +630,7 @@ Run outside Minecraft on every change:
 
 Automate where practical:
 
-- manifests and script entry point load;
+- manifests and script entry point load (first BDS smoke implemented);
 - starter island/dock placement;
 - island generation resumes after reload;
 - loot structure contains required rewards;
@@ -634,6 +639,10 @@ Automate where practical:
 - two players cannot both become pilot;
 - NPC interaction opens and advances dialogue;
 - a fresh player can complete the critical progression chain.
+
+Keep BDS/GameTest opt-in and version-gated. Use `SimulatedPlayer` only for
+bounded server-side behavior; client UI, input feel, rendering, and real
+multiplayer remain manual gates.
 
 ### Manual playtest matrix
 

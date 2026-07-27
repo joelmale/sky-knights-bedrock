@@ -18,7 +18,7 @@ export function runTutorialSweep(): void {
 export function objectiveText(objective: TutorialObjective): string {
   const text: Record<TutorialObjective, string> = {
     gather_ship_parts:
-      "Gather materials and craft a Ship Core, two Canvas Bundles, and a Thruster Module.",
+      "Harvest the two oak trees and exposed iron/coal seams, then craft a Ship Core, two Canvas Bundles, and a Thruster Module.",
     assemble_skiff:
       "Bring the starter components to Dockmaster Elian and assemble a skiff.",
     recover_aether_crystal:

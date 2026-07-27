@@ -30,7 +30,7 @@ Optional:
 - Minecraft Creator Tools at `https://mctools.dev`
 - Blockbench for entity/block models and animations
 - Minecraft Preview for testing upcoming API versions
-- Bedrock Dedicated Server for later multiplayer automation
+- Bedrock Dedicated Server `1.26.34.3` for the opt-in GameTest smoke harness
 
 ## Version baseline
 
@@ -40,6 +40,10 @@ Minecraft 1.26.30 ships:
 - `@minecraft/server-ui` 2.1.0
 
 The npm type packages, Behavior Pack dependencies, and minimum engine version must move together when this baseline changes.
+
+The GameTest npm type package uses its build-specific version, while the
+GameTest profile manifest declares the `1.0.0-beta` runtime module that BDS
+`1.26.34.3` exposes.
 
 ## Local deployment
 
@@ -61,6 +65,20 @@ Expected installed paths:
 ```
 
 Do not edit deployed copies. They are build output and are replaced by the next deployment.
+
+## Optional BDS/GameTest validation
+
+The repository does not install or redistribute BDS. Download and extract the
+supported server manually outside Git, then follow
+[`BDS_GAME_TEST_HARNESS.md`](BDS_GAME_TEST_HARNESS.md) to configure
+`SKY_KNIGHTS_BDS_ROOT`, create the test-only sentinel, and run:
+
+```powershell
+npm run test:bds:smoke
+```
+
+The command is version-gated and separate from normal CI and client hands-on
+validation.
 
 ## Dependency audit note
 

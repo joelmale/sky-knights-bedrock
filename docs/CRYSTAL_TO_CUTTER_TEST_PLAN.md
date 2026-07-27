@@ -9,14 +9,14 @@ replace the authored structure volumes.
 
 Record these details before testing:
 
-| Field | Value |
-| --- | --- |
-| Minecraft version | |
-| Add-on commit/build | |
-| Input device | Keyboard / controller / touch |
-| Player count | |
-| World | Fresh / upgraded copy |
-| Content Log clean at start | Yes / No |
+| Field                      | Value                         |
+| -------------------------- | ----------------------------- |
+| Minecraft version          |                               |
+| Add-on commit/build        |                               |
+| Input device               | Keyboard / controller / touch |
+| Player count               |                               |
+| World                      | Fresh / upgraded copy         |
+| Content Log clean at start | Yes / No                      |
 
 For every failure, capture the exact step, expected and actual result, a
 screenshot or video, and the relevant Content Log lines.
@@ -43,7 +43,7 @@ Pass when:
 - the Content Log has no pack, script, entity, recipe, texture, geometry, or
   structure errors;
 - debug reports world schema `5`, `activeJob=none`,
-  `starter_island:v3`, `ember_outpost:v3`, and `frostspire:v1`;
+  `starter_island:v4`, `ember_outpost:v4`, and `frostspire:v2`;
 - the starter island is a continuous solid mass with no ordinary walking
   surface gaps;
 - Ember Outpost is present near `X=84, Z=0`;
@@ -217,15 +217,15 @@ Pass when:
 
 At each row, test both `/reload` and save/quit/reopen:
 
-| State | `/reload` | Reopen |
-| --- | ---: | ---: |
-| Blueprint unlocked, modules not yet crafted | [ ] | [ ] |
-| Skycutter assembled at the home dock | [ ] | [ ] |
-| Skycutter parked at Ember Outpost | [ ] | [ ] |
-| Skycutter parked at Frostspire with cargo | [ ] | [ ] |
-| Skycutter damaged | [ ] | [ ] |
-| Skycutter destroyed and awaiting reconstruction | [ ] | [ ] |
-| Expedition complete | [ ] | [ ] |
+| State                                           | `/reload` | Reopen |
+| ----------------------------------------------- | --------: | -----: |
+| Blueprint unlocked, modules not yet crafted     |       [ ] |    [ ] |
+| Skycutter assembled at the home dock            |       [ ] |    [ ] |
+| Skycutter parked at Ember Outpost               |       [ ] |    [ ] |
+| Skycutter parked at Frostspire with cargo       |       [ ] |    [ ] |
+| Skycutter damaged                               |       [ ] |    [ ] |
+| Skycutter destroyed and awaiting reconstruction |       [ ] |    [ ] |
+| Expedition complete                             |       [ ] |    [ ] |
 
 Also fly or push both the player and ship below `Y=64`.
 

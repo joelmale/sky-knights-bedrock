@@ -15,7 +15,7 @@ import { queueGeneration } from "./state";
  */
 export function queueNextRequiredIsland(state: WorldState): WorldState {
   if (state.activeGeneration !== undefined) {
-    return state;
+    return refreshQueuedRequiredIsland(state);
   }
 
   const island = REQUIRED_ISLANDS.map((legacy) =>
@@ -45,6 +45,43 @@ export function queueNextRequiredIsland(state: WorldState): WorldState {
     generationRequest(state, island),
     state.generatedIslandIds.includes(island.id),
   );
+}
+
+/**
+ * A playtest pack can replace authored structure bytes while an interrupted
+ * queued job is persisted. Refresh only an uncheckpointed, unmodified required
+ * island so recovery records the content version that is actually packaged.
+ */
+function refreshQueuedRequiredIsland(state: WorldState): WorldState {
+  const job = state.activeGeneration;
+
+  if (job === undefined || job.stage !== "queued") {
+    return state;
+  }
+
+  const island = REQUIRED_ISLANDS.map((legacy) =>
+    islandDefinition(legacy.id),
+  ).find((candidate) => candidate.id === job.id);
+  const playerModified =
+    islandLayoutRecord(state, job.id)?.playerModified === true;
+
+  if (
+    island === undefined ||
+    playerModified ||
+    (job.contentVersion === island.contentVersion &&
+      job.structureId === island.structureId)
+  ) {
+    return state;
+  }
+
+  return {
+    ...state,
+    activeGeneration: {
+      ...generationRequest(state, island),
+      stage: "queued",
+      attempts: job.attempts,
+    },
+  };
 }
 
 export function generationRequest(

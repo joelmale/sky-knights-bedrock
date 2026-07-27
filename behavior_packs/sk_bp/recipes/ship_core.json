@@ -17,10 +17,8 @@
     "result": {
       "item": "skyknights:ship_core"
     },
-    "unlock": [
-      {
-        "context": "AlwaysUnlocked"
-      }
-    ]
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
   }
 }

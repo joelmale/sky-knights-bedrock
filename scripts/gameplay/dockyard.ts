@@ -241,6 +241,9 @@ async function showDockyard(player: Player, logger: Logger): Promise<void> {
   );
   const body = [
     `Objective: ${objectiveText(playerState.objective)}`,
+    playerState.ownedShip === undefined
+      ? "Starter supplies: two oak trees, exposed iron/coal seams, stone, a crafting table, and a furnace."
+      : "",
     "",
     `Owned ship: ${
       playerState.ownedShip === undefined

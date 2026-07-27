@@ -67,8 +67,9 @@ Expected:
 - The authored island is centered around `0, 160, 0`.
 - The player arrives on the safe dock without falling.
 - Island generation causes no visible hitch longer than one second.
-- Debug output reports schema `5`, islands `starter_island,ember_outpost`,
-  versions `starter_island:v3,ember_outpost:v2`, `activeJob=none`, a saved
+- Debug output reports schema `5`, islands
+  `starter_island,ember_outpost,frostspire`, versions
+  `starter_island:v4,ember_outpost:v4,frostspire:v2`, `activeJob=none`, a saved
   seed, a dynamic-property byte count, and the detected control scheme.
 
 Capture a screenshot of the island, the debug output, and the relevant Content
@@ -144,13 +145,13 @@ Expected:
 
 At each state below, test both `/reload` and a full save/quit/reopen:
 
-| State | `/reload` | Reopen |
-| --- | ---: | ---: |
-| Standing on the dock | [ ] | [ ] |
-| Seated in a stationary skiff | [ ] | [ ] |
-| Skiff away from the island | [ ] | [ ] |
-| Immediately after recovery | [ ] | [ ] |
-| Immediately after island regeneration | [ ] | [ ] |
+| State                                 | `/reload` | Reopen |
+| ------------------------------------- | --------: | -----: |
+| Standing on the dock                  |       [ ] |    [ ] |
+| Seated in a stationary skiff          |       [ ] |    [ ] |
+| Skiff away from the island            |       [ ] |    [ ] |
+| Immediately after recovery            |       [ ] |    [ ] |
+| Immediately after island regeneration |       [ ] |    [ ] |
 
 After every reload, confirm commands still work, the island remains intact,
 the skiff is usable, and `/skyknights:debug` reports valid state.
@@ -172,16 +173,16 @@ behavior, and any camera conflicts.
 
 Repeat the following matrix on a touch-capable Bedrock device:
 
-| Scenario | Result |
-| --- | ---: |
-| Enter pilot seat | [ ] |
-| Forward and reverse | [ ] |
-| Strafe left and right | [ ] |
-| Ascend and descend | [ ] |
-| Turn and control camera | [ ] |
-| Hover and land | [ ] |
-| Dismount safely | [ ] |
-| Automatic and manual recovery | [ ] |
+| Scenario                      | Result |
+| ----------------------------- | -----: |
+| Enter pilot seat              |    [ ] |
+| Forward and reverse           |    [ ] |
+| Strafe left and right         |    [ ] |
+| Ascend and descend            |    [ ] |
+| Turn and control camera       |    [ ] |
+| Hover and land                |    [ ] |
+| Dismount safely               |    [ ] |
+| Automatic and manual recovery |    [ ] |
 
 If no suitable device is available, mark touch as **not tested** with the
 reason; do not record it as passed.
@@ -291,8 +292,8 @@ The Phase 0 candidate is accepted only when:
 
 Use one row per scenario or defect:
 
-| ID | Date | Git build | Device/game build | Input | Players | Result | Evidence | Issue |
-| --- | --- | --- | --- | --- | ---: | --- | --- | --- |
-| HV-001 | | | | | | | | |
+| ID     | Date | Git build | Device/game build | Input | Players | Result | Evidence | Issue |
+| ------ | ---- | --------- | ----------------- | ----- | ------: | ------ | -------- | ----- |
+| HV-001 |      |           |                   |       |         |        |          |       |
 
 Attach screenshots, recordings, and Content Log excerpts using the evidence ID.

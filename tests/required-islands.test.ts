@@ -44,6 +44,23 @@ describe("required-island bootstrap sequence", () => {
     expect(queued.activeGeneration?.id).toBe("starter_island");
   });
 
+  it("refreshes an interrupted queued job to the packaged content version", () => {
+    const queued = queueNextRequiredIsland(realmState());
+    const stale = {
+      ...queued,
+      activeGeneration: {
+        ...queued.activeGeneration!,
+        contentVersion: 3,
+      },
+    };
+    const refreshed = queueNextRequiredIsland(stale);
+
+    expect(refreshed.activeGeneration).toEqual({
+      ...queued.activeGeneration,
+      contentVersion: 4,
+    });
+  });
+
   it("does not restamp a player-modified island after a version mismatch", () => {
     let state = realmState();
 

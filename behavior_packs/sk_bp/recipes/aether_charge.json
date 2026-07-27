@@ -17,10 +17,8 @@
       "item": "skyknights:aether_charge",
       "count": 8
     },
-    "unlock": [
-      {
-        "context": "AlwaysUnlocked"
-      }
-    ]
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
   }
 }

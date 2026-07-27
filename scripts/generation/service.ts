@@ -74,11 +74,11 @@ export function ensureRequiredIslandsQueued(
   repository: WorldStateRepository,
   logger: Logger,
 ): void {
-  let state = ensureIslandLayoutRecorded(repository);
+  const state = ensureIslandLayoutRecorded(repository);
+  const next = queueNextRequiredIsland(state);
 
-  if (state.activeGeneration === undefined) {
-    state = queueNextRequiredIsland(state);
-    repository.save(state);
+  if (next !== state) {
+    repository.save(next);
   }
 
   resumeGeneration(repository, logger);

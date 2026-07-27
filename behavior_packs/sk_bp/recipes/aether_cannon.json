@@ -23,10 +23,8 @@
     "result": {
       "item": "skyknights:aether_cannon"
     },
-    "unlock": [
-      {
-        "context": "AlwaysUnlocked"
-      }
-    ]
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
   }
 }

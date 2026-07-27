@@ -34,7 +34,7 @@ export const IDENTIFIERS = {
   skyRaider: "skyknights:sky_raider",
 } as const;
 
-export const ADDON_VERSION = "0.3.0";
+export const ADDON_VERSION = "0.3.1";
 
 function pinnedIsland(id: string): {
   definition: IslandDefinition;

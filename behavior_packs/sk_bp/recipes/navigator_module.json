@@ -17,10 +17,8 @@
     "result": {
       "item": "skyknights:navigator_module"
     },
-    "unlock": [
-      {
-        "context": "AlwaysUnlocked"
-      }
-    ]
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
   }
 }

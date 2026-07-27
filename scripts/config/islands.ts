@@ -382,7 +382,7 @@ const STARTER_ISLAND_DEFINITION: IslandDefinition = {
   tier: 0,
   structureId: ISLAND_STRUCTURE_IDS.starter_island,
   dimensionId: LAYOUT.dimensionId,
-  contentVersion: 3,
+  contentVersion: 4,
   size: { x: 31, y: 16, z: 23 },
   placement: "pinned",
   gameplayActivation: "ready",
@@ -391,7 +391,7 @@ const STARTER_ISLAND_DEFINITION: IslandDefinition = {
   integrityBlocks: [
     { offset: { x: 12, y: 0, z: 10 }, typeId: "minecraft:stone" },
     { offset: { x: 1, y: 11, z: 10 }, typeId: "minecraft:grass_block" },
-    { offset: { x: 23, y: 11, z: 10 }, typeId: "minecraft:grass_block" },
+    { offset: { x: 23, y: 11, z: 10 }, typeId: "minecraft:oak_planks" },
     { offset: { x: 12, y: 11, z: 1 }, typeId: "minecraft:grass_block" },
     { offset: { x: 12, y: 11, z: 19 }, typeId: "minecraft:grass_block" },
     { offset: { x: 30, y: 11, z: 10 }, typeId: "minecraft:oak_planks" },

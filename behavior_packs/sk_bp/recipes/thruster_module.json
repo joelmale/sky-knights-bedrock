@@ -20,10 +20,8 @@
     "result": {
       "item": "skyknights:thruster_module"
     },
-    "unlock": [
-      {
-        "context": "AlwaysUnlocked"
-      }
-    ]
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
   }
 }

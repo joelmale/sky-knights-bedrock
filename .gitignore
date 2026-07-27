@@ -25,6 +25,16 @@ pnpm-debug.log*
 *.mcworld
 *.mctemplate
 
+# Bedrock Dedicated Server must remain external and test-only
+/bedrock-server-*/
+/bedrock_server*/
+/.bds/
+/sky_knights_bds_artifacts/
+/.sky-knights-bds-test-root
+/.sky-knights-bds-smoke.lock
+/.sky-knights-server.properties.backup
+/server.properties.sky-knights-*.tmp
+
 # Editor, operating-system, and scratch files
 .idea/
 .vs/

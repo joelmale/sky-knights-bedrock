@@ -30,8 +30,8 @@ Pass when:
   lines.
 - There are no holes through the ordinary walking surface.
 - The player starts and recovers safely at the dock.
-- Debug reports schema `5`, `activeJob=none`, `starter_island:v3`,
-  `ember_outpost:v3`, and `frostspire:v1`.
+- Debug reports schema `5`, `activeJob=none`, `starter_island:v4`,
+  `ember_outpost:v4`, and `frostspire:v2`.
 - The Content Log contains no script, registry, structure, recipe, or texture
   errors.
 
@@ -42,10 +42,14 @@ judging the migration.
 
 Use Survival mode and do not use `/give` or `/skyknights:skiff`.
 
-1. Harvest the exposed oak logs.
-2. Craft planks, a crafting table, wooden tools, stone tools, and a furnace.
-3. Mine the home island for at least seven iron ore and two coal.
-4. Smelt the iron.
+1. Confirm the workshop has two visible oak trees (8 logs), 12 exposed iron
+   ore, 8 exposed coal ore, abundant stone, a crafting table, and a furnace.
+2. Harvest logs and craft planks, sticks, a wooden pickaxe, then a stone
+   pickaxe. Use the placed crafting table and furnace; do not need to dismantle
+   the dock or workshop.
+3. Mine at least seven iron ore and three coal (two for the ship recipes and
+   one as furnace fuel); the exposed seams provide a deliberate buffer.
+4. Smelt seven iron ingots.
 5. Craft:
    - one Ship Core;
    - two Canvas Bundles;
@@ -57,6 +61,8 @@ Use Survival mode and do not use `/give` or `/skyknights:skiff`.
 Pass when:
 
 - Every required material is obtainable on the home island.
+- The visible resource budget and placed workstations support the route without
+  consuming dock blocks or using commands.
 - All three recipes are visible and craft successfully.
 - Assembly fails cleanly when any component is missing.
 - Successful assembly consumes exactly the listed components.
@@ -85,14 +91,14 @@ Pass when:
 
 Test both `/reload` and save/quit/reopen at each point:
 
-| State | `/reload` | Reopen |
-| --- | ---: | ---: |
-| Before crafting ship parts | [ ] | [ ] |
-| With some ship parts crafted | [ ] | [ ] |
-| Immediately after skiff assembly | [ ] | [ ] |
-| Parked at Ember Outpost | [ ] | [ ] |
-| After taking the Aether Crystal | [ ] | [ ] |
-| After returning home | [ ] | [ ] |
+| State                            | `/reload` | Reopen |
+| -------------------------------- | --------: | -----: |
+| Before crafting ship parts       |       [ ] |    [ ] |
+| With some ship parts crafted     |       [ ] |    [ ] |
+| Immediately after skiff assembly |       [ ] |    [ ] |
+| Parked at Ember Outpost          |       [ ] |    [ ] |
+| After taking the Aether Crystal  |       [ ] |    [ ] |
+| After returning home             |       [ ] |    [ ] |
 
 Also move the player and skiff below Y=64. Both must recover without deleting
 inventory, duplicating a ship, resetting island content, or refilling a looted

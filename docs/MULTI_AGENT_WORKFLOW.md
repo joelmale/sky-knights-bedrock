@@ -62,6 +62,42 @@ challenges the integrated result for:
 QA findings are inputs to the central architect, not parallel architecture
 decisions.
 
+### BDS/GameTest Validation Engineer
+
+This specialist owns a bounded server-validation implementation, not gameplay
+behavior or release approval. Its contract includes:
+
+- own only the assigned harness, GameTest, or BDS-sandbox files;
+- keep BDS external through `SKY_KNIGHTS_BDS_ROOT`; never download BDS, accept
+  its EULA, or commit server/world binaries;
+- create disposable, sentinel-tracked worlds and ports; clean up only processes
+  and sandboxes it created;
+- make API/BDS/profile compatibility explicit and fail clearly on mismatch;
+- retain logs, GameTest output, exit status, and timeout diagnostics as evidence;
+- report what the scripted scenario proves and what still needs a real client.
+
+The targeted verification is `npm run test:bds:smoke` plus focused host tests.
+The command is opt-in, version-gated, and evidence for only the named
+server-side scenario it runs. See
+[`BDS_GAME_TEST_HARNESS.md`](BDS_GAME_TEST_HARNESS.md).
+
+### Independent BDS Safety/Release Reviewer
+
+This role is read-only and independent of the harness author. It reviews the
+integrated BDS/GameTest diff and artifacts for:
+
+- process ownership, sentinel correctness, port isolation, timeout behavior,
+  and cleanup safety;
+- no destructive action outside the managed sandbox or external BDS root;
+- explicit manual BDS/EULA setup and no redistributed server artifacts;
+- API/BDS/profile compatibility gates and honest unsupported-version behavior;
+- meaningful readiness and GameTest completion evidence rather than a green
+  process exit alone; and
+- a clear boundary between SimulatedPlayer coverage and real-client acceptance.
+
+It may recommend stop-ship findings but cannot declare a release ready. The
+central architect resolves findings and records the final evidence.
+
 ## Slice lifecycle
 
 ### 1. Establish the checkpoint
@@ -90,15 +126,15 @@ put it in a tracked design or status document.
 
 Each role brief must include:
 
-| Field | Required content |
-| --- | --- |
-| Role | A concrete specialty, not "help with the project" |
-| Deliverable | The behavior or artifact to produce |
-| Owned files | Exact files or directories the role may edit |
-| Forbidden scope | Adjacent systems it must not change |
-| Invariants | IDs, schema, determinism, API, or compatibility rules |
-| Verification | Targeted commands the role must run |
-| Handoff | Changed files, decisions, evidence, and unresolved needs |
+| Field           | Required content                                         |
+| --------------- | -------------------------------------------------------- |
+| Role            | A concrete specialty, not "help with the project"        |
+| Deliverable     | The behavior or artifact to produce                      |
+| Owned files     | Exact files or directories the role may edit             |
+| Forbidden scope | Adjacent systems it must not change                      |
+| Invariants      | IDs, schema, determinism, API, or compatibility rules    |
+| Verification    | Targeted commands the role must run                      |
+| Handoff         | Changed files, decisions, evidence, and unresolved needs |
 
 Keep ownership disjoint. When two roles need the same file, the central
 architect owns that file and accepts proposals from the specialists.

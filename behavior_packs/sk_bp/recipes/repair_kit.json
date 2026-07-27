@@ -18,10 +18,8 @@
       "item": "skyknights:repair_kit",
       "count": 2
     },
-    "unlock": [
-      {
-        "context": "AlwaysUnlocked"
-      }
-    ]
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
   }
 }

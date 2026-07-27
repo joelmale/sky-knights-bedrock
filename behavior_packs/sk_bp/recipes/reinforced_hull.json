@@ -17,10 +17,8 @@
     "result": {
       "item": "skyknights:reinforced_hull"
     },
-    "unlock": [
-      {
-        "context": "AlwaysUnlocked"
-      }
-    ]
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
   }
 }

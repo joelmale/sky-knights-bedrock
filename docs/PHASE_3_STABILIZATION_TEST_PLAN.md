@@ -7,15 +7,15 @@ are implemented.
 
 ## Test record
 
-| Field                        | Value                                     |
-| ---------------------------- | ----------------------------------------- |
-| Add-on commit                |                                           |
-| Package version              | `0.3.0` bootstrap-recovery playtest build |
-| Minecraft build              |                                           |
-| Platform/input               |                                           |
-| Fresh-world name             |                                           |
-| Upgraded schema-4 world name |                                           |
-| Tester/date                  |                                           |
+| Field                        | Value                                                |
+| ---------------------------- | ---------------------------------------------------- |
+| Add-on commit                |                                                      |
+| Package version              | `0.3.1` bootstrap/resource corrective playtest build |
+| Minecraft build              |                                                      |
+| Platform/input               |                                                      |
+| Fresh-world name             |                                                      |
+| Upgraded schema-4 world name |                                                      |
+| Tester/date                  |                                                      |
 
 Back up the upgraded world before opening it with this build. Do not use a
 valued world as the interruption test world.
@@ -36,6 +36,16 @@ Expected:
 - formatting, TypeScript, host tests, packaging, and profiles pass;
 - npm reports zero high-severity vulnerabilities;
 - `dist/packages/sky_knights.mcaddon` is produced.
+
+When the documented external BDS `1.26.34.3` test root is configured, also run:
+
+```powershell
+npm run test:bds:smoke
+```
+
+Expected: both packs load without content errors and the named skiff-seat
+GameTest emits its exact pass marker. This is a server-side preflight for one
+component contract; it does not replace any session below.
 
 ## Session A — Pack startup and registry validation
 
@@ -87,13 +97,18 @@ For each world:
 3. Record `/skyknights:debug` after arrival and while generation progresses.
 4. Wait for the automatic sequence to finish, then inspect the starter island,
    Dockmaster, Ember Outpost, and Frostspire.
-5. Complete the released route without developer shortcuts: gather starter
+5. Confirm two visible oak trees (8 logs), 12 exposed iron ore, 8 exposed coal
+   ore, abundant stone, and the placed crafting table/furnace.
+6. Complete the released route without developer shortcuts: gather starter
    materials, build the skiff, obtain Ember's Aether Crystal, assemble the
    Skycutter, and obtain Frostspire Froststeel.
 
 Expected:
 
 - starter island is solid and the player arrives at the safe dock;
+- a visibly placed starter is not sufficient: its integrity checkpoint must
+  complete, `activeJob` must advance, and automatic arrival/recovery must no
+  longer defer once the dock is ready;
 - Dockmaster appears and remains available after reload;
 - the original three islands generate in their established locations with
   their guaranteed content;
@@ -190,7 +205,7 @@ loop.
 - [ ] Interrupted placement resumes safely.
 - [ ] Existing progression regression passes.
 
-`0.3.0` status: automated verification is recorded separately; all Minecraft
+`0.3.1` status: automated verification is pending separately; all Minecraft
 hands-on rows above remain pending until this plan is executed and evidenced.
 
 For a failure, record the exact commit, world provenance, debug output,

@@ -15,6 +15,8 @@ The repository is based on Microsoft/Mojang's TypeScript starter, updated for Mi
 - Blockception's Minecraft Bedrock Development VS Code extension
 
 Minecraft Creator Tools (`mctools.dev` or its CLI) is optional. The build does not require it.
+Bedrock Dedicated Server `1.26.34.3` is optional and used only by the opt-in
+GameTest smoke harness.
 
 ## First setup
 
@@ -77,6 +79,8 @@ The debugger listens on port `19144` and uses the source maps under `dist/debug`
 npm run build                 Type-check and bundle scripts
 npm run lint                  Lint TypeScript
 npm test                      Run host-side unit tests
+npm run test:bds:unit         Test the Bedrock level.dat/NBT tooling
+npm run test:bds:smoke        Run the opt-in BDS/GameTest smoke harness
 npm run check                 Lint, build, and test
 npm run local-deploy          Build/deploy and watch for changes
 npm run build:profiles        Build opt-in experimental and GameTest packs
@@ -106,6 +110,7 @@ resource_packs/sk_rp/   Client assets, text, geometry, animation, and sound
 scripts/                TypeScript source
 tests/                  Host-side unit tests for deterministic/pure logic
 docs/                   Decisions and environment notes
+tools/bds/              Guarded opt-in BDS/GameTest validation harness
 ```
 
 See [BEDROCK_ADDON_ROADMAP.md](BEDROCK_ADDON_ROADMAP.md) for the full implementation plan.
@@ -122,10 +127,25 @@ The status tracker distinguishes implemented code, automated verification, and
 Minecraft hands-on acceptance. Update the implementation, changelog, validation
 evidence, and focused test plan together for each feature slice.
 
+## Optional BDS/GameTest smoke validation
+
+The repository includes a guarded two-boot Bedrock Dedicated Server harness. It
+stages copies of the stable and GameTest packs into a dedicated, externally
+downloaded BDS `1.26.34.3` installation, creates only its fixed disposable
+world, and runs one registered GameTest. It is not part of normal CI and does
+not replace hands-on Minecraft testing.
+
+See the [BDS/GameTest Harness guide](docs/BDS_GAME_TEST_HARNESS.md) before
+creating the required test-root sentinel or running:
+
+```powershell
+npm run test:bds:smoke
+```
+
 ## Playable Dockyard Refit and Airship Combat slice
 
-The `0.3.0` playtest build extends the `0.2.0` two-expedition survival progression into
-dockyard refitting and airship combat:
+The `0.3.1` playtest build extends the `0.2.0` two-expedition survival
+progression into dockyard refitting and airship combat:
 
 1. Start on a solid Verdant home island and assemble a two-seat starter skiff.
 2. Fly to Ember Outpost and return its guaranteed Aether Crystal to Dockmaster
@@ -158,7 +178,13 @@ in order: starter island, Ember Outpost, then Frostspire. The initial player is
 held until the starter island passes its readiness and integrity checks, then is
 moved to the safe dock automatically. Transient generation failures retry with
 backoff. This behavior is covered by automated verification but remains pending
-Minecraft hands-on acceptance for `0.3.0`.
+Minecraft hands-on acceptance for `0.3.1`.
+
+The starter island now visibly supplies the first-skiff route: two oak trees
+(8 logs), 12 exposed iron ore, 8 exposed coal ore, abundant stone, and a
+placed crafting table and furnace. The player still crafts the Ship Core,
+Canvas Bundles, and Thruster Module from those raw resources; the Dockmaster
+does not grant ship components directly.
 
 Development commands:
 

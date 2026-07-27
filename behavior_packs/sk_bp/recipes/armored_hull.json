@@ -20,10 +20,8 @@
     "result": {
       "item": "skyknights:armored_hull"
     },
-    "unlock": [
-      {
-        "context": "AlwaysUnlocked"
-      }
-    ]
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
   }
 }

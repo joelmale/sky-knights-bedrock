@@ -20,10 +20,8 @@
     "result": {
       "item": "skyknights:expanded_cargo_hold"
     },
-    "unlock": [
-      {
-        "context": "AlwaysUnlocked"
-      }
-    ]
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
   }
 }

@@ -7,10 +7,10 @@
 import { structureBuffer } from "./nbt.mjs";
 import {
   assertSolidBody,
+  blockStamp,
+  boxStamp,
   buildIslandIndices,
-  canopyStamp,
   dockPlatform,
-  orePocket,
   taperedEllipsoidBody,
 } from "./shape.mjs";
 
@@ -24,6 +24,9 @@ const PALETTE = [
   "minecraft:coal_ore",
   "minecraft:iron_ore",
   "minecraft:oak_log",
+  "minecraft:crafting_table",
+  "minecraft:furnace",
+  "minecraft:oak_leaves",
 ];
 
 const BLOCK = {
@@ -34,7 +37,44 @@ const BLOCK = {
   coalOre: 4,
   ironOre: 5,
   log: 6,
+  craftingTable: 7,
+  furnace: 8,
+  leaves: 9,
 };
+
+export const STARTER_RESOURCE_MINIMUMS = {
+  "minecraft:oak_log": 8,
+  "minecraft:stone": 16,
+  "minecraft:coal_ore": 8,
+  "minecraft:iron_ore": 12,
+};
+
+// A fresh player can read these seams from the island's exposed west/east and
+// north/south faces. The twelve iron and eight coal blocks provide a deliberate
+// buffer above the first skiff's seven ingots, two recipe coal, and smelting
+// fuel without requiring blind mining.
+const STARTER_PROSPECTS = [
+  { index: BLOCK.ironOre, x: 4, y: 8, z: 10 },
+  { index: BLOCK.ironOre, x: 20, y: 8, z: 10 },
+  { index: BLOCK.ironOre, x: 4, y: 7, z: 10 },
+  { index: BLOCK.ironOre, x: 20, y: 7, z: 10 },
+  { index: BLOCK.ironOre, x: 5, y: 6, z: 10 },
+  { index: BLOCK.ironOre, x: 19, y: 6, z: 10 },
+  { index: BLOCK.ironOre, x: 6, y: 5, z: 10 },
+  { index: BLOCK.ironOre, x: 18, y: 5, z: 10 },
+  { index: BLOCK.ironOre, x: 7, y: 4, z: 10 },
+  { index: BLOCK.ironOre, x: 17, y: 4, z: 10 },
+  { index: BLOCK.ironOre, x: 7, y: 3, z: 10 },
+  { index: BLOCK.ironOre, x: 17, y: 3, z: 10 },
+  { index: BLOCK.coalOre, x: 12, y: 8, z: 3 },
+  { index: BLOCK.coalOre, x: 12, y: 8, z: 17 },
+  { index: BLOCK.coalOre, x: 12, y: 7, z: 4 },
+  { index: BLOCK.coalOre, x: 12, y: 7, z: 16 },
+  { index: BLOCK.coalOre, x: 12, y: 6, z: 5 },
+  { index: BLOCK.coalOre, x: 12, y: 6, z: 15 },
+  { index: BLOCK.coalOre, x: 12, y: 5, z: 5 },
+  { index: BLOCK.coalOre, x: 12, y: 5, z: 15 },
+];
 
 const BODY = taperedEllipsoidBody({
   centerX: 12,
@@ -44,7 +84,7 @@ const BODY = taperedEllipsoidBody({
   growthZ: 7,
 });
 
-function build() {
+function buildIndices() {
   const indices = buildIslandIndices({
     size: SIZE,
     body: BODY,
@@ -53,28 +93,10 @@ function build() {
       subsurface: BLOCK.dirt,
       surface: BLOCK.grass,
     },
-    orePockets: [
-      orePocket({
-        index: BLOCK.coalOre,
-        minY: 4,
-        maxY: 7,
-        offsets: [
-          [-3, 1],
-          [4, -2],
-          [1, 4],
-        ],
-      }),
-      orePocket({
-        index: BLOCK.ironOre,
-        minY: 3,
-        maxY: 6,
-        offsets: [
-          [-1, -3],
-          [3, 2],
-        ],
-      }),
-    ],
     stamps: [
+      ...STARTER_PROSPECTS.map((prospect) => blockStamp(prospect)),
+      blockStamp({ index: BLOCK.craftingTable, x: 12, y: 12, z: 7 }),
+      blockStamp({ index: BLOCK.furnace, x: 13, y: 12, z: 7 }),
       ...dockPlatform({
         index: BLOCK.planks,
         y: 11,
@@ -84,14 +106,46 @@ function build() {
         maxZ: 11,
         supports: { y: 10, minX: 23, maxX: 29, z: [9, 11] },
       }),
-      canopyStamp({
-        index: BLOCK.log,
-        y: 12,
-        minX: 6,
+      boxStamp({
+        index: BLOCK.leaves,
+        minX: 5,
         maxX: 9,
+        minY: 14,
+        maxY: 14,
+        minZ: 5,
+        maxZ: 9,
+      }),
+      boxStamp({
+        index: BLOCK.leaves,
+        minX: 6,
+        maxX: 8,
+        minY: 15,
+        maxY: 15,
         minZ: 6,
         maxZ: 8,
       }),
+      boxStamp({
+        index: BLOCK.leaves,
+        minX: 15,
+        maxX: 19,
+        minY: 14,
+        maxY: 14,
+        minZ: 13,
+        maxZ: 17,
+      }),
+      boxStamp({
+        index: BLOCK.leaves,
+        minX: 16,
+        maxX: 18,
+        minY: 15,
+        maxY: 15,
+        minZ: 14,
+        maxZ: 16,
+      }),
+      ...[12, 13, 14, 15].flatMap((y) => [
+        blockStamp({ index: BLOCK.log, x: 7, y, z: 7 }),
+        blockStamp({ index: BLOCK.log, x: 17, y, z: 15 }),
+      ]),
     ],
   });
 
@@ -102,7 +156,26 @@ function build() {
     indices,
   });
 
+  assertStarterResourceMinimums(indices);
+  return indices;
+}
+
+function build() {
+  const indices = buildIndices();
   return structureBuffer(SIZE, PALETTE, indices);
+}
+
+function assertStarterResourceMinimums(indices) {
+  for (const [typeId, minimum] of Object.entries(STARTER_RESOURCE_MINIMUMS)) {
+    const paletteIndex = PALETTE.indexOf(typeId);
+    const actual = indices.filter((index) => index === paletteIndex).length;
+
+    if (actual < minimum) {
+      throw new Error(
+        `Starter island supplies ${actual} ${typeId}; expected at least ${minimum}.`,
+      );
+    }
+  }
 }
 
 export const island = {
@@ -126,10 +199,16 @@ export const island = {
   integrityBlocks: [
     { offset: { x: 12, y: 0, z: 10 }, typeId: "minecraft:stone" },
     { offset: { x: 1, y: 11, z: 10 }, typeId: "minecraft:grass_block" },
-    { offset: { x: 23, y: 11, z: 10 }, typeId: "minecraft:grass_block" },
+    { offset: { x: 23, y: 11, z: 10 }, typeId: "minecraft:oak_planks" },
     { offset: { x: 12, y: 11, z: 1 }, typeId: "minecraft:grass_block" },
     { offset: { x: 12, y: 11, z: 19 }, typeId: "minecraft:grass_block" },
     { offset: { x: 30, y: 11, z: 10 }, typeId: "minecraft:oak_planks" },
   ],
+  inspect() {
+    return {
+      palette: [...PALETTE],
+      indices: buildIndices(),
+    };
+  },
   build,
 };

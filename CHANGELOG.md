@@ -4,6 +4,52 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
+## [0.3.1] — 2026-07-26
+
+### Added
+
+- Starter-island resource and integrity corrective slice: two visible oak
+  trees, 12 exposed iron ore, 8 exposed coal ore, abundant stone, and a placed
+  crafting table and furnace.
+- A host-side starter-resource budget contract that ties the authored structure
+  to the starter-skiff recipes and Dockmaster material requirements.
+- Clearer Dockmaster and tutorial directions for the starter resources,
+  workstation, furnace, and first skiff assembly.
+- A guarded, opt-in BDS `1.26.34.3` two-boot smoke harness with bounded world
+  and pack ownership, `level.dat` fixture tests, exact GameTest result parsing,
+  retained run evidence, and failure-safe server configuration restoration.
+- Vendor-neutral BDS/GameTest validation and independent safety-review roles.
+- Host contracts for the BDS runtime GameTest dependency and recipe-unlock
+  syntax.
+
+### Fixed
+
+- Corrected the starter island's runtime integrity probe to expect the authored
+  oak-plank dock rather than grass. In reported `0.3.0` test 4, the island was
+  visibly placed but its job remained `queued`; safe arrival and manual recovery
+  correctly deferred while the false integrity check prevented completion.
+- Changed the GameTest manifest dependency to the `1.0.0-beta` runtime version
+  exposed by BDS while retaining the build-specific npm type package.
+- Changed all custom `AlwaysUnlocked` recipes to the context-object form
+  accepted by BDS `1.26.34.3`, eliminating pack-load recipe errors.
+
+### Automated evidence
+
+- `npm run verify` passed with 153 host tests across 19 files, NBT fixture
+  tests, production add-on packaging, and both opt-in profile builds.
+- `npm run test:bds:smoke` passed on BDS `1.26.34.3`; both packs loaded without
+  content errors and
+  `skyknights:skiff_has_pilot_and_passenger_seats` reported the exact
+  `onTestPassed` marker.
+- `npm audit --audit-level=high` reported zero vulnerabilities.
+
+### Pending validation
+
+- Retest the fresh-world bootstrap and starter-to-skiff route in Minecraft;
+  no `0.3.1` hands-on pass is recorded yet.
+- Add broader BDS coverage, beginning with one bounded `SimulatedPlayer`
+  interaction/mounting test; the current smoke runs one component GameTest.
+
 ## [0.3.0] — 2026-07-26
 
 ### Added
