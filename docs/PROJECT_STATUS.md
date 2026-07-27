@@ -2,13 +2,13 @@
 
 > Last updated: 2026-07-27
 >
-> Current playtest version: `0.3.2`
+> Current playtest version: `0.3.3`
 >
 > Stable API baseline: Minecraft Bedrock 1.26.30+, `@minecraft/server` 2.8.0,
 > `@minecraft/server-ui` 2.1.0
 >
 > Current state: the `0.2.0` legacy ship/combat loop, `0.3.1` deterministic
-> realm stabilization, and an integrated `0.3.2` bounded player-built
+> realm stabilization, and an integrated `0.3.3` bounded player-built
 > Skycraft prototype. The repository gate and independent QA are green;
 > Skycraft-specific BDS, Minecraft, multiplayer, input, migration, and device
 > gates remain.
@@ -65,7 +65,7 @@ not require them.
 | Advanced modules   | Armored Hull, Frostfire Engine, Expanded Cargo Hold, Aether Cannon, Shield Projector |
 | Encounters         | Ember Guardian, Frostspire Warden, Ashwing Raider                                    |
 | GameTests          | 4 registered; 1 executed by the opt-in BDS smoke harness                             |
-| Host tests         | 207 passed across 35 files at the integrated `0.3.2` repository gate                 |
+| Host tests         | 209 passed across 35 files at the `0.3.3` corrective repository gate                 |
 | Developer commands | `debug`, `skiff`, `skycutter`, `island`, `raider`, `recover`, test bench, objective  |
 
 ## Systems implemented
@@ -100,8 +100,9 @@ not require them.
   integrity polling, persisted recovery, and retry backoff.
 - Indefinite automatic first-player safe-dock arrival while the starter island
   is being prepared.
-- Two visible oak trees, exposed buffered coal/iron seams, abundant stone, and
-  placed workstation/furnace support the command-free first-skiff route.
+- Two visible oak trees, adjacent surface iron/coal prospects with deeper
+  buffered seams, abundant stone, and a placed workstation/furnace support the
+  command-free first-skiff route.
 - Host-side resource-budget contract joins the authored starter structure,
   recipes, and Dockmaster material requirements.
 - Deterministic rebuilding of corrected islands.
@@ -171,7 +172,7 @@ The current development source has passed:
 ```text
 npm run verify
 npm audit --audit-level=high
-node tools/project.mjs local-deploy --once
+npm run test:bds:smoke
 ```
 
 Results:
@@ -179,17 +180,15 @@ Results:
 - non-mutating generated-structure verification: passed;
 - formatting/lint: passed;
 - TypeScript/stable bundle: passed;
-- host tests: 153 passed across 19 files;
+- host tests: 209 passed across 35 files;
 - BDS NBT fixture tests: passed;
 - production `.mcaddon`: built;
 - experimental profile: built;
 - GameTest profile: built;
 - npm vulnerabilities: 0;
-- local Behavior and Resource Pack deployment: passed;
-- opt-in BDS `1.26.34.3` clean-commit smoke: passed — both packs loaded without
-  content errors, the named skiff-seat test emitted the exact `onTestPassed`
-  marker, `gitDirty: false` was recorded, server properties were restored, and
-  no runner process or temporary safety file remained.
+- opt-in BDS `1.26.34.3` working-tree smoke: passed — both packs loaded without
+  content errors and the named skiff-seat test passed. This smoke does not
+  inspect the starter prospect in a real client.
 
 These checks prove repository consistency, not in-game behavior. The remaining
 Minecraft validation is explicitly tracked below.
@@ -213,8 +212,8 @@ Minecraft validation is explicitly tracked below.
 | Clean-client `.mcaddon` import                                       | Pending              | [`HANDS_ON_TEST_PLAN.md`](HANDS_ON_TEST_PLAN.md)                                                                               |
 | World-template import                                                | Pending              | Hands-on plan, Session 11                                                                                                      |
 | Experimental custom dimension                                        | Pending/non-blocking | Hands-on plan, Session 10                                                                                                      |
-| `0.3.2` Apprentice scan/launch/dock/exact recovery                    | Pending              | [`SKYCRAFT_HANDS_ON_TEST_PLAN.md`](SKYCRAFT_HANDS_ON_TEST_PLAN.md), Sessions A–D                                               |
-| `0.3.2` reference/personal-blueprint material accounting             | Pending              | Skycraft plan, Session E                                                                                                       |
+| `0.3.3` starter resource visibility and Apprentice recovery          | Pending              | [`SKYCRAFT_HANDS_ON_TEST_PLAN.md`](SKYCRAFT_HANDS_ON_TEST_PLAN.md), Sessions A–D                                               |
+| `0.3.3` reference/personal-blueprint material accounting             | Pending              | Skycraft plan, Session E                                                                                                       |
 | Advanced proxy/cap/device profile                                    | Pending/gated        | Skycraft plan, Sessions F and J; normal activation remains disabled                                                            |
 | Skycraft damage/repair/combat and multiplayer permissions            | Pending              | Skycraft plan, Sessions G–H                                                                                                    |
 | Skycraft progression and legacy coexistence                          | Pending              | Skycraft plan, Session I                                                                                                       |
@@ -231,8 +230,12 @@ Minecraft validation is explicitly tracked below.
 - Five seeded structures now have deterministic placement, discovery, and
   guaranteed gray-box caches. Their final custom creature/boss and reveal
   presentation remain incomplete.
-- Stable release architecture remains a supplied world/template; the custom
+- The intended stable sky-only distribution remains a void-world template, but
+  no source world or `.mctemplate` artifact is supplied yet; the custom
   dimension is experimental.
+- A normal Overworld continues generating vanilla land below the islands.
+  Sky-only presentation requires a new void-world template; existing worlds
+  are not destructively cleared or silently converted.
 - Current art is functional gray-box/vanilla-derived presentation, not final
   release art.
 - The BDS harness is a local one-test smoke, not dedicated-server longevity,

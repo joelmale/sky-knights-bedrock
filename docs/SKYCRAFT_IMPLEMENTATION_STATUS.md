@@ -3,7 +3,7 @@
 > Central integration tracker for
 > [`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md).
 >
-> Playtest build: `0.3.2`
+> Playtest build: `0.3.3`
 >
 > Branch: `codex/skycraft-program`
 >
@@ -138,6 +138,7 @@ final art.
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | Pre-Skycraft checkpoint `53b38e9`               | `npm run verify`: 162 tests across 20 files; audit zero; independent QA GO                              | Test-bench hands-on cases pending                                        |
 | Integrated Skycraft `0.3.2` repository gate     | `npm run verify`: 207 tests/35 files, structures, TypeScript, NBT, production `.mcaddon`, both profiles; audit zero | Not external evidence                                                      |
+| Starter visibility `0.3.3` corrective gate      | `npm run verify`: 209 tests/35 files; deterministic starter structure; audit zero; BDS pack-load smoke passed       | Surface readability and void-template presentation still require Minecraft |
 | Integrated Skycraft BDS pack-load smoke         | BDS `1.26.34.3` loaded the integrated packs without content errors and passed the existing named seat test          | Partial only; no Skycraft reconstruction, interaction, or restart GameTest |
 | Independent integrated QA                       | GO after owner-action, component-tier, pre-mount role/seat-cap, active-craft-cap, parser, and repository hardening  | Not applicable                                                             |
 | `0.4.0` BDS/real-client feasibility             | Pending                                                                                                 | Required before Apprentice architecture promotion                       |

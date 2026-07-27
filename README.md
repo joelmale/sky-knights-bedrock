@@ -147,7 +147,7 @@ npm run test:bds:smoke
 
 ## Playable Dockyard Refit and Airship Combat slice
 
-The `0.3.2` playtest build retains the `0.2.0` two-expedition survival
+The `0.3.3` playtest build retains the `0.2.0` two-expedition survival
 progression into dockyard refitting and airship combat:
 
 1. Start on a solid Verdant home island and assemble a two-seat starter skiff.
@@ -181,17 +181,25 @@ in order: starter island, Ember Outpost, then Frostspire. The initial player is
 held until the starter island passes its readiness and integrity checks, then is
 moved to the safe dock automatically. Transient generation failures retry with
 backoff. This behavior is covered by automated verification but remains pending
-Minecraft hands-on acceptance for `0.3.2`.
+Minecraft hands-on acceptance for `0.3.3`.
 
 The starter island now visibly supplies the first-skiff route: two oak trees
-(8 logs), 12 exposed iron ore, 8 exposed coal ore, abundant stone, and a
-placed crafting table and furnace. The player still crafts the Ship Core,
-Canvas Bundles, and Thruster Module from those raw resources; the Dockmaster
-does not grant ship components directly.
+(8 logs), 12 iron ore, 8 coal ore, abundant stone, and a placed crafting table
+and furnace. One iron block and one coal block sit adjacent in the walkable
+surface near the workshop, with more ore directly underneath, so the first
+mining route no longer depends on finding a cliff-face seam. The player still
+crafts the Ship Core, Canvas Bundles, and Thruster Module from those raw
+resources; the Dockmaster does not grant ship components directly.
+
+The stable add-on cannot replace normal Overworld terrain generation. A
+regular world therefore continues generating vanilla land below the high
+islands. The intended sky-only presentation uses a new void-world template,
+where the authored and seeded structures are the landmass. Existing normal
+worlds are never cleared or silently converted.
 
 ### Player-built Skycraft prototype
 
-`0.3.2` adds the integrated bounded Skycraft prototype beside the unchanged
+`0.3.3` includes the integrated bounded Skycraft prototype beside the unchanged
 legacy Skiff and Skycutter. Build an approved connected wood airframe around
 exactly one Helm and Ship Core in the east dock berth. The Helm reports mass,
 required lift, thrust, control, seats, hull, cargo reserve, hardpoints, and the

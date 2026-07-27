@@ -48,6 +48,9 @@ Status meanings:
 | 2026-07-27 | Player-built Skycraft `0.3.2` final repository gate     | `npm run verify` and `npm audit --audit-level=high`                           | Passed — 207 tests across 35 files, authored structures, TypeScript, NBT, production `.mcaddon`, both profiles, and zero vulnerabilities                            |
 | 2026-07-27 | Player-built Skycraft `0.3.2` final working tree        | BDS `1.26.34.3` pack load and existing named skiff-seat GameTest             | Partial — packs loaded without content errors and the named test passed; Skycraft-specific reconstruction, restart, interaction, and permission tests remain       |
 | 2026-07-27 | Player-built Skycraft `0.3.2` final integrated diff     | Independent architecture/release re-review                                   | Passed — GO after owner action, component-tier, pre-mount role/seat-cap, active-craft-cap, parser, and repository hardening                                        |
+| 2026-07-27 | Starter visibility corrective `0.3.3` working tree      | `npm run verify` and `npm audit --audit-level=high`                           | Passed — 209 tests across 35 files, deterministic structures, TypeScript, NBT, production `.mcaddon`, both profiles, and zero vulnerabilities                      |
+| 2026-07-27 | Starter visibility corrective `0.3.3` working tree      | BDS `1.26.34.3` pack load and existing named skiff-seat GameTest             | Partial — corrected packs loaded without content errors and the named test passed; client-visible ore placement and void-template presentation were not exercised |
+| 2026-07-27 | Starter visibility corrective `0.3.3` integrated diff   | Independent migration/resource/release review                                | Passed — GO after pre-schema-5 generated islands were conservatively protected from content-version restamping                                                    |
 
 ## Hands-on development evidence
 

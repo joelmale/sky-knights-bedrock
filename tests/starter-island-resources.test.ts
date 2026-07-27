@@ -160,8 +160,17 @@ describe("starter island resource contract", () => {
     expect(blockTypeAt(13, 12, 7)).toBe("minecraft:furnace");
     expect(blockTypeAt(7, 12, 7)).toBe("minecraft:oak_log");
     expect(blockTypeAt(17, 12, 15)).toBe("minecraft:oak_log");
-    expect(exposedBlockCount("minecraft:iron_ore")).toBeGreaterThanOrEqual(12);
-    expect(exposedBlockCount("minecraft:coal_ore")).toBeGreaterThanOrEqual(8);
+    expect(exposedBlockCount("minecraft:iron_ore")).toBeGreaterThanOrEqual(1);
+    expect(exposedBlockCount("minecraft:coal_ore")).toBeGreaterThanOrEqual(1);
+  });
+
+  it("places adjacent iron and coal prospects in the walkable surface", () => {
+    expect(blockTypeAt(9, 11, 9)).toBe("minecraft:iron_ore");
+    expect(blockTypeAt(9, 12, 9)).toBe("minecraft:air");
+    expect(blockTypeAt(9, 10, 9)).toBe("minecraft:iron_ore");
+    expect(blockTypeAt(10, 11, 9)).toBe("minecraft:coal_ore");
+    expect(blockTypeAt(10, 12, 9)).toBe("minecraft:air");
+    expect(blockTypeAt(10, 10, 9)).toBe("minecraft:coal_ore");
   });
 
   it("covers the complete first-skiff recipe and survival-tool budget", () => {

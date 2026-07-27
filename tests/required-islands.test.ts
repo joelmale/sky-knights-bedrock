@@ -57,7 +57,7 @@ describe("required-island bootstrap sequence", () => {
 
     expect(refreshed.activeGeneration).toEqual({
       ...queued.activeGeneration,
-      contentVersion: 4,
+      contentVersion: 5,
     });
   });
 

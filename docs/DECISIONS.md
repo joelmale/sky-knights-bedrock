@@ -177,16 +177,26 @@ Status: accepted for the `0.3.1` corrective slice.
 The fresh-world starter path ships raw vanilla resources, not direct Skiff
 components, so players exercise the intended tools, mining, smelting, recipes,
 and Dockmaster assembly loop. The authored starter island must visibly provide
-two oak trees (8 logs), 12 exposed iron ore, 8 exposed coal ore, abundant
-stone, a crafting table, and a furnace. This is deliberately buffered above the
-first skiff's 7 ingots, 2 recipe coal, 1 fuel coal, cobblestone, and wood/tool
-needs.
+two oak trees (8 logs), 12 iron ore, 8 coal ore, abundant stone, a crafting
+table, and a furnace. At least one iron and one coal block must be adjacent and
+visible from the walkable workshop surface, with additional ore directly below
+them. This is deliberately buffered above the first skiff's 7 ingots, 2 recipe
+coal, 1 fuel coal, cobblestone, and wood/tool needs.
 
 A host-side contract verifies the structure's resource budget against the
 shipping recipes and Dockmaster requirements. Runtime integrity probes are part
 of the same authored-structure contract: they must match the placed dock and
 workshop blocks, because a false probe can leave a visibly placed island queued
 and correctly defer safe arrival.
+
+The `0.3.3` corrective patch replaces the misleading cliff-only visibility
+contract with the walkable-surface prospect. Starter island content version 5
+allows an already schema-5 island tracked as unmodified to rebuild.
+Player-modified islands remain protected and require a fresh world to validate
+the new authored terrain.
+Because schema 4 and earlier did not record terrain edits, every island already
+generated before a schema-5 migration is conservatively marked protected when
+its layout record is created.
 
 ## ADR-014 — Layered BDS/GameTest validation
 

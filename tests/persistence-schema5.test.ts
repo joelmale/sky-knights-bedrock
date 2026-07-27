@@ -11,6 +11,7 @@ import {
   resolveWorldProfileId,
   worldProfile,
 } from "../scripts/config/profiles";
+import { plannedIslandLayoutRecords } from "../scripts/generation/discovery";
 import {
   DynamicPropertyHost,
   WorldStateRepository,
@@ -179,6 +180,25 @@ describe("world schema 4 -> 5 migration", () => {
     expect(state.layoutVersion).toBe(LAYOUT.layoutVersion);
     expect(state.islandLayout).toEqual({});
     expect(state.worldSeed).toBe(deriveWorldSeed(2026, "standard"));
+  });
+
+  it("protects legacy generated islands when edit history is unknowable", () => {
+    const migrated = migrateWorldState(liveWorldStateV4(), neverCalledSeed);
+    const records = plannedIslandLayoutRecords(migrated);
+    const recorded = recordIslandLayout(migrated, records);
+
+    expect(islandLayoutRecord(recorded, "starter_island")?.playerModified).toBe(
+      true,
+    );
+    expect(islandLayoutRecord(recorded, "ember_outpost")?.playerModified).toBe(
+      true,
+    );
+    expect(islandLayoutRecord(recorded, "frostspire")?.playerModified).toBe(
+      true,
+    );
+    expect(islandLayoutRecord(recorded, "verdant_hollow")?.playerModified).toBe(
+      false,
+    );
   });
 
   it("derives a stable world seed instead of rolling a fresh one", () => {

@@ -4,7 +4,7 @@
     "name": "Sky Knights GameTests",
     "description": "Opt-in in-engine tests for Sky Knights development.",
     "uuid": "29a34cfe-361a-46a2-8aca-724d5f347e0d",
-    "version": [0, 3, 2],
+    "version": [0, 3, 3],
     "min_engine_version": [1, 26, 30]
   },
   "modules": [
@@ -12,14 +12,14 @@
       "description": "Sky Knights GameTest data",
       "type": "data",
       "uuid": "dbd1b90e-4a24-441d-81fc-ddb8c306b3b1",
-      "version": [0, 3, 2]
+      "version": [0, 3, 3]
     },
     {
       "description": "Sky Knights GameTest registration",
       "type": "script",
       "language": "javascript",
       "uuid": "578215d1-4d00-4a5b-a91b-966b7bb8037d",
-      "version": [0, 3, 2],
+      "version": [0, 3, 3],
       "entry": "scripts/main.js"
     }
   ],
@@ -34,7 +34,7 @@
     },
     {
       "uuid": "4e8ae092-a400-48fc-82d7-f1c42decefd6",
-      "version": [0, 3, 2]
+      "version": [0, 3, 3]
     }
   ]
 }

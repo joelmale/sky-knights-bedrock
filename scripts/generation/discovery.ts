@@ -78,6 +78,9 @@ export function worldIncludesIsland(
 export function plannedIslandLayoutRecords(
   state: WorldState,
 ): readonly IslandLayoutRecord[] {
+  const migratedWithoutModificationHistory =
+    state.migrations.includes("world:v4->v5");
+
   return planIslandLayout(state.worldSeed, state.layoutVersion)
     .placements.filter((placement) => worldIncludesIsland(state, placement.id))
     .map((placement) => ({
@@ -88,7 +91,12 @@ export function plannedIslandLayoutRecords(
       origin: placement.origin,
       size: placement.size,
       reserved: placement.reserved,
-      playerModified: false,
+      // Schema 4 and earlier did not track edits to authored terrain. Treat
+      // every island that was already generated before migration as protected;
+      // guessing "unmodified" could restamp a player's build.
+      playerModified:
+        migratedWithoutModificationHistory &&
+        state.generatedIslandIds.includes(placement.id),
     }));
 }
 

@@ -49,13 +49,15 @@ export const STARTER_RESOURCE_MINIMUMS = {
   "minecraft:iron_ore": 12,
 };
 
-// A fresh player can read these seams from the island's exposed west/east and
-// north/south faces. The twelve iron and eight coal blocks provide a deliberate
-// buffer above the first skiff's seven ingots, two recipe coal, and smelting
-// fuel without requiring blind mining.
+// The first iron and coal pairs form an adjacent surface prospect beside the
+// workshop clearing. Each visible block has a second ore directly underneath,
+// teaching the player where to dig without requiring a dangerous cliff search.
+// The remaining seams stay on the island's exposed west/east and north/south
+// faces. Twelve iron and eight coal provide a deliberate buffer above the first
+// skiff's seven ingots, two recipe coal, and smelting fuel.
 const STARTER_PROSPECTS = [
-  { index: BLOCK.ironOre, x: 4, y: 8, z: 10 },
-  { index: BLOCK.ironOre, x: 20, y: 8, z: 10 },
+  { index: BLOCK.ironOre, x: 9, y: 11, z: 9 },
+  { index: BLOCK.ironOre, x: 9, y: 10, z: 9 },
   { index: BLOCK.ironOre, x: 4, y: 7, z: 10 },
   { index: BLOCK.ironOre, x: 20, y: 7, z: 10 },
   { index: BLOCK.ironOre, x: 5, y: 6, z: 10 },
@@ -66,8 +68,8 @@ const STARTER_PROSPECTS = [
   { index: BLOCK.ironOre, x: 17, y: 4, z: 10 },
   { index: BLOCK.ironOre, x: 7, y: 3, z: 10 },
   { index: BLOCK.ironOre, x: 17, y: 3, z: 10 },
-  { index: BLOCK.coalOre, x: 12, y: 8, z: 3 },
-  { index: BLOCK.coalOre, x: 12, y: 8, z: 17 },
+  { index: BLOCK.coalOre, x: 10, y: 11, z: 9 },
+  { index: BLOCK.coalOre, x: 10, y: 10, z: 9 },
   { index: BLOCK.coalOre, x: 12, y: 7, z: 4 },
   { index: BLOCK.coalOre, x: 12, y: 7, z: 16 },
   { index: BLOCK.coalOre, x: 12, y: 6, z: 5 },

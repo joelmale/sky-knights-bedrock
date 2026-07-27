@@ -1,6 +1,6 @@
 # Player-Built Skycraft Technology Roadmap
 
-> Status: accepted product direction with an integrated `0.3.2` prototype.
+> Status: accepted product direction with an integrated `0.3.3` prototype.
 > Promotion remains gated by the bounded Bedrock feasibility, multiplayer,
 > migration, input, and device evidence defined below.
 >

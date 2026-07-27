@@ -1,6 +1,6 @@
 # Player-Built Skycraft Hands-On Test Plan
 
-> Build under test: `0.3.2`
+> Build under test: `0.3.3`
 >
 > Scope: integrated Skycraft prototype and every activation gate defined by
 > [`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md).
@@ -28,7 +28,7 @@ For an importable package instead:
 npm run mcaddon:production
 ```
 
-Confirm the behavior-pack description or `/skyknights:debug` reports `0.3.2`.
+Confirm the behavior-pack description or `/skyknights:debug` reports `0.3.3`.
 For script-only local-deploy changes, `/reload` may reload the pack, but use a
 full world exit/reopen for entity, block, recipe, resource-pack, manifest, or
 recovery testing.
@@ -82,12 +82,19 @@ transaction gate is implemented and separately accepted.
 ## Session A — clean load and starter berth
 
 1. Create a new Survival world with the behavior and resource packs active.
+   Use the packaged void-world template when validating the sky-only visual
+   presentation. A normal Overworld is acceptable for functional testing but
+   will continue generating vanilla terrain below the islands.
 2. Do not run a developer command.
 3. Confirm automatic arrival on the solid starter island.
 4. Confirm Dockmaster Elian appears.
-5. Walk east along the wooden dock.
-6. Confirm a solid smooth-stone Apprentice berth and connecting walkway exist.
-7. Open the Content Log.
+5. Confirm adjacent iron and coal blocks are visible in the walkable surface
+   near the crafting table and furnace.
+6. Mine either surface block and confirm another block of the same ore is
+   directly underneath.
+7. Walk east along the wooden dock.
+8. Confirm a solid smooth-stone Apprentice berth and connecting walkway exist.
+9. Open the Content Log.
 
 Pass:
 
