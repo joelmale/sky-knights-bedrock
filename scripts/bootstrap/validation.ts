@@ -1,8 +1,9 @@
-import { EntityTypes, ItemTypes, world } from "@minecraft/server";
+import { BlockTypes, EntityTypes, ItemTypes, world } from "@minecraft/server";
 
 import { IDENTIFIERS } from "../config/constants";
 import { shippedIslandStructureIds } from "../config/islands";
 import { Logger } from "../diagnostics/logger";
+import { SKYCRAFT_COMPONENT_IDS, SKYCRAFT_IDS } from "../skycraft/config";
 
 export interface ValidationResult {
   ok: boolean;
@@ -17,6 +18,7 @@ export function validateRegistries(logger: Logger): ValidationResult {
     IDENTIFIERS.skycutter,
     IDENTIFIERS.dockmaster,
     IDENTIFIERS.skyRaider,
+    SKYCRAFT_IDS.flightEntity,
   ];
   // Structure-only Phase 3 islands must still have their packaged structure;
   // that validation is intentionally independent from gameplay activation.
@@ -40,7 +42,10 @@ export function validateRegistries(logger: Logger): ValidationResult {
     IDENTIFIERS.cannonControl,
     IDENTIFIERS.aetherCharge,
     IDENTIFIERS.raiderCore,
+    IDENTIFIERS.relicShard,
+    IDENTIFIERS.aetherCore,
   ];
+  const requiredBlocks = [...SKYCRAFT_COMPONENT_IDS];
 
   for (const identifier of requiredEntities) {
     if (EntityTypes.get(identifier) === undefined) {
@@ -62,6 +67,12 @@ export function validateRegistries(logger: Logger): ValidationResult {
     }
   }
 
+  for (const identifier of requiredBlocks) {
+    if (BlockTypes.get(identifier) === undefined) {
+      missing.push(identifier);
+    }
+  }
+
   if (missing.length > 0) {
     logger.error("Startup registry validation failed.", { missing });
     return { ok: false, missing };
@@ -72,6 +83,7 @@ export function validateRegistries(logger: Logger): ValidationResult {
       ...requiredEntities,
       ...requiredStructures,
       ...requiredItems,
+      ...requiredBlocks,
     ],
   });
   return { ok: true, missing };

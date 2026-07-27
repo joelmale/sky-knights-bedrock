@@ -14,18 +14,26 @@ describe("island content table", () => {
   it("contains only gameplay-ready island content, sorted by id", () => {
     const ids = ISLAND_CONTENT_TABLE.map((entry) => entry.id);
 
-    expect(ids).toEqual(["ember_outpost", "frostspire"]);
+    expect(ids).toEqual([
+      "aether_sanctum",
+      "ashfall_crater",
+      "ember_outpost",
+      "frostspire",
+      "glacier_vault",
+      "sunspire_reach",
+      "verdant_hollow",
+    ]);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("has no entry for contentless, unknown, or structure-only islands", () => {
+  it("has no entry for contentless or unknown islands", () => {
     expect(islandContentDefinition("starter_island")).toBeUndefined();
     expect(islandContentDefinition("unknown_island")).toBeUndefined();
-    expect(islandContentDefinition("sunspire_reach")).toBeUndefined();
-    expect(islandContentDefinition("verdant_hollow")).toBeUndefined();
-    expect(islandContentDefinition("glacier_vault")).toBeUndefined();
-    expect(islandContentDefinition("ashfall_crater")).toBeUndefined();
-    expect(islandContentDefinition("aether_sanctum")).toBeUndefined();
+    expect(islandContentDefinition("sunspire_reach")).toBeDefined();
+    expect(islandContentDefinition("verdant_hollow")).toBeDefined();
+    expect(islandContentDefinition("glacier_vault")).toBeDefined();
+    expect(islandContentDefinition("ashfall_crater")).toBeDefined();
+    expect(islandContentDefinition("aether_sanctum")).toBeDefined();
   });
 
   it("keeps ember_outpost's guaranteed loot byte-for-byte equivalent to the shipped chest", () => {

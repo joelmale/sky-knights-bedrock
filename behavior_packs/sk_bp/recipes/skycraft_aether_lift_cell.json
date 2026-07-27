@@ -1,0 +1,15 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:aether_lift_cell" },
+    "tags": ["crafting_table"],
+    "pattern": ["FAF", "ACA", "FAF"],
+    "key": {
+      "F": { "item": "skyknights:froststeel_ingot" },
+      "A": { "item": "skyknights:aether_crystal" },
+      "C": { "item": "skyknights:canvas_bundle" }
+    },
+    "result": { "item": "skyknights:aether_lift_cell" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

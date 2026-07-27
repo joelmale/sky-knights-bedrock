@@ -101,14 +101,9 @@ describe("island registry", () => {
     expect(ISLAND_STRUCTURE_IDS.frostspire).toBe(IDENTIFIERS.frostspire);
   });
 
-  it("keeps new structures inert until their custom gameplay assets ship", () => {
+  it("marks every guaranteed-reward island gameplay-ready", () => {
     for (const definition of ISLAND_DEFINITIONS) {
-      const expected = [
-        "starter_island",
-        "ember_outpost",
-        "frostspire",
-      ].includes(definition.id);
-      expect(isIslandGameplayReady(definition)).toBe(expected);
+      expect(isIslandGameplayReady(definition)).toBe(true);
     }
   });
 

@@ -1,0 +1,14 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:cargo_rack" },
+    "tags": ["crafting_table"],
+    "pattern": ["P P", "PCP", "P P"],
+    "key": {
+      "P": { "item": "minecraft:oak_planks" },
+      "C": { "item": "skyknights:cargo_hold" }
+    },
+    "result": { "item": "skyknights:cargo_rack" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

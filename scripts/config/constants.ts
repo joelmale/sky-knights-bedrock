@@ -32,9 +32,12 @@ export const IDENTIFIERS = {
   aetherCharge: "skyknights:aether_charge",
   raiderCore: "skyknights:raider_core",
   skyRaider: "skyknights:sky_raider",
+  relicShard: "skyknights:relic_shard",
+  aetherCore: "skyknights:aether_core",
+  airshipFlight: "skyknights:airship_flight",
 } as const;
 
-export const ADDON_VERSION = "0.3.1";
+export const ADDON_VERSION = "0.3.2";
 
 function pinnedIsland(id: string): {
   definition: IslandDefinition;
@@ -208,6 +211,11 @@ export const TEST_BENCH = {
         { itemId: IDENTIFIERS.shipCore, count: 8 },
         { itemId: IDENTIFIERS.canvasBundle, count: 16 },
         { itemId: IDENTIFIERS.thrusterModule, count: 8 },
+        { itemId: "skyknights:basic_helm", count: 4 },
+        { itemId: "skyknights:ship_core_block", count: 4 },
+        { itemId: "skyknights:lift_sail", count: 16 },
+        { itemId: "skyknights:coal_thruster", count: 4 },
+        { itemId: "skyknights:crew_seat", count: 8 },
       ],
     },
     {
@@ -218,6 +226,11 @@ export const TEST_BENCH = {
         { itemId: IDENTIFIERS.aetherEngine, count: 1 },
         { itemId: IDENTIFIERS.cargoHold, count: 4 },
         { itemId: IDENTIFIERS.navigatorModule, count: 4 },
+        { itemId: "skyknights:reinforced_helm", count: 4 },
+        { itemId: "skyknights:braced_frame", count: 32 },
+        { itemId: "skyknights:rudder", count: 8 },
+        { itemId: "skyknights:aether_thruster", count: 8 },
+        { itemId: "skyknights:cargo_rack", count: 16 },
       ],
     },
     {
@@ -227,6 +240,12 @@ export const TEST_BENCH = {
         { itemId: IDENTIFIERS.armoredHull, count: 4 },
         { itemId: IDENTIFIERS.frostfireEngine, count: 1 },
         { itemId: IDENTIFIERS.expandedCargoHold, count: 4 },
+        { itemId: "skyknights:airbag", count: 32 },
+        { itemId: "skyknights:dirigible_propeller", count: 8 },
+        { itemId: "skyknights:aether_lift_cell", count: 16 },
+        { itemId: "skyknights:frostfire_thruster", count: 8 },
+        { itemId: "skyknights:stabilizer", count: 8 },
+        { itemId: "skyknights:repair_station", count: 4 },
       ],
     },
     {
@@ -236,6 +255,8 @@ export const TEST_BENCH = {
         { itemId: IDENTIFIERS.aetherCannon, count: 1 },
         { itemId: IDENTIFIERS.cannonControl, count: 1 },
         { itemId: IDENTIFIERS.aetherCharge, count: 64 },
+        { itemId: "skyknights:cannon_hardpoint", count: 4 },
+        { itemId: "skyknights:shield_hardpoint", count: 4 },
       ],
     },
     {
@@ -253,6 +274,8 @@ export const TEST_BENCH = {
         { itemId: IDENTIFIERS.aetherCrystal, count: 16 },
         { itemId: IDENTIFIERS.froststeelIngot, count: 64 },
         { itemId: IDENTIFIERS.raiderCore, count: 8 },
+        { itemId: IDENTIFIERS.relicShard, count: 2 },
+        { itemId: IDENTIFIERS.aetherCore, count: 1 },
       ],
     },
     {

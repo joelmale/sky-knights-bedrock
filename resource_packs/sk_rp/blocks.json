@@ -1,0 +1,21 @@
+{
+  "format_version": "1.21.100",
+  "skyknights:basic_helm": { "sound": "wood" },
+  "skyknights:reinforced_helm": { "sound": "metal" },
+  "skyknights:ship_core_block": { "sound": "metal" },
+  "skyknights:lift_sail": { "sound": "cloth" },
+  "skyknights:coal_thruster": { "sound": "metal" },
+  "skyknights:braced_frame": { "sound": "wood" },
+  "skyknights:rudder": { "sound": "wood" },
+  "skyknights:airbag": { "sound": "cloth" },
+  "skyknights:dirigible_propeller": { "sound": "copper" },
+  "skyknights:aether_lift_cell": { "sound": "amethyst_block" },
+  "skyknights:aether_thruster": { "sound": "metal" },
+  "skyknights:frostfire_thruster": { "sound": "metal" },
+  "skyknights:stabilizer": { "sound": "metal" },
+  "skyknights:cargo_rack": { "sound": "wood" },
+  "skyknights:crew_seat": { "sound": "wood" },
+  "skyknights:repair_station": { "sound": "anvil" },
+  "skyknights:cannon_hardpoint": { "sound": "metal" },
+  "skyknights:shield_hardpoint": { "sound": "amethyst_block" }
+}

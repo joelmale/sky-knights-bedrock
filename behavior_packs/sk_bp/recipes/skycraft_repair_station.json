@@ -1,0 +1,16 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:repair_station" },
+    "tags": ["crafting_table"],
+    "pattern": ["IRI", "PKP", "PPP"],
+    "key": {
+      "I": { "item": "minecraft:iron_ingot" },
+      "R": { "item": "skyknights:repair_kit" },
+      "P": { "item": "minecraft:oak_planks" },
+      "K": { "item": "minecraft:crafting_table" }
+    },
+    "result": { "item": "skyknights:repair_station" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

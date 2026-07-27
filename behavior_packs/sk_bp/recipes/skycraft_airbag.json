@@ -1,0 +1,14 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:airbag" },
+    "tags": ["crafting_table"],
+    "pattern": ["CCC", "CGC", "CCC"],
+    "key": {
+      "C": { "item": "skyknights:canvas_bundle" },
+      "G": { "item": "minecraft:gold_ingot" }
+    },
+    "result": { "item": "skyknights:airbag", "count": 2 },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

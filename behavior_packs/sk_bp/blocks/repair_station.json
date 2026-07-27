@@ -1,0 +1,25 @@
+{
+  "format_version": "1.21.100",
+  "minecraft:block": {
+    "description": {
+      "identifier": "skyknights:repair_station",
+      "menu_category": {
+        "category": "construction",
+        "group": "minecraft:itemGroup.name.boat"
+      }
+    },
+    "components": {
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "skyknights_repair_station",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": { "seconds_to_destroy": 4 },
+      "minecraft:destructible_by_explosion": { "explosion_resistance": 12 },
+      "minecraft:collision_box": true,
+      "minecraft:selection_box": true
+    }
+  }
+}

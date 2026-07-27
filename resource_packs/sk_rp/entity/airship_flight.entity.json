@@ -1,0 +1,22 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "skyknights:airship_flight",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/boat/oak"
+      },
+      "geometry": {
+        "default": "geometry.skyknights.airship_flight"
+      },
+      "render_controllers": ["controller.render.skyknights.airship_flight"],
+      "spawn_egg": {
+        "base_color": "#4A2E1C",
+        "overlay_color": "#82DDEB"
+      }
+    }
+  }
+}

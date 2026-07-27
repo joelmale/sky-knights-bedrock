@@ -1,0 +1,15 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:shield_hardpoint" },
+    "tags": ["crafting_table"],
+    "pattern": ["FAF", "ASA", "FAF"],
+    "key": {
+      "F": { "item": "skyknights:froststeel_ingot" },
+      "A": { "item": "skyknights:aether_crystal" },
+      "S": { "item": "skyknights:shield_projector" }
+    },
+    "result": { "item": "skyknights:shield_hardpoint" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

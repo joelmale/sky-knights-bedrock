@@ -1,0 +1,15 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:crew_seat" },
+    "tags": ["crafting_table"],
+    "pattern": ["CCC", "PPP", "S S"],
+    "key": {
+      "C": { "item": "skyknights:canvas_bundle" },
+      "P": { "item": "minecraft:oak_planks" },
+      "S": { "item": "minecraft:stick" }
+    },
+    "result": { "item": "skyknights:crew_seat" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

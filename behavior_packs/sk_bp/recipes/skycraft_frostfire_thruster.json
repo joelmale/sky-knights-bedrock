@@ -1,0 +1,16 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:frostfire_thruster" },
+    "tags": ["crafting_table"],
+    "pattern": ["FIF", "FAF", "FTF"],
+    "key": {
+      "F": { "item": "skyknights:froststeel_ingot" },
+      "I": { "item": "minecraft:iron_ingot" },
+      "A": { "item": "skyknights:aether_engine" },
+      "T": { "item": "skyknights:frostfire_engine" }
+    },
+    "result": { "item": "skyknights:frostfire_thruster" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

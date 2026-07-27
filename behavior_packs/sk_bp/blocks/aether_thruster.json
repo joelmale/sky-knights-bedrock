@@ -1,0 +1,33 @@
+{
+  "format_version": "1.21.100",
+  "minecraft:block": {
+    "description": {
+      "identifier": "skyknights:aether_thruster",
+      "menu_category": {
+        "category": "construction",
+        "group": "minecraft:itemGroup.name.boat"
+      },
+      "traits": {
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction",
+            "minecraft:facing_direction"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "skyknights_aether_thruster",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": { "seconds_to_destroy": 5 },
+      "minecraft:destructible_by_explosion": { "explosion_resistance": 18 },
+      "minecraft:collision_box": true,
+      "minecraft:selection_box": true
+    }
+  }
+}

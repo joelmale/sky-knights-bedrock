@@ -1,0 +1,16 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:aether_thruster" },
+    "tags": ["crafting_table"],
+    "pattern": ["IFI", "IAI", "ITI"],
+    "key": {
+      "I": { "item": "minecraft:iron_ingot" },
+      "F": { "item": "skyknights:froststeel_ingot" },
+      "A": { "item": "skyknights:aether_engine" },
+      "T": { "item": "skyknights:thruster_module" }
+    },
+    "result": { "item": "skyknights:aether_thruster" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

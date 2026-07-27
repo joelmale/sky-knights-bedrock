@@ -21,9 +21,9 @@ GameTest smoke harness.
 ## First setup
 
 ```powershell
-git clone <future-remote-url>
+git clone https://github.com/joelmale/sky-knights-bedrock.git
 cd sky-knights-bedrock
-npm install
+npm ci
 npm run check
 npm run local-deploy
 ```
@@ -123,6 +123,8 @@ See [BEDROCK_ADDON_ROADMAP.md](BEDROCK_ADDON_ROADMAP.md) for the full implementa
 - [Architecture decisions](docs/DECISIONS.md)
 - [Product roadmap](BEDROCK_ADDON_ROADMAP.md)
 - [Player-built skycraft technology roadmap](docs/SKYCRAFT_TECHNOLOGY_ROADMAP.md)
+- [Skycraft implementation and gate tracker](docs/SKYCRAFT_IMPLEMENTATION_STATUS.md)
+- [Skycraft hands-on test plan](docs/SKYCRAFT_HANDS_ON_TEST_PLAN.md)
 
 The status tracker distinguishes implemented code, automated verification, and
 Minecraft hands-on acceptance. Update the implementation, changelog, validation
@@ -145,7 +147,7 @@ npm run test:bds:smoke
 
 ## Playable Dockyard Refit and Airship Combat slice
 
-The `0.3.1` playtest build extends the `0.2.0` two-expedition survival
+The `0.3.2` playtest build retains the `0.2.0` two-expedition survival
 progression into dockyard refitting and airship combat:
 
 1. Start on a solid Verdant home island and assemble a two-seat starter skiff.
@@ -169,23 +171,54 @@ Player and ship schemas remain version 3. Opening an older test world preserves
 the three released island origins, ships, progression, and encounter state
 while recording the expanded realm layout.
 
-Five additional authored island structures are packaged and deterministically
-planned, but remain explicitly `structure_only`. They cannot be discovered or
-generated through gameplay until their creatures, items, guaranteed rewards,
-and progression paths are implemented and validated.
+Five additional authored islands are deterministically placed and can stock
+their guaranteed gray-box progression caches. Their final custom creature,
+boss, reveal, art, and balance layers remain incomplete and are tracked
+separately from the built structures/rewards.
 
 On a fresh supported world, the three released islands generate automatically
 in order: starter island, Ember Outpost, then Frostspire. The initial player is
 held until the starter island passes its readiness and integrity checks, then is
 moved to the safe dock automatically. Transient generation failures retry with
 backoff. This behavior is covered by automated verification but remains pending
-Minecraft hands-on acceptance for `0.3.1`.
+Minecraft hands-on acceptance for `0.3.2`.
 
 The starter island now visibly supplies the first-skiff route: two oak trees
 (8 logs), 12 exposed iron ore, 8 exposed coal ore, abundant stone, and a
 placed crafting table and furnace. The player still crafts the Ship Core,
 Canvas Bundles, and Thruster Module from those raw resources; the Dockmaster
 does not grant ship components directly.
+
+### Player-built Skycraft prototype
+
+`0.3.2` adds the integrated bounded Skycraft prototype beside the unchanged
+legacy Skiff and Skycutter. Build an approved connected wood airframe around
+exactly one Helm and Ship Core in the east dock berth. The Helm reports mass,
+required lift, thrust, control, seats, hull, cargo reserve, hardpoints, and the
+current certification cap. A successful launch persists and clears the exact
+docked blueprint, creates an authored flight proxy, and restores the approved
+blocks and states when docked.
+
+Dockmaster Elian offers eight editable reference plans and inventory-consuming
+construction orders. Owners can save certified designs to a bounded personal
+library and rematerialize them with a fresh registration. Crew roles,
+certified seats, damage/repair bills, destruction recovery, and Cannon
+Hardpoints are integrated.
+
+Only Apprentice is exposed in ordinary playtesting. To expose every
+provisional certification and reference fixture in a cheats-enabled test
+world:
+
+```mcfunction
+/tag @s add skyknights.skycraft_experimental
+```
+
+Physical cargo remains intentionally disabled for player-built craft. Cargo
+racks currently reserve engineering mass and capacity; they do not transfer or
+store items in flight. See the
+[implementation tracker](docs/SKYCRAFT_IMPLEMENTATION_STATUS.md) and
+[focused test plan](docs/SKYCRAFT_HANDS_ON_TEST_PLAN.md) before interpreting
+prototype code or assets as a completed release.
 
 Development commands:
 

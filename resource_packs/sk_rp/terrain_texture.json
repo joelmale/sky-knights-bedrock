@@ -1,0 +1,40 @@
+{
+  "resource_pack_name": "sky_knights",
+  "texture_name": "atlas.terrain",
+  "texture_data": {
+    "skyknights_basic_helm": { "textures": "textures/blocks/planks_oak" },
+    "skyknights_reinforced_helm": {
+      "textures": "textures/blocks/planks_spruce"
+    },
+    "skyknights_ship_core_block": { "textures": "textures/blocks/iron_block" },
+    "skyknights_lift_sail": {
+      "textures": "textures/blocks/wool_colored_white"
+    },
+    "skyknights_coal_thruster": { "textures": "textures/blocks/coal_block" },
+    "skyknights_braced_frame": { "textures": "textures/blocks/log_oak" },
+    "skyknights_rudder": { "textures": "textures/blocks/planks_oak" },
+    "skyknights_airbag": { "textures": "textures/blocks/wool_colored_yellow" },
+    "skyknights_dirigible_propeller": {
+      "textures": "textures/blocks/copper_block"
+    },
+    "skyknights_aether_lift_cell": {
+      "textures": "textures/blocks/amethyst_block"
+    },
+    "skyknights_aether_thruster": {
+      "textures": "textures/blocks/warped_nylium"
+    },
+    "skyknights_frostfire_thruster": { "textures": "textures/blocks/blue_ice" },
+    "skyknights_stabilizer": { "textures": "textures/blocks/iron_block" },
+    "skyknights_cargo_rack": { "textures": "textures/blocks/chest_front" },
+    "skyknights_crew_seat": { "textures": "textures/blocks/planks_oak" },
+    "skyknights_repair_station": {
+      "textures": "textures/blocks/anvil_top_damaged_0"
+    },
+    "skyknights_cannon_hardpoint": {
+      "textures": "textures/blocks/deepslate_tiles"
+    },
+    "skyknights_shield_hardpoint": {
+      "textures": "textures/blocks/amethyst_block"
+    }
+  }
+}

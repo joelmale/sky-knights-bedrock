@@ -48,55 +48,122 @@ const FROSTSTEEL_INGOT = "skyknights:froststeel_ingot";
  * can appear here. New Phase 3 islands are structure-only until the custom
  * entity/item assets they need are genuinely packaged and registered.
  */
-export const ISLAND_CONTENT_TABLE: readonly IslandContentDefinition[] = [
-  {
-    id: "ember_outpost",
-    lootChest: {
-      anchor: "lootChest",
-      idempotencySlot: 0,
-      idempotencyItemId: AETHER_CRYSTAL,
-      items: [
-        { slot: 0, itemId: AETHER_CRYSTAL, count: 1 },
-        { slot: 1, itemId: "minecraft:emerald", count: 3 },
-        { slot: 2, itemId: "minecraft:iron_ingot", count: 24 },
-        { slot: 3, itemId: "minecraft:cooked_beef", count: 8 },
-        { slot: 4, itemId: "minecraft:redstone", count: 8 },
+export const ISLAND_CONTENT_TABLE: readonly IslandContentDefinition[] = (
+  [
+    {
+      id: "ember_outpost",
+      lootChest: {
+        anchor: "lootChest",
+        idempotencySlot: 0,
+        idempotencyItemId: AETHER_CRYSTAL,
+        items: [
+          { slot: 0, itemId: AETHER_CRYSTAL, count: 1 },
+          { slot: 1, itemId: "minecraft:emerald", count: 3 },
+          { slot: 2, itemId: "minecraft:iron_ingot", count: 24 },
+          { slot: 3, itemId: "minecraft:cooked_beef", count: 8 },
+          { slot: 4, itemId: "minecraft:redstone", count: 8 },
+        ],
+      },
+      encounters: [
+        {
+          entityId: "minecraft:husk",
+          nameTag: "Ember Outpost Guardian",
+          tag: "skyknights.ember_guard",
+          anchor: "encounterSpawn",
+          discoveryRadius: 12,
+        },
       ],
     },
-    encounters: [
-      {
-        entityId: "minecraft:husk",
-        nameTag: "Ember Outpost Guardian",
-        tag: "skyknights.ember_guard",
-        anchor: "encounterSpawn",
-        discoveryRadius: 12,
+    {
+      id: "frostspire",
+      lootChest: {
+        anchor: "lootChest",
+        idempotencySlot: 0,
+        idempotencyItemId: FROSTSTEEL_INGOT,
+        items: [
+          { slot: 0, itemId: FROSTSTEEL_INGOT, count: 16 },
+          { slot: 1, itemId: "minecraft:diamond", count: 2 },
+          { slot: 2, itemId: "minecraft:arrow", count: 24 },
+          { slot: 3, itemId: "minecraft:cooked_salmon", count: 8 },
+        ],
       },
-    ],
-  },
-  {
-    id: "frostspire",
-    lootChest: {
-      anchor: "lootChest",
-      idempotencySlot: 0,
-      idempotencyItemId: FROSTSTEEL_INGOT,
-      items: [
-        { slot: 0, itemId: FROSTSTEEL_INGOT, count: 16 },
-        { slot: 1, itemId: "minecraft:diamond", count: 2 },
-        { slot: 2, itemId: "minecraft:arrow", count: 24 },
-        { slot: 3, itemId: "minecraft:cooked_salmon", count: 8 },
+      encounters: [
+        {
+          entityId: "minecraft:stray",
+          nameTag: "Frostspire Warden",
+          tag: "skyknights.frost_guard",
+          anchor: "encounterSpawn",
+          discoveryRadius: 12,
+        },
       ],
     },
-    encounters: [
-      {
-        entityId: "minecraft:stray",
-        nameTag: "Frostspire Warden",
-        tag: "skyknights.frost_guard",
-        anchor: "encounterSpawn",
-        discoveryRadius: 12,
+    {
+      id: "sunspire_reach",
+      lootChest: {
+        anchor: "lootChest",
+        idempotencySlot: 0,
+        idempotencyItemId: "minecraft:gold_ingot",
+        items: [
+          { slot: 0, itemId: "minecraft:gold_ingot", count: 16 },
+          { slot: 1, itemId: "minecraft:copper_ingot", count: 8 },
+          { slot: 2, itemId: "minecraft:cooked_beef", count: 8 },
+        ],
       },
-    ],
-  },
-];
+    },
+    {
+      id: "verdant_hollow",
+      lootChest: {
+        anchor: "lootChest",
+        idempotencySlot: 0,
+        idempotencyItemId: "skyknights:repair_kit",
+        items: [
+          { slot: 0, itemId: "skyknights:repair_kit", count: 1 },
+          { slot: 1, itemId: "minecraft:oak_sapling", count: 4 },
+          { slot: 2, itemId: "skyknights:canvas_bundle", count: 8 },
+        ],
+      },
+    },
+    {
+      id: "glacier_vault",
+      lootChest: {
+        anchor: "lootChest",
+        idempotencySlot: 0,
+        idempotencyItemId: "skyknights:relic_shard",
+        items: [
+          { slot: 0, itemId: "skyknights:relic_shard", count: 1 },
+          { slot: 1, itemId: "minecraft:diamond", count: 4 },
+          { slot: 2, itemId: "skyknights:froststeel_ingot", count: 8 },
+        ],
+      },
+    },
+    {
+      id: "ashfall_crater",
+      lootChest: {
+        anchor: "lootChest",
+        idempotencySlot: 0,
+        idempotencyItemId: "skyknights:relic_shard",
+        items: [
+          { slot: 0, itemId: "skyknights:relic_shard", count: 1 },
+          { slot: 1, itemId: "skyknights:aether_crystal", count: 2 },
+          { slot: 2, itemId: "minecraft:blaze_rod", count: 4 },
+        ],
+      },
+    },
+    {
+      id: "aether_sanctum",
+      lootChest: {
+        anchor: "lootChest",
+        idempotencySlot: 0,
+        idempotencyItemId: "skyknights:aether_core",
+        items: [
+          { slot: 0, itemId: "skyknights:aether_core", count: 1 },
+          { slot: 1, itemId: "skyknights:repair_kit", count: 4 },
+          { slot: 2, itemId: "minecraft:emerald", count: 32 },
+        ],
+      },
+    },
+  ] satisfies IslandContentDefinition[]
+).sort((left, right) => (left.id < right.id ? -1 : left.id > right.id ? 1 : 0));
 
 export function islandContentDefinition(
   id: string,

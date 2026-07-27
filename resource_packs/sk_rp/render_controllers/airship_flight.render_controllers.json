@@ -1,0 +1,40 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.skyknights.airship_flight": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": ["Texture.default"],
+      "part_visibility": [
+        {
+          "minnow": "query.variant == 0"
+        },
+        {
+          "dart": "query.variant == 1"
+        },
+        {
+          "wayfarer": "query.variant == 2"
+        },
+        {
+          "cloudwhale": "query.variant == 3"
+        },
+        {
+          "disc": "query.variant == 4"
+        },
+        {
+          "frostwing": "query.variant == 5"
+        },
+        {
+          "surveyor": "query.variant == 6"
+        },
+        {
+          "grand": "query.variant == 7"
+        }
+      ]
+    }
+  }
+}

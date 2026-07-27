@@ -214,8 +214,8 @@ evidence claims.
 
 ## ADR-015 — Bounded player-built skycraft
 
-Status: accepted as the future Phase 5 product architecture; implementation is
-gated by the `0.4.0` feasibility spike.
+Status: accepted and implemented as an integrated `0.3.2` prototype; promotion
+is still gated by the `0.4.0` BDS and hands-on feasibility evidence.
 
 Players will build a connected, bounded wooden airframe inside a registered
 dock berth around exactly one Helm and Ship Core. A deterministic scan creates
@@ -254,3 +254,33 @@ new repository. Any retrofit is explicit, owner-approved, migration-tested, and
 reversible through normal recovery. The full mechanic, technology tree,
 delivery phases, provisional caps, and evidence gates are defined in
 [`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md).
+
+## ADR-016 — Authored Skycraft proxy and gated later tiers
+
+Status: accepted for the `0.3.2` integrated prototype.
+
+The first runtime selects the roadmap's authored modular flight-proxy fallback.
+The exact docked blueprint remains authoritative and reconstructs byte-stable
+approved block states. Flight classifies the design into a bounded authored
+raft, cutter, dirigible, disc, combat, expedition, or masterwork visual. The
+proxy is allowed to preserve engineering identity without reproducing every
+voxel, but real-client testing must still prove that the result is readable and
+recognizable.
+
+Implementation does not promote unmeasured caps. Apprentice construction is
+available for ordinary hands-on testing. Advanced certification code, assets,
+recipes, and reference fixtures are packaged but require the explicit
+`skyknights.skycraft_experimental` tester tag. The tag bypasses progression
+only in cheats-enabled test worlds and is never release evidence.
+
+Skycraft persistence uses a separate bounded fleet index, per-airship chunked
+records, owner-scoped personal-blueprint records, and a world milestone
+document. Corrupt or unknown schemas, stale revisions, oversized records,
+unauthorized actors, and ambiguous dock/flight authority fail closed. Legacy
+Skiff/Skycutter state is not migrated implicitly.
+
+Physical cargo is not approximated. Cargo racks contribute an abstract
+reserved mass and slot count to engineering, but launch and docking reject any
+runtime cargo authority other than `disabled`. A later physical-container
+implementation requires an atomic ownership transfer and restart/destruction
+no-duplication matrix before activation.

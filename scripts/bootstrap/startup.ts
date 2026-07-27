@@ -34,6 +34,11 @@ import {
   runTutorialSweep,
 } from "../gameplay/tutorial";
 import {
+  ensureApprenticeBerth,
+  registerSkycraftRuntime,
+  runSkycraftSweep,
+} from "../skycraft/controller";
+import {
   PlayerStateRepository,
   WorldStateRepository,
 } from "../persistence/repositories";
@@ -54,6 +59,7 @@ const INITIAL_PLAYER_FAST_RETRY_ATTEMPTS = 120;
 registerDockyardInteractions(logger.child("dockyard"));
 registerShipEvents(logger.child("ships"));
 registerSkyRaiderEvents(worldRepository, logger.child("sky-raider"));
+registerSkycraftRuntime(logger.child("skycraft"));
 registerIslandModificationTracking(
   worldRepository,
   logger.child("island-modifications"),
@@ -101,11 +107,15 @@ function initializeRuntime(validationAttempt: number): void {
     resumeGeneration(worldRepository, logger.child("generation"));
     system.runInterval(() => {
       runRecoverySweep(worldRepository, logger.child("recovery"));
-      runDestinationDiscoverySweep();
+      runDestinationDiscoverySweep(
+        worldRepository,
+        logger.child("exploration"),
+      );
       runShipSystemsSweep(logger.child("ships"));
       runSkyRaiderSweep(worldRepository, logger.child("sky-raider"));
       runTutorialSweep();
     }, RECOVERY_INTERVAL_TICKS);
+    system.runInterval(() => runSkycraftSweep(logger.child("skycraft")), 20);
     system.runInterval(() => {
       try {
         ensureDockmaster(worldRepository, logger.child("dockyard"));
@@ -114,6 +124,7 @@ function initializeRuntime(validationAttempt: number): void {
       }
     }, 200);
     prepareDockmaster(0);
+    prepareSkycraftBerth(0);
     runtimeStatus = "ready";
   } catch (error) {
     retryOrFailRuntime(
@@ -297,4 +308,22 @@ function prepareDockmaster(attempt: number): void {
   }
 
   system.runTimeout(() => prepareDockmaster(attempt + 1), 5);
+}
+
+function prepareSkycraftBerth(attempt: number): void {
+  try {
+    if (
+      ensureApprenticeBerth(logger.child("skycraft-berth")) ||
+      attempt >= 120
+    ) {
+      return;
+    }
+  } catch (error) {
+    logger.warn("Skycraft berth preparation will retry.", {
+      attempt,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+  system.runTimeout(() => prepareSkycraftBerth(attempt + 1), 5);
 }

@@ -1,0 +1,14 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:dirigible_propeller" },
+    "tags": ["crafting_table"],
+    "pattern": [" C ", "CTC", " C "],
+    "key": {
+      "C": { "item": "minecraft:copper_ingot" },
+      "T": { "item": "skyknights:thruster_module" }
+    },
+    "result": { "item": "skyknights:dirigible_propeller" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

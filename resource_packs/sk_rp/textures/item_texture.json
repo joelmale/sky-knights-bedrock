@@ -55,6 +55,12 @@
     },
     "skyknights_raider_core": {
       "textures": "textures/items/nether_star"
+    },
+    "skyknights_relic_shard": {
+      "textures": "textures/items/echo_shard"
+    },
+    "skyknights_aether_core": {
+      "textures": "textures/items/nether_star"
     }
   }
 }

@@ -302,13 +302,12 @@ describe("discoverDestination", () => {
     expect(shouldHoldForDestination(outcome.readiness)).toBe(false);
   });
 
-  it("does not queue structure-only islands before their gameplay exists", () => {
+  it("queues newly gameplay-ready seeded islands", () => {
     const state = createWorldState(WORLD_SEED);
     const outcome = discoverDestination(state, "sunspire_reach");
 
-    expect(outcome.state).toBe(state);
-    expect(outcome.readiness.status).toBe("inactive");
-    expect(outcome.state.activeGeneration).toBeUndefined();
+    expect(outcome.state.activeGeneration?.id).toBe("sunspire_reach");
+    expect(outcome.readiness.status).toBe("generating");
     expect(shouldHoldForDestination(outcome.readiness)).toBe(true);
   });
 

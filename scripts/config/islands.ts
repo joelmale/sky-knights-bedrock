@@ -364,7 +364,7 @@ function seededIsland(
     tier,
     structureId: ISLAND_STRUCTURE_IDS[id],
     dimensionId: LAYOUT.dimensionId,
-    contentVersion: 1,
+    contentVersion: gameplayActivation === "ready" ? 2 : 1,
     size,
     placement: "seeded",
     gameplayActivation,
@@ -442,14 +442,26 @@ const FROSTSPIRE_DEFINITION: IslandDefinition = {
 
 /** Sorted by id. Iteration order is part of the determinism contract. */
 export const ISLAND_DEFINITIONS: readonly IslandDefinition[] = [
-  seededIsland("aether_sanctum", "desert", 3, { x: 37, y: 22, z: 33 }),
-  seededIsland("ashfall_crater", "volcanic", 3, { x: 31, y: 18, z: 27 }),
+  seededIsland("aether_sanctum", "desert", 3, { x: 37, y: 22, z: 33 }, "ready"),
+  seededIsland(
+    "ashfall_crater",
+    "volcanic",
+    3,
+    { x: 31, y: 18, z: 27 },
+    "ready",
+  ),
   EMBER_OUTPOST_DEFINITION,
   FROSTSPIRE_DEFINITION,
-  seededIsland("glacier_vault", "tundra", 3, { x: 31, y: 18, z: 27 }),
+  seededIsland("glacier_vault", "tundra", 3, { x: 31, y: 18, z: 27 }, "ready"),
   STARTER_ISLAND_DEFINITION,
-  seededIsland("sunspire_reach", "desert", 1, { x: 29, y: 16, z: 25 }),
-  seededIsland("verdant_hollow", "verdant", 1, { x: 27, y: 15, z: 23 }),
+  seededIsland("sunspire_reach", "desert", 1, { x: 29, y: 16, z: 25 }, "ready"),
+  seededIsland(
+    "verdant_hollow",
+    "verdant",
+    1,
+    { x: 27, y: 15, z: 23 },
+    "ready",
+  ),
 ];
 
 export function islandDefinition(id: string): IslandDefinition {

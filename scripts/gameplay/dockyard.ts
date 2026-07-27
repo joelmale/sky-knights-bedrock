@@ -23,6 +23,7 @@ import {
   WorldStateRepository,
 } from "../persistence/repositories";
 import { ShipModuleSlot } from "../persistence/schema";
+import { showSkycraftDockmaster } from "../skycraft/controller";
 import {
   MaterialConsumption,
   countMaterials,
@@ -225,6 +226,11 @@ async function showDockyard(player: Player, logger: Logger): Promise<void> {
       execute: () => returnRaiderCore(player, container, logger),
     });
   }
+
+  actions.push({
+    label: "Player-built Skycraft",
+    execute: () => showSkycraftDockmaster(player, logger.child("skycraft")),
+  });
 
   actions.push({
     label: "Current Objective",

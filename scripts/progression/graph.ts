@@ -67,14 +67,12 @@ export function shipTokenForTier(tier: number): string {
 }
 
 /**
- * Identifiers the content matrix declares but `IDENTIFIERS` does not carry yet,
- * because no implementing content ships. The integrator adds these to
- * `scripts/config/constants.ts` when the Phase 4 source lands; keeping them in
- * one place here means the graph never hand-types them twice.
+ * Compatibility aliases retained for tests and downstream documentation that
+ * referenced the earlier planned-name table.
  */
 export const PLANNED_IDENTIFIERS = {
-  relicShard: "skyknights:relic_shard",
-  aetherCore: "skyknights:aether_core",
+  relicShard: IDENTIFIERS.relicShard,
+  aetherCore: IDENTIFIERS.aetherCore,
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -146,12 +144,12 @@ export interface GuaranteedItem {
 export const GUARANTEED_ITEMS: readonly GuaranteedItem[] = [
   {
     itemId: "minecraft:copper_ingot",
-    status: "planned",
+    status: "built",
     matrixRow: "`gold_ingot` (vanilla), `copper_ingot` (vanilla)",
   },
   {
     itemId: "minecraft:gold_ingot",
-    status: "planned",
+    status: "built",
     matrixRow: "`gold_ingot` (vanilla), `copper_ingot` (vanilla)",
   },
   {
@@ -166,7 +164,7 @@ export const GUARANTEED_ITEMS: readonly GuaranteedItem[] = [
   },
   {
     itemId: PLANNED_IDENTIFIERS.aetherCore,
-    status: "planned",
+    status: "built",
     matrixRow: "`aether_core`",
   },
   {
@@ -235,7 +233,7 @@ export const GUARANTEED_ITEMS: readonly GuaranteedItem[] = [
   },
   {
     itemId: PLANNED_IDENTIFIERS.relicShard,
-    status: "planned",
+    status: "built",
     matrixRow: "`relic_shard`",
   },
   {
@@ -305,16 +303,16 @@ export const PROGRESSION_ISLANDS: readonly ProgressionIsland[] = [
   {
     id: "aether_sanctum",
     tier: 3,
-    status: "planned",
+    status: "built",
     accessRequires: [PLANNED_IDENTIFIERS.relicShard],
   },
-  { id: "ashfall_crater", tier: 3, status: "planned", accessRequires: [] },
+  { id: "ashfall_crater", tier: 3, status: "built", accessRequires: [] },
   { id: "ember_outpost", tier: 1, status: "built", accessRequires: [] },
   { id: "frostspire", tier: 2, status: "built", accessRequires: [] },
-  { id: "glacier_vault", tier: 3, status: "planned", accessRequires: [] },
+  { id: "glacier_vault", tier: 3, status: "built", accessRequires: [] },
   { id: "starter_island", tier: 0, status: "built", accessRequires: [] },
-  { id: "sunspire_reach", tier: 1, status: "planned", accessRequires: [] },
-  { id: "verdant_hollow", tier: 1, status: "planned", accessRequires: [] },
+  { id: "sunspire_reach", tier: 1, status: "built", accessRequires: [] },
+  { id: "verdant_hollow", tier: 1, status: "built", accessRequires: [] },
 ];
 
 export function progressionIsland(id: string): ProgressionIsland {
@@ -730,12 +728,12 @@ const BASE_NODES: readonly ProgressionNode[] = [
   {
     id: "loot:sunspire_reach",
     kind: "loot",
-    status: "planned",
+    status: "built",
     requires: [islandAccessToken("sunspire_reach")],
     grants: ["minecraft:gold_ingot", "minecraft:copper_ingot"],
     island: "sunspire_reach",
     oneTime: true,
-    note: "Matrix: 16 gold ingot, 8 copper. No implementing source yet.",
+    note: "Guaranteed content table: 16 gold ingot and 8 copper ingot.",
   },
   {
     id: "mine:sunspire_reach/ore",
@@ -749,7 +747,7 @@ const BASE_NODES: readonly ProgressionNode[] = [
   {
     id: "loot:verdant_hollow",
     kind: "loot",
-    status: "planned",
+    status: "built",
     requires: [islandAccessToken("verdant_hollow")],
     grants: [IDENTIFIERS.repairKit, "minecraft:oak_sapling"],
     island: "verdant_hollow",
@@ -768,7 +766,7 @@ const BASE_NODES: readonly ProgressionNode[] = [
   {
     id: "loot:glacier_vault",
     kind: "loot",
-    status: "planned",
+    status: "built",
     requires: [islandAccessToken("glacier_vault")],
     grants: ["minecraft:diamond", PLANNED_IDENTIFIERS.relicShard],
     island: "glacier_vault",
@@ -778,7 +776,7 @@ const BASE_NODES: readonly ProgressionNode[] = [
   {
     id: "loot:ashfall_crater",
     kind: "loot",
-    status: "planned",
+    status: "built",
     requires: [islandAccessToken("ashfall_crater")],
     grants: [IDENTIFIERS.aetherCrystal, PLANNED_IDENTIFIERS.relicShard],
     island: "ashfall_crater",
@@ -786,13 +784,14 @@ const BASE_NODES: readonly ProgressionNode[] = [
     note: "Matrix: 2 Aether Crystal, 1 Relic Shard.",
   },
   {
-    id: "encounter:aether_sanctum_giant",
-    kind: "encounter",
-    status: "planned",
+    id: "loot:aether_sanctum",
+    kind: "loot",
+    status: "built",
     requires: [islandAccessToken("aether_sanctum")],
     grants: [PLANNED_IDENTIFIERS.aetherCore],
     island: "aether_sanctum",
-    note: "skyknights:giant boss drop; the 1.0 completion objective.",
+    oneTime: true,
+    note: "Guaranteed Sanctum cache; a custom boss remains a later encounter layer.",
   },
   {
     id: "encounter:goblin",
@@ -832,9 +831,113 @@ const BASE_NODES: readonly ProgressionNode[] = [
   },
 ];
 
+function skycraftCraft(
+  id: string,
+  ingredients: readonly string[],
+): ProgressionNode {
+  return {
+    id: `craft:${id}`,
+    kind: "craft",
+    status: "built",
+    requires: [TABLE, ...ingredients],
+    grants: [id],
+  };
+}
+
+const SKYCRAFT_CRAFT_NODES: readonly ProgressionNode[] = [
+  skycraftCraft("skyknights:aether_lift_cell", [
+    IDENTIFIERS.aetherCrystal,
+    IDENTIFIERS.canvasBundle,
+    IDENTIFIERS.froststeelIngot,
+  ]),
+  skycraftCraft("skyknights:aether_thruster", [
+    "minecraft:iron_ingot",
+    IDENTIFIERS.aetherEngine,
+    IDENTIFIERS.froststeelIngot,
+    IDENTIFIERS.thrusterModule,
+  ]),
+  skycraftCraft("skyknights:airbag", [
+    "minecraft:gold_ingot",
+    IDENTIFIERS.canvasBundle,
+  ]),
+  skycraftCraft("skyknights:basic_helm", [
+    "minecraft:oak_planks",
+    "minecraft:stick",
+  ]),
+  skycraftCraft("skyknights:braced_frame", [
+    "minecraft:iron_ingot",
+    "minecraft:oak_planks",
+  ]),
+  skycraftCraft("skyknights:cannon_hardpoint", [
+    "minecraft:iron_ingot",
+    IDENTIFIERS.aetherCannon,
+    IDENTIFIERS.aetherCharge,
+    IDENTIFIERS.froststeelIngot,
+  ]),
+  skycraftCraft("skyknights:cargo_rack", [
+    "minecraft:oak_planks",
+    IDENTIFIERS.cargoHold,
+  ]),
+  skycraftCraft("skyknights:coal_thruster", [
+    "minecraft:coal",
+    "minecraft:cobblestone",
+    IDENTIFIERS.thrusterModule,
+  ]),
+  skycraftCraft("skyknights:crew_seat", [
+    "minecraft:oak_planks",
+    "minecraft:stick",
+    IDENTIFIERS.canvasBundle,
+  ]),
+  skycraftCraft("skyknights:dirigible_propeller", [
+    "minecraft:copper_ingot",
+    IDENTIFIERS.thrusterModule,
+  ]),
+  skycraftCraft("skyknights:frostfire_thruster", [
+    "minecraft:iron_ingot",
+    IDENTIFIERS.aetherEngine,
+    IDENTIFIERS.frostfireEngine,
+    IDENTIFIERS.froststeelIngot,
+  ]),
+  skycraftCraft("skyknights:lift_sail", [
+    "minecraft:oak_planks",
+    IDENTIFIERS.canvasBundle,
+  ]),
+  skycraftCraft("skyknights:reinforced_helm", [
+    "minecraft:iron_ingot",
+    "minecraft:oak_planks",
+    "minecraft:redstone",
+    "skyknights:basic_helm",
+  ]),
+  skycraftCraft("skyknights:repair_station", [
+    "minecraft:crafting_table",
+    "minecraft:iron_ingot",
+    "minecraft:oak_planks",
+    IDENTIFIERS.repairKit,
+  ]),
+  skycraftCraft("skyknights:rudder", [
+    "minecraft:oak_planks",
+    "minecraft:stick",
+  ]),
+  skycraftCraft("skyknights:shield_hardpoint", [
+    IDENTIFIERS.aetherCrystal,
+    IDENTIFIERS.froststeelIngot,
+    IDENTIFIERS.shieldProjector,
+  ]),
+  skycraftCraft("skyknights:ship_core_block", [
+    "minecraft:oak_planks",
+    IDENTIFIERS.shipCore,
+  ]),
+  skycraftCraft("skyknights:stabilizer", [
+    "minecraft:iron_ingot",
+    "minecraft:redstone",
+    IDENTIFIERS.froststeelIngot,
+  ]),
+];
+
 /** Every declared rule. Order is stable and part of the test contract. */
 export const PROGRESSION_NODES: readonly ProgressionNode[] = [
   ...BASE_NODES,
+  ...SKYCRAFT_CRAFT_NODES,
   ...TRAVEL_NODES,
 ];
 
@@ -844,12 +947,7 @@ export const PROGRESSION_NODES: readonly ProgressionNode[] = [
  * so the suite turns green as Phase 4 lands each source and fails loudly if a
  * new gap appears.
  */
-export const PENDING_GUARANTEED_ITEMS: readonly string[] = [
-  "minecraft:copper_ingot",
-  "minecraft:gold_ingot",
-  PLANNED_IDENTIFIERS.aetherCore,
-  PLANNED_IDENTIFIERS.relicShard,
-];
+export const PENDING_GUARANTEED_ITEMS: readonly string[] = [];
 
 // ---------------------------------------------------------------------------
 // Closure

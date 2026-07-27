@@ -4,7 +4,7 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
-## [Unreleased]
+## [0.3.2] — 2026-07-27
 
 ### Added
 
@@ -25,12 +25,55 @@ Validation evidence and pending hands-on gates are maintained in
 - `tests/testbench.test.ts` asserts the bench row stays on the island surface,
   clear of the dock, evenly spaced, and stocked with every custom ship part,
   module, and progression item.
+- Integrated the bounded player-built Skycraft prototype: five dock
+  certifications, deterministic connected-block scanning, strict canonical
+  blueprints, fixed-point mass/lift/thrust engineering, directional engines,
+  authored flight proxies, exact docking, and restart-safe transactions.
+- Added 18 localized placed Skycraft components and survival recipes, including
+  Helm/Core, lift sails, airbags, compact lift cells, four propulsion families,
+  seats, cargo reserve, repair, cannon, and shield hardpoints.
+- Added eight editable reference fixtures: Minnow, Dart, Cargo Punt,
+  Cloudwhale, Aether Disc, Frostwing, Surveyor, and Grand Cruiser.
+- Added owner-scoped saved blueprints with bounded storage, optimistic
+  revisions, fresh-ID materialization, exact material consumption, and
+  inventory/world rollback.
+- Added player-built crew permissions, certified-seat enforcement, persisted
+  hull/subsystem damage, Repair Kit relaunch gates, destruction recovery, and
+  owner/gunner Cannon Hardpoint use.
+- Activated guaranteed deterministic caches on the five seeded islands,
+  including two Relic Shards and the Aether Core needed by the prototype
+  certification ladder.
+- Added the focused
+  [`docs/SKYCRAFT_HANDS_ON_TEST_PLAN.md`](docs/SKYCRAFT_HANDS_ON_TEST_PLAN.md)
+  and an implementation/gate tracker.
 
 ### Changed
 
 - Rewrote all twelve tutorial objective strings to state where to go and what
   to do, and replaced the player-facing internal slice name
   ("Crystal-to-Cutter expedition is active") with plain language.
+- Bumped the visible add-on/package version to `0.3.2`.
+- Kept unmeasured certifications behind the explicit
+  `skyknights.skycraft_experimental` tester tag. Apprentice remains the only
+  normally exposed player-built certification until performance and device
+  gates pass.
+- Kept player-built physical cargo disabled; cargo racks currently reserve
+  engineering mass and capacity only.
+
+### Validation
+
+- `npm run verify` passed with 207 tests across 35 files, authored-structure
+  checks, TypeScript build, NBT tests, production `.mcaddon`, and both opt-in
+  profiles.
+- `npm audit --audit-level=high` reported zero vulnerabilities.
+- BDS `1.26.34.3` loaded the dirty integrated stable/GameTest packs without
+  content errors and passed the existing named skiff-seat GameTest. This is
+  pack-load evidence, not Skycraft reconstruction or interaction proof.
+- Independent QA returned GO after fixes for owner-only launch, component
+  certification, pre-mount authorization and certified-seat limits, the
+  active-craft cap, and strict persisted-record validation.
+- Minecraft hands-on, multiplayer, input, migration, and device evidence
+  remains pending.
 
 ## Skycraft architecture roadmap — 2026-07-26
 

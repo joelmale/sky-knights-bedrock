@@ -1,0 +1,14 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": { "identifier": "skyknights:coal_thruster" },
+    "tags": ["crafting_table"],
+    "ingredients": [
+      { "item": "skyknights:thruster_module" },
+      { "item": "minecraft:coal" },
+      { "item": "minecraft:cobblestone" }
+    ],
+    "result": { "item": "skyknights:coal_thruster" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

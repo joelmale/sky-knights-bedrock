@@ -34,16 +34,16 @@ Ember Skiff, and Specialist Airframe. Expedition and Masterwork certifications
 remain tier 3 and add capacity/specialization rather than unlocking otherwise
 unreachable Relic sources.
 
-| Island id        | Family   | Tier | Purpose                                                                                | Guaranteed reward                             | Status  |
-| ---------------- | -------- | ---: | -------------------------------------------------------------------------------------- | --------------------------------------------- | ------- |
-| `starter_island` | verdant  |    0 | Home, dock, Dockmaster, 2 oak trees, exposed coal/iron, stone, crafting table, furnace | raw starter resources for ship part materials | built   |
-| `ember_outpost`  | volcanic |    1 | First expedition, ruin, guardian                                                       | 1 Aether Crystal, 24 iron, 8 redstone         | built   |
-| `frostspire`     | tundra   |    2 | Range-gated raid, warden                                                               | 16 Froststeel, 2 diamond                      | built   |
-| `sunspire_reach` | desert   |    1 | Structure built; gold/metal tier, hut content, and goblins inactive                    | 16 gold ingot, 8 copper                       | partial |
-| `verdant_hollow` | verdant  |    1 | Structure built; renewable-wood content and passive fauna inactive                     | 1 Repair Kit, saplings                        | partial |
-| `glacier_vault`  | tundra   |    3 | Structure built; watchtower, Yeti, and reward content inactive                         | 4 diamond, 1 Relic Shard                      | partial |
-| `ashfall_crater` | volcanic |    3 | Structure built; Demon, shrine, and reward content inactive                            | 2 Aether Crystal, 1 Relic Shard               | partial |
-| `aether_sanctum` | desert   |    3 | Structure built; boss encounter and completion objective inactive                      | 1 Aether Core, Giant boss loot                | partial |
+| Island id        | Family   | Tier | Purpose                                                                                | Guaranteed reward                             | Status |
+| ---------------- | -------- | ---: | -------------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| `starter_island` | verdant  |    0 | Home, dock, Dockmaster, 2 oak trees, exposed coal/iron, stone, crafting table, furnace | raw starter resources for ship part materials | built  |
+| `ember_outpost`  | volcanic |    1 | First expedition, ruin, guardian                                                       | 1 Aether Crystal, 24 iron, 8 redstone         | built  |
+| `frostspire`     | tundra   |    2 | Range-gated raid, warden                                                               | 16 Froststeel, 2 diamond                      | built  |
+| `sunspire_reach` | desert   |    1 | Seeded structure and guaranteed Balloonwright metal cache; custom goblins remain later | 16 gold ingot, 8 copper                       | built  |
+| `verdant_hollow` | verdant  |    1 | Seeded structure and guaranteed wood/Canvas cache; passive fauna remain later          | 1 Repair Kit, saplings, Canvas Bundles        | built  |
+| `glacier_vault`  | tundra   |    3 | Seeded watchtower and guaranteed Frostwright/relic cache; custom Yeti remains later    | 4 diamond, 1 Relic Shard                      | built  |
+| `ashfall_crater` | volcanic |    3 | Seeded shrine and guaranteed relic cache; custom Demon remains later                   | 2 Aether Crystal, 1 Relic Shard               | built  |
+| `aether_sanctum` | desert   |    3 | Seeded arena and guaranteed completion cache; custom Giant remains later               | 1 Aether Core                                 | built  |
 
 Layout rule: the three released islands retain their pinned coordinates; seeded
 island centers come from the deterministic layout registry. Travel lanes
@@ -92,25 +92,25 @@ share enemy health or loot families.
 ## Skycraft construction and technology
 
 The shipping Skiff/Skycutter systems remain `built`. The player-built airframe
-direction is `planned` and must not be added to executable registries until the
-`0.4.0` feasibility gate passes. Component names below are design labels, not
-reserved runtime identifiers.
+program is now an integrated prototype. Automated contracts are present, while
+representation, device-performance, BDS, and hands-on acceptance gates remain
+open; those rows therefore stay `partial`.
 
 | Capability                        | Progression/source                                     | Status  |
 | --------------------------------- | ------------------------------------------------------ | ------- |
 | Legacy Skiff and Skycutter        | Starter, Ember, and Frostspire path                    | built   |
-| Bounded owned dock berth          | Starter Dockmaster/Ship Core                           | planned |
-| Helm-centered connected wood scan | Apprentice Raft certification                          | planned |
-| Canonical block blueprint         | Dock validation and persistence                        | planned |
-| Mass, lift, thrust, and control   | Apprentice engineering rules                           | planned |
-| Downward/aft engine orientation   | Starter and Ember propulsion                           | planned |
-| Dockmaster reference blueprints   | Technology-gated plan/kit/construction order           | planned |
-| Player-saved personal blueprints  | Successful certified dock scan                         | planned |
-| Ember custom cutter               | Aether Crystal, iron, and redstone                     | planned |
-| Balloonwright/dirigible branch    | Sunspire gold/copper and Verdant renewable fabric/wood | planned |
-| Frostwright compact-lift branch   | Frostspire Froststeel and diamond                      | planned |
-| Expedition certification          | Glacier/Ashfall Relic Shards                           | planned |
-| Masterwork skycraft               | Aether Sanctum Aether Core                             | planned |
+| Bounded owned dock berth          | Starter Dockmaster/Ship Core                           | partial |
+| Helm-centered connected wood scan | Apprentice Raft certification                          | partial |
+| Canonical block blueprint         | Dock validation and persistence                        | partial |
+| Mass, lift, thrust, and control   | Apprentice engineering rules                           | partial |
+| Downward/aft engine orientation   | Starter and Ember propulsion                           | partial |
+| Dockmaster reference blueprints   | Eight gated plans and exact construction orders         | partial |
+| Player-saved personal blueprints  | Owner library, revision checks, exact materialization    | partial |
+| Ember custom cutter               | Aether Crystal, iron, and redstone                     | partial |
+| Balloonwright/dirigible branch    | Sunspire gold/copper and Verdant renewable fabric/wood | partial |
+| Frostwright compact-lift branch   | Frostspire Froststeel and diamond                      | partial |
+| Expedition certification          | Glacier/Ashfall Relic Shards                           | partial |
+| Masterwork skycraft               | Aether Sanctum Aether Core                             | partial |
 
 Reference designs, provisional certification caps, component families, and
 validation gates are defined in
@@ -128,9 +128,9 @@ validation gates are defined in
 | `armored_hull`, `frostfire_engine`, `expanded_cargo_hold`            | Refit modules                      | yes        | built   |
 | `aether_cannon`, `cannon_control`, `aether_charge`                   | Offense utility                    | yes        | built   |
 | `shield_projector`, `raider_core`                                    | Defense utility                    | yes        | built   |
-| `gold_ingot` (vanilla), `copper_ingot` (vanilla)                     | Desert metal tier                  | yes        | planned |
-| `relic_shard`                                                        | Tier-3 unlock currency, 2 required | yes        | planned |
-| `aether_core`                                                        | Endgame ship/objective item        | yes        | planned |
+| `gold_ingot` (vanilla), `copper_ingot` (vanilla)                     | Desert metal tier                  | yes        | built   |
+| `relic_shard`                                                        | Tier-3 unlock currency, 2 required | yes        | built   |
+| `aether_core`                                                        | Endgame ship/objective item        | yes        | built   |
 | `skyblade`, `frostbrand`, `emberfang`, `aetherpiercer`               | Curated named weapons              | no         | planned |
 
 ## Loot tables
@@ -168,9 +168,10 @@ world holding nothing.
 | Relic shard ×2 | glacier_vault, ashfall_crater           | aether_sanctum access                      |
 | Aether core    | aether_sanctum boss                     | completion objective                       |
 
-### Planned custom-skycraft capability mapping
+### Custom-skycraft capability mapping
 
-This mapping is a roadmap contract, not a built progression rule.
+The sources and prototype rules are executable. Certification caps and proxy
+acceptance remain provisional until the roadmap's BDS/device gates pass.
 
 | Travel tier | Custom certification | Guaranteed prerequisite                     | Required reach                        |
 | ----------: | -------------------- | ------------------------------------------- | ------------------------------------- |

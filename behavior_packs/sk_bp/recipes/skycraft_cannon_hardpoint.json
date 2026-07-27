@@ -1,0 +1,16 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:cannon_hardpoint" },
+    "tags": ["crafting_table"],
+    "pattern": ["IFI", "CAC", "IFI"],
+    "key": {
+      "I": { "item": "minecraft:iron_ingot" },
+      "F": { "item": "skyknights:froststeel_ingot" },
+      "C": { "item": "skyknights:aether_cannon" },
+      "A": { "item": "skyknights:aether_charge" }
+    },
+    "result": { "item": "skyknights:cannon_hardpoint" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

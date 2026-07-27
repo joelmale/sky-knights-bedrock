@@ -65,11 +65,16 @@ const MATRIX_SOURCES: Record<string, string> = import.meta.glob(
 const ONE_TIME_ONLY_BUILT_TOKENS: readonly string[] = [
   "minecraft:cooked_beef",
   "minecraft:cooked_salmon",
+  "minecraft:copper_ingot",
   "minecraft:diamond",
   "minecraft:emerald",
+  "minecraft:gold_ingot",
+  "minecraft:oak_sapling",
   "minecraft:redstone",
+  IDENTIFIERS.aetherCore,
   IDENTIFIERS.aetherCrystal,
   IDENTIFIERS.froststeelIngot,
+  IDENTIFIERS.relicShard,
 ];
 
 function onlyValue(sources: Record<string, string>): string {
@@ -280,7 +285,7 @@ describe("progression closure", () => {
     expect(chain).toContain("assembly:skycutter");
     expect(chain).toContain("loot:frostspire");
     expect(chain).toContain("assembly:skycutter_refit");
-    expect(chain[chain.length - 1]).toBe("encounter:aether_sanctum_giant");
+    expect(chain[chain.length - 1]).toBe("loot:aether_sanctum");
   });
 });
 
@@ -386,6 +391,11 @@ describe("shipping content agreement", () => {
     expect(lootRules.map((rule) => rule.id)).toEqual([
       "loot:ember_outpost",
       "loot:frostspire",
+      "loot:sunspire_reach",
+      "loot:verdant_hollow",
+      "loot:glacier_vault",
+      "loot:ashfall_crater",
+      "loot:aether_sanctum",
     ]);
 
     for (const rule of lootRules) {
@@ -506,12 +516,12 @@ describe("closure failure detection", () => {
     expect(missing).toContain(IDENTIFIERS.froststeelIngot);
   });
 
-  it("reports a missing source as missing rather than as a cycle", () => {
+  it("reports the fallback Ashfall source cycle when Ember loot is removed", () => {
     const broken = nodesInScope(
       withoutNodes(PROGRESSION_NODES, ["loot:ember_outpost"]),
       "built",
     );
-    expect(findGateCycle(broken, IDENTIFIERS.aetherCrystal)).toBeUndefined();
+    expect(findGateCycle(broken, IDENTIFIERS.aetherCrystal)).toBeDefined();
   });
 
   it("ignores benign cycles around an already reachable item", () => {

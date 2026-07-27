@@ -1,0 +1,14 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:braced_frame" },
+    "tags": ["crafting_table"],
+    "pattern": ["IPI", "P P", "IPI"],
+    "key": {
+      "I": { "item": "minecraft:iron_ingot" },
+      "P": { "item": "minecraft:oak_planks" }
+    },
+    "result": { "item": "skyknights:braced_frame", "count": 4 },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}

@@ -1,10 +1,14 @@
 # Player-Built Skycraft Technology Roadmap
 
-> Status: accepted product direction; implementation is planned and gated by a
-> bounded Bedrock feasibility spike.
+> Status: accepted product direction with an integrated `0.3.2` prototype.
+> Promotion remains gated by the bounded Bedrock feasibility, multiplayer,
+> migration, input, and device evidence defined below.
 >
-> Current Skiff and Skycutter behavior remains implemented and supported. No
-> player-built airframe capability described here is shipping yet.
+> Current Skiff and Skycutter behavior remains implemented and supported.
+> Apprentice Skycraft is available for hands-on testing; later provisional
+> tiers require the `skyknights.skycraft_experimental` tester tag. See
+> [`SKYCRAFT_IMPLEMENTATION_STATUS.md`](SKYCRAFT_IMPLEMENTATION_STATUS.md) for
+> exact implemented, gated, and pending rows.
 
 ## Product promise
 

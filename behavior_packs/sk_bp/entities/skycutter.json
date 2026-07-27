@@ -56,11 +56,7 @@
     },
     "components": {
       "minecraft:type_family": {
-        "family": [
-          "skyknights_ship",
-          "skyknights_skycutter",
-          "inanimate"
-        ]
+        "family": ["skyknights_ship", "skyknights_skycutter", "inanimate"]
       },
       "minecraft:collision_box": {
         "width": 4.8,

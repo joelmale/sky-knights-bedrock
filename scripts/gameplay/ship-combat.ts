@@ -13,11 +13,16 @@ import {
 
 import { COMBAT, IDENTIFIERS } from "../config/constants";
 import { Logger } from "../diagnostics/logger";
+import { SKYCRAFT_IDS } from "../skycraft/config";
+import { canPerform } from "../skycraft/permissions";
+import { WorldDynamicPropertyHost } from "../skycraft/runtime/bedrock";
+import { AirshipRepository } from "../skycraft/runtime/repository";
 import { hasAetherCannon } from "./ship-modules";
 import { isShipOwner, loadShipState, saveShipState } from "./skiff";
 
 const nextCannonTick = new Map<string, number>();
 const LAST_ATTACKER_PROPERTY = "skyknights:last_cannon_attacker";
+const airships = new AirshipRepository(new WorldDynamicPropertyHost());
 
 export function registerCombatItemComponents(
   registry: ItemComponentRegistry,
@@ -46,8 +51,12 @@ export function fireAetherCannon(player: Player, logger: Logger): boolean {
   const ship = mountedSkycutter(player);
 
   if (ship === undefined) {
+    const skycraft = mountedSkycraft(player);
+    if (skycraft !== undefined) {
+      return fireSkycraftCannon(player, skycraft, logger);
+    }
     player.onScreenDisplay.setActionBar(
-      "§eBoard a cannon-equipped Skycutter to use this control.§r",
+      "§eBoard a cannon-equipped Skycutter or Skycraft to use this control.§r",
     );
     return false;
   }
@@ -137,6 +146,87 @@ export function fireAetherCannon(player: Player, logger: Logger): boolean {
   return true;
 }
 
+function fireSkycraftCannon(
+  player: Player,
+  skycraft: Entity,
+  logger: Logger,
+): boolean {
+  const airshipId = skycraft.getDynamicProperty("skyknights:airship_id");
+  const state =
+    typeof airshipId === "string" ? airships.load(airshipId) : undefined;
+  if (
+    state === undefined ||
+    state.transaction !== "in_flight" ||
+    !canPerform(state, player.id, "gun")
+  ) {
+    player.onScreenDisplay.setActionBar(
+      "§cOnly this Skycraft's owner or assigned gunner may fire.§r",
+    );
+    return false;
+  }
+  if (
+    !state.blueprint.components.some(
+      (component) => component.typeId === SKYCRAFT_IDS.cannonHardpoint,
+    )
+  ) {
+    player.onScreenDisplay.setActionBar(
+      "§eInstall and certify a Cannon Hardpoint first.§r",
+    );
+    return false;
+  }
+
+  const allowedTick = nextCannonTick.get(player.id) ?? 0;
+  if (system.currentTick < allowedTick) {
+    return false;
+  }
+  const playerInventory = player.getComponent(
+    EntityComponentTypes.Inventory,
+  ) as EntityInventoryComponent | undefined;
+  const ammoContainer = containerWithItem(
+    playerInventory?.container,
+    IDENTIFIERS.aetherCharge,
+  );
+  if (ammoContainer === undefined) {
+    player.onScreenDisplay.setActionBar(
+      "§cCarry an Aether Charge while controlled cargo remains gated.§r",
+    );
+    return false;
+  }
+
+  consumeOne(ammoContainer, IDENTIFIERS.aetherCharge);
+  nextCannonTick.set(
+    player.id,
+    system.currentTick + COMBAT.cannonCooldownTicks,
+  );
+  const origin = player.getHeadLocation();
+  const direction = player.getViewDirection();
+  spawnCannonVisual(player, origin, direction);
+  const hit = player.dimension
+    .getEntitiesFromRay(origin, direction, {
+      maxDistance: COMBAT.cannonRange,
+    })
+    .find((candidate) => candidate.entity.typeId === IDENTIFIERS.skyRaider);
+
+  if (hit !== undefined) {
+    hit.entity.setDynamicProperty(LAST_ATTACKER_PROPERTY, player.name);
+    hit.entity.applyDamage(COMBAT.cannonDamage, {
+      cause: EntityDamageCause.projectile,
+      damagingEntity: player,
+    });
+    player.onScreenDisplay.setActionBar(
+      `§bSkycraft cannon hit: ${COMBAT.cannonDamage} hull damage.§r`,
+    );
+  } else {
+    player.onScreenDisplay.setActionBar("§7Skycraft cannon shot missed.§r");
+  }
+  logger.info("Player-built Skycraft cannon fired.", {
+    airshipId: state.airshipId,
+    playerId: player.id,
+    hit: hit?.entity.id,
+  });
+  return true;
+}
+
 export function lastCannonAttacker(entity: Entity): string | undefined {
   const value = entity.getDynamicProperty(LAST_ATTACKER_PROPERTY);
   return typeof value === "string" ? value : undefined;
@@ -154,6 +244,20 @@ export function mountedSkycutter(player: Player): Entity | undefined {
       EntityRideableComponent | undefined;
     return rideable?.getRiders().some((rider) => rider.id === player.id);
   });
+}
+
+function mountedSkycraft(player: Player): Entity | undefined {
+  return player.dimension
+    .getEntities({
+      type: SKYCRAFT_IDS.flightEntity,
+      location: player.location,
+      maxDistance: 16,
+    })
+    .find((candidate) => {
+      const rideable = candidate.getComponent(EntityComponentTypes.Rideable) as
+        EntityRideableComponent | undefined;
+      return rideable?.getRiders().some((rider) => rider.id === player.id);
+    });
 }
 
 function spawnCannonVisual(

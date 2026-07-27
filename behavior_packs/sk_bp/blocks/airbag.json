@@ -1,0 +1,22 @@
+{
+  "format_version": "1.21.100",
+  "minecraft:block": {
+    "description": {
+      "identifier": "skyknights:airbag",
+      "menu_category": {
+        "category": "construction",
+        "group": "minecraft:itemGroup.name.boat"
+      }
+    },
+    "components": {
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": { "texture": "skyknights_airbag", "render_method": "alpha_test" }
+      },
+      "minecraft:destructible_by_mining": { "seconds_to_destroy": 0.8 },
+      "minecraft:destructible_by_explosion": { "explosion_resistance": 2 },
+      "minecraft:collision_box": true,
+      "minecraft:selection_box": true
+    }
+  }
+}

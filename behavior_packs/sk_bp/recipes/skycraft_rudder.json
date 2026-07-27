@@ -1,0 +1,14 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "skyknights:rudder" },
+    "tags": ["crafting_table"],
+    "pattern": [" PP", "SPP", "S  "],
+    "key": {
+      "P": { "item": "minecraft:oak_planks" },
+      "S": { "item": "minecraft:stick" }
+    },
+    "result": { "item": "skyknights:rudder" },
+    "unlock": { "context": "AlwaysUnlocked" }
+  }
+}
