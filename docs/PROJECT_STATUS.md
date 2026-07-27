@@ -65,8 +65,8 @@ not require them.
 | Advanced modules   | Armored Hull, Frostfire Engine, Expanded Cargo Hold, Aether Cannon, Shield Projector |
 | Encounters         | Ember Guardian, Frostspire Warden, Ashwing Raider                                    |
 | GameTests          | 4 registered; 1 executed by the opt-in BDS smoke harness                             |
-| Host tests         | 153 passed across 19 files                                                           |
-| Developer commands | `debug`, `skiff`, `skycutter`, `island`, `raider`, `recover`                         |
+| Host tests         | 162 passed across 20 files                                                           |
+| Developer commands | `debug`, `skiff`, `skycutter`, `island`, `raider`, `recover`, test bench, objective  |
 
 ## Systems implemented
 

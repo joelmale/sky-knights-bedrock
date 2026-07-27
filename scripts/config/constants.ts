@@ -177,6 +177,108 @@ export const DOCKYARD = {
   ],
 } as const;
 
+/**
+ * Developer test bench.
+ *
+ * A row of labelled barrels placed on the starter island so a tester can
+ * exercise any ship, module, or combat system without playing the progression
+ * chain first. This is deliberately NOT baked into
+ * `starter_island.mcstructure`: changing authored starter terrain would
+ * require an explicit content-version and existing-world replacement
+ * decision. It is placed on demand by `/skyknights:testbench` instead.
+ *
+ * The row runs west-to-east along `z = TEST_BENCH.row.z`, north of the dock.
+ * Each stall is a barrel at `y` with a standing sign one block above it.
+ */
+export const TEST_BENCH = {
+  dimensionId: "minecraft:overworld",
+  row: {
+    startX: -7,
+    z: -5,
+    y: 161,
+    spacing: 2,
+  },
+  /** Blocks whose surface must be solid before a stall is placed. */
+  supportOffsetY: -1,
+  stalls: [
+    {
+      id: "starter_parts",
+      label: "Starter Parts",
+      items: [
+        { itemId: IDENTIFIERS.shipCore, count: 8 },
+        { itemId: IDENTIFIERS.canvasBundle, count: 16 },
+        { itemId: IDENTIFIERS.thrusterModule, count: 8 },
+      ],
+    },
+    {
+      id: "skycutter_base",
+      label: "Skycutter Base",
+      items: [
+        { itemId: IDENTIFIERS.reinforcedHull, count: 4 },
+        { itemId: IDENTIFIERS.aetherEngine, count: 1 },
+        { itemId: IDENTIFIERS.cargoHold, count: 4 },
+        { itemId: IDENTIFIERS.navigatorModule, count: 4 },
+      ],
+    },
+    {
+      id: "advanced_modules",
+      label: "Advanced Modules",
+      items: [
+        { itemId: IDENTIFIERS.armoredHull, count: 4 },
+        { itemId: IDENTIFIERS.frostfireEngine, count: 1 },
+        { itemId: IDENTIFIERS.expandedCargoHold, count: 4 },
+      ],
+    },
+    {
+      id: "cannon",
+      label: "Cannon + Ammo",
+      items: [
+        { itemId: IDENTIFIERS.aetherCannon, count: 1 },
+        { itemId: IDENTIFIERS.cannonControl, count: 1 },
+        { itemId: IDENTIFIERS.aetherCharge, count: 64 },
+      ],
+    },
+    {
+      id: "shield",
+      label: "Shield + Repair",
+      items: [
+        { itemId: IDENTIFIERS.shieldProjector, count: 1 },
+        { itemId: IDENTIFIERS.repairKit, count: 16 },
+      ],
+    },
+    {
+      id: "progression",
+      label: "Progression Items",
+      items: [
+        { itemId: IDENTIFIERS.aetherCrystal, count: 16 },
+        { itemId: IDENTIFIERS.froststeelIngot, count: 64 },
+        { itemId: IDENTIFIERS.raiderCore, count: 8 },
+      ],
+    },
+    {
+      id: "materials",
+      label: "Raw Materials",
+      items: [
+        { itemId: "minecraft:iron_ingot", count: 64 },
+        { itemId: "minecraft:diamond", count: 32 },
+        { itemId: "minecraft:coal", count: 64 },
+        { itemId: "minecraft:redstone", count: 64 },
+        { itemId: "minecraft:oak_log", count: 64 },
+      ],
+    },
+    {
+      id: "survival",
+      label: "Survival Kit",
+      items: [
+        { itemId: "minecraft:cooked_beef", count: 64 },
+        { itemId: "minecraft:diamond_pickaxe", count: 1 },
+        { itemId: "minecraft:diamond_sword", count: 1 },
+        { itemId: "minecraft:torch", count: 64 },
+      ],
+    },
+  ],
+} as const;
+
 export const VOID_RESCUE_Y = 64;
 export const RECOVERY_INTERVAL_TICKS = 10;
 export const BASIC_SHIP_RANGE = 150;

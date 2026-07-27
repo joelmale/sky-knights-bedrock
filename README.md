@@ -190,13 +190,38 @@ does not grant ship components directly.
 Development commands:
 
 ```text
-/skyknights:skiff       Developer shortcut: spawn a test skiff
-/skyknights:skycutter   Developer shortcut: spawn a configured Skycutter
-/skyknights:debug       Show schema, generation, input, and entity state
-/skyknights:island      Safely resume required-island bootstrap when needed
-/skyknights:raider      Reset and spawn the Ashwing Raider for development
-/skyknights:recover     Return to the last safe dock
+/skyknights:skiff            Developer shortcut: spawn a test skiff
+/skyknights:skycutter        Developer shortcut: spawn a configured Skycutter
+/skyknights:debug            Show schema, generation, input, and entity state
+/skyknights:island           Safely resume required-island bootstrap when needed
+/skyknights:raider           Reset and spawn the Ashwing Raider for development
+/skyknights:recover          Return to the last safe dock
+/skyknights:testbench        Place the stocked test-bench row on the home island
+/skyknights:testbench_clear  Remove the test-bench row
+/skyknights:objective        Show the current objective (available to all players)
 ```
+
+### Test bench
+
+`/skyknights:testbench` places a labelled row of stocked barrels on the grass
+north of the home dock so a tester can exercise any ship, module, or combat
+system without playing the progression chain first. Each barrel carries a sign
+naming its contents:
+
+```text
+Starter Parts | Skycutter Base | Advanced Modules | Cannon + Ammo
+Shield + Repair | Progression Items | Raw Materials | Survival Kit
+```
+
+The row is placed on demand rather than baked into
+`starter_island.mcstructure`, because changing authored starter terrain would
+require an explicit content-version and existing-world replacement decision.
+Re-running the command restocks only recorded bench-owned barrels, and a stall
+whose support, target cells, ownership marker, or labelled sign does not match
+is skipped rather than overwriting a player build.
+
+See [docs/TEST_BENCH.md](docs/TEST_BENCH.md) for the per-stall inventory and
+the suggested per-system test recipes.
 
 Run the focused
 [Dockyard Refit and Airship Combat test plan](docs/DOCKYARD_REFIT_COMBAT_TEST_PLAN.md)

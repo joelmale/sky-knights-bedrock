@@ -28,7 +28,11 @@ import {
   registerShipEvents,
   runShipSystemsSweep,
 } from "../gameplay/ship-systems";
-import { objectiveText, runTutorialSweep } from "../gameplay/tutorial";
+import {
+  announceObjective,
+  playIntroduction,
+  runTutorialSweep,
+} from "../gameplay/tutorial";
 import {
   PlayerStateRepository,
   WorldStateRepository,
@@ -236,6 +240,8 @@ function prepareInitialPlayer(
     const state = repository.load();
     const dimension = world.getDimension(state.lastSafeDock.dimensionId);
 
+    const justInitialized = !state.initialized;
+
     if (!state.initialized) {
       player.teleport(
         {
@@ -256,10 +262,12 @@ function prepareInitialPlayer(
       y: state.lastSafeDock.y,
       z: state.lastSafeDock.z,
     });
-    player.sendMessage(
-      "§bSky Knights§r Crystal-to-Cutter expedition is active.",
-    );
-    player.sendMessage(`Objective: ${objectiveText(state.objective)}`);
+    if (justInitialized) {
+      playIntroduction(player, state.objective);
+    } else {
+      announceObjective(player, state.objective, false);
+    }
+
     preparingPlayers.delete(playerId);
   } catch (error) {
     logger.warn("Initial player placement will retry.", {

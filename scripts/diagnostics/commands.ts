@@ -21,6 +21,8 @@ import {
   spawnSkycutterForPlayer,
 } from "../gameplay/skiff";
 import { getSkiffSpawnLocation } from "../gameplay/skiff-placement";
+import { clearTestBench, placeTestBench } from "../gameplay/testbench";
+import { announceObjective } from "../gameplay/tutorial";
 import {
   PlayerStateRepository,
   WorldStateRepository,
@@ -111,6 +113,91 @@ export function registerDevelopmentCommands(
         status: CustomCommandStatus.Success,
         message: "Spawning a gray-box skiff.",
       };
+    },
+  );
+
+  registry.registerCommand(
+    {
+      name: "skyknights:testbench",
+      description:
+        "Developer shortcut: place a labelled row of stocked barrels on the starter island.",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: true,
+    },
+    (origin) => {
+      const player = commandPlayer(origin.sourceEntity);
+
+      if (player === undefined) {
+        return {
+          status: CustomCommandStatus.Failure,
+          message: "Run this command as a player.",
+        };
+      }
+
+      system.run(() => {
+        const report = placeTestBench(logger.child("testbench"));
+        player.sendMessage(
+          `§bTest bench:§r placed ${report.placed.length} stalls north of the dock.`,
+        );
+
+        for (const stall of report.skipped) {
+          player.sendMessage(`§cSkipped ${stall.id}: ${stall.reason}§r`);
+        }
+      });
+      return { status: CustomCommandStatus.Success };
+    },
+  );
+
+  registry.registerCommand(
+    {
+      name: "skyknights:testbench_clear",
+      description: "Developer shortcut: remove the starter-island test bench.",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: true,
+    },
+    (origin) => {
+      const player = commandPlayer(origin.sourceEntity);
+
+      if (player === undefined) {
+        return {
+          status: CustomCommandStatus.Failure,
+          message: "Run this command as a player.",
+        };
+      }
+
+      system.run(() => {
+        const removed = clearTestBench(logger.child("testbench"));
+        player.sendMessage(`§bTest bench:§r removed ${removed} blocks.`);
+      });
+      return { status: CustomCommandStatus.Success };
+    },
+  );
+
+  registry.registerCommand(
+    {
+      name: "skyknights:objective",
+      description: "Show the current Sky Knights objective.",
+      permissionLevel: CommandPermissionLevel.Any,
+      cheatsRequired: false,
+    },
+    (origin) => {
+      const player = commandPlayer(origin.sourceEntity);
+
+      if (player === undefined) {
+        return {
+          status: CustomCommandStatus.Failure,
+          message: "Run this command as a player.",
+        };
+      }
+
+      system.run(() => {
+        const state = new PlayerStateRepository(
+          player,
+          STARTER_ISLAND.safeDock,
+        ).load();
+        announceObjective(player, state.objective, false);
+      });
+      return { status: CustomCommandStatus.Success };
     },
   );
 

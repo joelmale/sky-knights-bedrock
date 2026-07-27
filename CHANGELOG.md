@@ -4,6 +4,34 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
+## [Unreleased]
+
+### Added
+
+- Developer test bench: `/skyknights:testbench` places a labelled, restockable
+  row of eight stocked barrels north of the home dock so any ship, module, or
+  combat system can be exercised without playing the progression chain.
+  `/skyknights:testbench_clear` removes it. Documented in
+  [`docs/TEST_BENCH.md`](docs/TEST_BENCH.md).
+- `/skyknights:objective` recalls the current objective. Unlike the other
+  development commands it is available to all players and needs no cheats,
+  because the objective was previously unrecoverable once it scrolled out of
+  chat.
+- A paced first-run introduction that explains the floating island, that void
+  falls return the player to the dock, where Dockmaster Elian is, and the
+  overall goal, ending with a title card and the first objective.
+- Objective changes now show a title card and an action-bar line in addition to
+  the chat message.
+- `tests/testbench.test.ts` asserts the bench row stays on the island surface,
+  clear of the dock, evenly spaced, and stocked with every custom ship part,
+  module, and progression item.
+
+### Changed
+
+- Rewrote all twelve tutorial objective strings to state where to go and what
+  to do, and replaced the player-facing internal slice name
+  ("Crystal-to-Cutter expedition is active") with plain language.
+
 ## Skycraft architecture roadmap — 2026-07-26
 
 - Added the player-built skycraft technology roadmap: bounded wood-block
