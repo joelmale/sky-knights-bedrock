@@ -122,6 +122,7 @@ See [BEDROCK_ADDON_ROADMAP.md](BEDROCK_ADDON_ROADMAP.md) for the full implementa
 - [Automated and hands-on validation log](docs/VALIDATION_LOG.md)
 - [Architecture decisions](docs/DECISIONS.md)
 - [Product roadmap](BEDROCK_ADDON_ROADMAP.md)
+- [Player-built skycraft technology roadmap](docs/SKYCRAFT_TECHNOLOGY_ROADMAP.md)
 
 The status tracker distinguishes implemented code, automated verification, and
 Minecraft hands-on acceptance. Update the implementation, changelog, validation

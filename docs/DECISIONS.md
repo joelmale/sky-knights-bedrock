@@ -17,11 +17,13 @@ decision.
 
 ## ADR-003 — Entity-based airships
 
-Status: accepted for the entity-based ship architecture.
+Status: accepted for the shipping Skiff/Skycutter architecture; superseded for
+future ship-builder scope by ADR-015.
 
-Airships will be rideable flying entities with dockyard-configured frames and
-modules. Version 1.0 will not promise that arbitrary player-built blocks can
-move as a rigid body.
+The shipping Skiff and Skycutter are rideable flying entities with
+dockyard-configured frames and modules. They remain supported prototypes and
+legacy craft; player-built skycraft does not silently replace their identifiers
+or saved state.
 
 The gray-box `skyknights:skiff` implements the two-seat, native air-controlled
 model. Hands-on mounting and flight validation confirmed that the entity model
@@ -32,8 +34,8 @@ blockers.
 The next frame, `skyknights:skycutter`, keeps the same native entity-flight
 model while adding four fixed module slots, four seats, an 18-slot cargo
 inventory, owner-only piloting, health, dock repair, recall, and blueprint
-reconstruction. Player-built blocks remain separate Minecraft structures; they
-do not become moving ship geometry.
+reconstruction. In the current build, player-built blocks remain separate
+Minecraft structures and do not become moving ship geometry.
 
 ## ADR-004 — Dimension strategy
 
@@ -209,3 +211,46 @@ replacement for the Minecraft hands-on plan. A BDS/GameTest Validation Engineer
 owns the harness slice, while an independent BDS Safety/Release Reviewer
 challenges its destructive paths, process lifecycle, network exposure, and
 evidence claims.
+
+## ADR-015 — Bounded player-built skycraft
+
+Status: accepted as the future Phase 5 product architecture; implementation is
+gated by the `0.4.0` feasibility spike.
+
+Players will build a connected, bounded wooden airframe inside a registered
+dock berth around exactly one Helm and Ship Core. A deterministic scan creates
+a canonical, versioned blueprint and validates block count, dimensions, mass,
+lift, directional engine output, control, seats, cargo reserve, hardpoints, and
+technology certification. Validation persists before any launch-side world
+mutation.
+
+The exact docked block construction is authoritative. Flight uses a separate
+persistent rideable entity representation generated from the blueprint.
+Docking restores the editable construction through an atomic transaction.
+Launch, docking, reload recovery, and destruction must maintain exactly one
+authoritative state and never duplicate blocks, components, or cargo.
+
+The first spike compares a bounded voxel-style proxy with an authored modular
+proxy. No documentation may promise arbitrary block-perfect moving collision,
+free walking on a moving deck, unbounded block counts, or exact in-flight
+visual reproduction until the relevant renderer, target-device, and
+multiplayer gates pass.
+
+Progression raises both a visible block cap and a mass/lift certification.
+Starter technology combines simple lift and thrust; later craft separate
+passive Airbag/Aether lift from directional propulsion. Downward engines
+contribute lift, aft engines contribute forward thrust, and other orientations
+provide braking or lateral control. The technology tree branches between
+large, efficient, slower dirigibles and compact, expensive, agile Aether craft.
+
+Dockmaster reference blueprints and player-saved blueprints use the exact same
+materials, certifications, validator, ownership, damage, and recovery contracts
+as custom designs. Purchasing a reference plan or construction order is an
+in-game convenience and cannot bypass progression or duplicate cargo/unique
+items.
+
+Existing Skiff and Skycutter entities, identifiers, and saves coexist with the
+new repository. Any retrofit is explicit, owner-approved, migration-tested, and
+reversible through normal recovery. The full mechanic, technology tree,
+delivery phases, provisional caps, and evidence gates are defined in
+[`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md).

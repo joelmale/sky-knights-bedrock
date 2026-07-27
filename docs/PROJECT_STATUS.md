@@ -10,7 +10,8 @@
 > Current state: `0.2.0` gameplay plus the `0.3.1` Phase 3 deterministic-realm
 > bootstrap, integrity, starter-resource correction, and first guarded
 > BDS/GameTest smoke harness implemented; Phase 3 client hands-on validation
-> pending
+> pending. Bounded player-built wooden skycraft is the accepted next major
+> architecture direction but is not implemented.
 
 This is the authoritative implementation tracker. The roadmap describes the
 target product; this document records what the repository currently delivers.
@@ -19,15 +20,15 @@ in [`VALIDATION_LOG.md`](VALIDATION_LOG.md).
 
 ## Milestone status
 
-| Roadmap milestone                           | Status                                           | Evidence and remaining work                                                                                                                                                                                                                                                                                                                                                                                |
-| ------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase 0 — capability proofs                 | Substantially implemented                        | Stable packs, entity flight, authored structures, persistence, GameTest, a version-gated BDS smoke runner, world-template packager, and experimental dimension profile exist. SimulatedPlayer depth, controller/touch, clean-client template import, and the complete experimental matrix remain open.                                                                                                     |
-| Phase 1 — production scaffold               | Implemented                                      | Repeatable lint/build/test/deploy/package commands, startup registry validation, structured logging, diagnostics, CI, and fixed dynamic-property repositories are present.                                                                                                                                                                                                                                 |
-| Phase 2 — gray-box vertical loop            | Implemented and hands-on exercised               | Solid home island, Dockmaster, crafting, Ember expedition, starter skiff, rescue, persistence, and safe return were exercised during development. Full multiplayer/input matrix remains open.                                                                                                                                                                                                              |
-| Phase 3 — deterministic sky realm           | Bootstrap recovery implemented; hands-on pending | Schema 5, deterministic default seed, world profile/seed derivation, four-family registry, three pinned islands, five seeded structure-only islands, persistent placements, clear-lane checks, origin-aware resumable placement, automatic retry/backoff, safe initial arrival, activation gates, and progression closure exist. New-island creatures, rewards, reveal UI, and gameplay activation remain. |
-| Phase 4 — progression/combat/NPC depth      | Partially implemented                            | Guaranteed Crystal/Froststeel progression, tutorial, Dockmaster, Frostspire Warden, and Ashwing Raider exist. Full tool ladder, four NPC roles, structure set, creature roster, and named weapons remain.                                                                                                                                                                                                  |
-| Phase 5 — ship builder depth                | First substantial slice implemented              | Skiff and Skycutter frames, four module slots, atomic refits, variants, seats, ownership, cargo, hull, cannon, shield, docking, recall, and reconstruction exist. `0.2.0` hands-on and device/multiplayer gates remain.                                                                                                                                                                                    |
-| Phases 6–7 — content complete and hardening | Not started as milestones                        | Packaging infrastructure exists, but final art/content, balance, localization breadth, performance, device matrix, migrations from public builds, and release-candidate checks remain.                                                                                                                                                                                                                     |
+| Roadmap milestone                           | Status                                           | Evidence and remaining work                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 0 — capability proofs                 | Substantially implemented                        | Stable packs, entity flight, authored structures, persistence, GameTest, a version-gated BDS smoke runner, world-template packager, and experimental dimension profile exist. SimulatedPlayer depth, controller/touch, clean-client template import, and the complete experimental matrix remain open.                                                                                                        |
+| Phase 1 — production scaffold               | Implemented                                      | Repeatable lint/build/test/deploy/package commands, startup registry validation, structured logging, diagnostics, CI, and fixed dynamic-property repositories are present.                                                                                                                                                                                                                                    |
+| Phase 2 — gray-box vertical loop            | Implemented and hands-on exercised               | Solid home island, Dockmaster, crafting, Ember expedition, starter skiff, rescue, persistence, and safe return were exercised during development. Full multiplayer/input matrix remains open.                                                                                                                                                                                                                 |
+| Phase 3 — deterministic sky realm           | Bootstrap recovery implemented; hands-on pending | Schema 5, deterministic default seed, world profile/seed derivation, four-family registry, three pinned islands, five seeded structure-only islands, persistent placements, clear-lane checks, origin-aware resumable placement, automatic retry/backoff, safe initial arrival, activation gates, and progression closure exist. New-island creatures, rewards, reveal UI, and gameplay activation remain.    |
+| Phase 4 — progression/combat/NPC depth      | Partially implemented                            | Guaranteed Crystal/Froststeel progression, tutorial, Dockmaster, Frostspire Warden, and Ashwing Raider exist. Full tool ladder, four NPC roles, structure set, creature roster, and named weapons remain.                                                                                                                                                                                                     |
+| Phase 5 — player-built skycraft             | Entity prototype built; custom airframes planned | Skiff and Skycutter frames, four module slots, atomic refits, seats, ownership, cargo, hull, cannon, shield, docking, recall, and reconstruction exist. The accepted future direction is a Helm-centered connected wood blueprint with mass/lift technology, directional engines, reference blueprints, compact and dirigible branches, and atomic dock reconstruction. No custom-airframe runtime ships yet. |
+| Phases 6–7 — content complete and hardening | Not started as milestones                        | Packaging infrastructure exists, but final art/content, balance, localization breadth, performance, device matrix, migrations from public builds, and release-candidate checks remain.                                                                                                                                                                                                                        |
 
 ## Implemented gameplay path
 
@@ -121,6 +122,8 @@ schemas 1–2.
 
 ### Airships
 
+Current implementation:
+
 - Native entity-based three-dimensional flight.
 - Two-seat starter skiff and four-seat Skycutter.
 - Owner pilot arbitration with passenger/gunner support.
@@ -130,6 +133,23 @@ schemas 1–2.
   destruction tracking, and one-Kit reconstruction.
 - Dock-only, owner-only module swaps that preserve both modules on failure.
 - Expanded-cargo downgrade protection for occupied extra slots.
+
+Accepted planned direction:
+
+- bounded wood-block construction around one Helm and Ship Core;
+- deterministic canonical blueprints with block, mass, lift, engine, seat,
+  hardpoint, and byte caps;
+- downward engines for lift and aft-facing engines for propulsion;
+- technology progression from Apprentice Raft through compact Aether craft,
+  Airbag dirigibles, expedition craft, and masterwork craft;
+- Dockmaster reference plans/kits/construction orders plus player-saved
+  blueprints;
+- exact docked block reconstruction and a performance-gated flight proxy; and
+- explicit coexistence with legacy Skiff/Skycutter saves.
+
+These planned capabilities are specified in
+[`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md). They are
+not implementation evidence.
 
 ### Combat refit
 
@@ -195,8 +215,10 @@ Minecraft validation is explicitly tracked below.
 
 ## Known scope boundaries
 
-- Ships are configured moving entities, not arbitrary player-built rigid block
-  structures.
+- Shipping ships are configured moving entities. Future custom airframes use
+  bounded player-built dock blueprints and an entity flight representation;
+  arbitrary unbounded rigid blocks, block-perfect moving collision, and free
+  walking on a moving deck remain outside the stable promise.
 - Island placement is authored-first; infinite/procedural generation is not
   implemented.
 - Five additional structures have deterministic placements but intentionally
@@ -216,10 +238,14 @@ Minecraft validation is explicitly tracked below.
 2. Add one bounded BDS `SimulatedPlayer` interaction/mounting test without
    claiming client UI or control coverage.
 3. Complete the outstanding `0.2.0` combat/refit hands-on rows.
-4. Fix only reproducible playtest defects before activating new content.
-5. Implement one complete new-island vertical slice, including assets,
-   guaranteed progression, reveal/holding behavior, and multiplayer checks.
-6. Activate that island only after its content-contract and hands-on gates pass.
+4. Fix only reproducible playtest defects before changing the ship foundation.
+5. Implement the bounded `0.4.0` player-built raft feasibility spike: scan,
+   canonical blueprint, mass/lift validation, directional engines, launch,
+   flight proxy, exact docking, restart recovery, and reference fixtures.
+6. Stop and choose the documented visual fallback if the target-device,
+   multiplayer, or reconstruction gates fail.
+7. Build the Apprentice Raft MVP before activating new content whose
+   progression assumes custom skycraft.
 
 ## Documentation map
 
@@ -231,6 +257,7 @@ Minecraft validation is explicitly tracked below.
 | [`DECISIONS.md`](DECISIONS.md)                                             | Accepted architecture decisions                                   |
 | [`MULTI_AGENT_WORKFLOW.md`](MULTI_AGENT_WORKFLOW.md)                       | Vendor-neutral central/specialist/QA workflow                     |
 | [`BDS_GAME_TEST_HARNESS.md`](BDS_GAME_TEST_HARNESS.md)                     | Opt-in server smoke setup, ownership, evidence, and limits        |
+| [`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md)         | Player-built airframes, lift/engine tech, blueprints, and gates   |
 | [`BEDROCK_ADDON_ROADMAP.md`](../BEDROCK_ADDON_ROADMAP.md)                  | Product target and phased roadmap                                 |
 | [`DEVELOPMENT_ENVIRONMENT.md`](DEVELOPMENT_ENVIRONMENT.md)                 | Tooling, deployment, audit, and debugging                         |
 | [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md) | Current `0.2.0` acceptance plan                                   |

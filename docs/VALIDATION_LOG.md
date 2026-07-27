@@ -39,6 +39,7 @@ Status meanings:
 | 2026-07-26 | `0.3.1` BDS harness                                     | BDS `1.26.34.3` two-boot pack load and one GameTest                          | Partial development evidence — dirty worktree; no content errors; exact skiff-seat `onTestPassed` marker; not a clean-commit release result                    |
 | 2026-07-26 | `0.3.1` BDS harness                                     | Independent BDS safety/release review                                        | Passed — no remaining stop-ship issues after failure-safe cleanup, exact result parsing, and atomic-write hardening                                            |
 | 2026-07-26 | `0.3.1` clean commit `9e725c0`                          | BDS `1.26.34.3` two-boot pack load and named skiff-seat GameTest             | Passed — `gitDirty: false`; no content errors; exact `onTestPassed` marker; properties restored; no process, lock, backup, or temporary file remained          |
+| 2026-07-26 | Player-built skycraft roadmap, documentation only       | Prettier, `npm run verify`, `npm audit --audit-level=high`                   | Passed — 161 tests across 20 files on the combined worktree, including separate in-progress testbench changes; zero vulnerabilities; no skycraft runtime claim |
 
 ## Hands-on development evidence
 

@@ -3,7 +3,8 @@
 > Status: implementation in progress; `0.2.0` Dockyard Refit/Airship Combat,
 > the Phase 3 deterministic-realm foundation, the `0.3.0` bootstrap-recovery
 > implementation, and the `0.3.1` starter-resource/integrity corrective slice
-> are built; hands-on acceptance pending
+> are built; hands-on acceptance is pending, and player-built skycraft is an
+> accepted planned direction behind a `0.4.0` feasibility gate
 > Last updated: 2026-07-26
 > Working title: **Sky Knights: Bedrock**
 > Namespace: `skyknights`
@@ -31,13 +32,17 @@ target.
 - Phase 5 now has two entity ship frames, four atomic module slots, ownership,
   seats, cargo, health, repair, recall, reconstruction, advanced variants,
   aimed cannon combat, and a shield choice.
+- The future Phase 5 direction is a bounded player-built wooden airframe system
+  with Helm-centered block scanning, mass/lift certification, technology tiers,
+  compact Aether and dirigible branches, and exact dock reconstruction. It is
+  planned, not implemented.
 - Validation now includes a guarded opt-in BDS `1.26.34.3` harness. It proves
   stable/GameTest pack load and one exact component GameTest; broader
   SimulatedPlayer and real-client coverage remain.
 - The next gate is the focused `0.3.1` Phase 3 bootstrap-recovery and
-  starter-resource Minecraft
-  test plan, followed by
-  multiplayer, controller/touch, and clean-client packaging checks.
+  starter-resource Minecraft test plan. The next major architecture slice is
+  the bounded `0.4.0` player-built raft feasibility spike described in
+  [`docs/SKYCRAFT_TECHNOLOGY_ROADMAP.md`](docs/SKYCRAFT_TECHNOLOGY_ROADMAP.md).
 
 ## 1. Purpose
 
@@ -68,7 +73,9 @@ The Unity project currently contains 4 biomes, 5 fluids, 9 creatures, 4 NPCs, 3 
 
 1. **Every trip has a purpose.** An island should offer a resource, challenge, structure, NPC, or secret that is not available at home.
 2. **Progression expands reach.** Better tools unlock materials; materials unlock stronger equipment and better ships; better ships reach harder islands.
-3. **The airship is earned.** Flight should follow a short survival-and-crafting loop, not be a free creative-mode convenience.
+3. **The airship is earned and built.** Flight should follow a short
+   survival-and-crafting loop in which the player constructs a bounded wooden
+   airframe around a Helm, not receive a free creative-mode convenience.
 4. **The void matters.** Travel and falling create tension, but recovery rules prevent permanent soft-locks.
 5. **Minecraft remains Minecraft.** Mining, block placement, inventory, recipes, water, lava, and multiplayer should use vanilla behavior unless a Sky Knights rule truly needs to differ.
 6. **Systems are data-driven.** Island, creature, loot, recipe, ship, and progression data should live in registries/configuration rather than scattered conditionals.
@@ -80,7 +87,7 @@ Arrive at a safe island
   → harvest trees and surface materials
   → craft tools and ship components
   → explore a local ruin and fight or evade enemies
-  → assemble or upgrade an airship at a dock
+  → build, inspect, launch, or upgrade an airship at a dock
   → fly to a more dangerous biome island
   → obtain gated ore, loot, and knowledge
   → return, craft the next tier, and expand farther
@@ -126,15 +133,27 @@ tree → planks → tools → ore → ship parts → skiff → remote ruin → l
 - renewable wood and ordinary Minecraft building;
 - at least one passive creature, four standard enemies, and one boss-class enemy;
 - four named NPC roles with dialogue and lightweight guidance;
-- two ship frames or four ship visual variants, with upgrades and multiplayer seats;
+- player-built wooden airframes that grow from small rafts into compact
+  cutters, dirigibles, and expedition craft through bounded technology,
+  lift, engine, and module progression;
+- multiplayer seats, ownership, docking, recovery, and technology-compatible
+  legacy Skiff/Skycutter support;
 - ship health, docking, recovery, and optional cargo;
 - named Sky Knights weapons as a small curated set, not all 51 Unity sword variants;
 - persistent world generation, player progression, and ship state;
 - packaging as an importable add-on and, if required by the dimension decision, a world template.
 
+The 1.0 player-built-airframe promise is conditional on the feasibility spike
+accepting at least one bounded, controllable in-flight representation. A static
+dock-to-dock transition does not by itself satisfy that promise. If both the
+voxel and modular entity representations fail their performance or usability
+gates, revise 1.0 scope explicitly instead of silently substituting static
+travel.
+
 ### Explicit non-goals for 1.0
 
-- Moving an arbitrary player-built collection of blocks as a rigid airship.
+- Unbounded or unsupported block collections, block-perfect moving collision,
+  and free walking on a moving deck.
 - Exact reproduction of Unity’s Newtonian block-by-block ship physics.
 - Exact reproduction of Unity terrain hashes or island geometry.
 - A replacement for Minecraft’s inventory, hotbar, crafting screen, water, or lava simulation.
@@ -217,25 +236,25 @@ If any gate fails, use Strategy A without delaying the vertical slice.
 
 ## 5. Unity-to-Bedrock translation
 
-| Sky Knights mechanic  | Existing intent                                                            | Bedrock implementation                                                                                             | Fidelity target              |
-| --------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
-| Floating island world | Distinct islands separated by meaningful flight                            | Void world/dimension plus deterministic island layout and `.mcstructure` or scripted generation                    | High                         |
-| Four biomes           | Verdant, Desert, Tundra, Volcanic with different resources and silhouettes | Island families with vanilla/custom block palettes, particles, fog where available, features, structures, and mobs | High                         |
-| Voxel mining/building | Everything important participates in the block loop                        | Reuse vanilla block breaking, placement, drops, tools, enchantments, and inventory                                 | Native substitution          |
-| Tool tiers            | Wood → stone → gold → diamond gates                                        | Prefer vanilla tiers and recipes; add custom tags/components only for Sky Knights ores                             | High                         |
-| Ore veins             | Clustered, biome-flavored, depth-gated resources                           | Pre-generated/script-generated clusters inside islands; no uniform speckle                                         | High                         |
-| Harvestable trees     | Renewable wood economy with regrowth                                       | Vanilla trees/saplings or custom tree structures with vanilla log drops                                            | Native substitution          |
-| Crafting and smelting | Mine → smelt → craft closes progression                                    | JSON recipes and furnaces; custom UI only for ship assembly or special forging                                     | Native substitution          |
-| Structures and chests | Exploration sites with tiered, guaranteed loot                             | `.mcstructure` templates, loot tables, structure placement APIs                                                    | High                         |
-| Combat                | Readable melee, enemies fight back, reward on kill                         | Bedrock damage, AI goals/components, animations, loot tables, optional item custom components                      | High                         |
-| NPC dialogue          | Safe, non-combat townsfolk who guide the player                            | Custom NPC entities plus interaction event and Action/Message forms                                                | Medium-high                  |
-| Five fluids           | Water/lava gameplay plus deferred exotic fluids                            | Vanilla water/lava for 1.0; exotic fluids deferred                                                                 | Intent-first                 |
-| Airship flight        | Earned flight, helm control, shared ship space                             | Rideable flying entity using `minecraft:input_air_controlled`; entity variants and seat definitions                | High fantasy, medium physics |
-| Ship builder          | Assemble components and improve the craft                                  | Dockyard slot/blueprint builder that converts crafted modules into an entity configuration                         | Medium-high                  |
-| Four prebuilt ships   | Increasing size/capability                                                 | Skiff, fighter, sailing ship, blimp variants or upgrade tiers                                                      | High                         |
-| World presets/lobby   | Choose world style before generation                                       | World-template variants or first-join setup form; defer advanced sliders                                           | Medium                       |
-| Determinism           | Same seed/config gives same content                                        | Seeded TypeScript PRNG, stable island IDs, versioned layout registry                                               | High                         |
-| Persistence           | World/player/ship state survives safely                                    | World, player, and entity dynamic properties with schema version and migration                                     | High                         |
+| Sky Knights mechanic  | Existing intent                                                            | Bedrock implementation                                                                                             | Fidelity target               |
+| --------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
+| Floating island world | Distinct islands separated by meaningful flight                            | Void world/dimension plus deterministic island layout and `.mcstructure` or scripted generation                    | High                          |
+| Four biomes           | Verdant, Desert, Tundra, Volcanic with different resources and silhouettes | Island families with vanilla/custom block palettes, particles, fog where available, features, structures, and mobs | High                          |
+| Voxel mining/building | Everything important participates in the block loop                        | Reuse vanilla block breaking, placement, drops, tools, enchantments, and inventory                                 | Native substitution           |
+| Tool tiers            | Wood → stone → gold → diamond gates                                        | Prefer vanilla tiers and recipes; add custom tags/components only for Sky Knights ores                             | High                          |
+| Ore veins             | Clustered, biome-flavored, depth-gated resources                           | Pre-generated/script-generated clusters inside islands; no uniform speckle                                         | High                          |
+| Harvestable trees     | Renewable wood economy with regrowth                                       | Vanilla trees/saplings or custom tree structures with vanilla log drops                                            | Native substitution           |
+| Crafting and smelting | Mine → smelt → craft closes progression                                    | JSON recipes and furnaces; custom UI only for ship assembly or special forging                                     | Native substitution           |
+| Structures and chests | Exploration sites with tiered, guaranteed loot                             | `.mcstructure` templates, loot tables, structure placement APIs                                                    | High                          |
+| Combat                | Readable melee, enemies fight back, reward on kill                         | Bedrock damage, AI goals/components, animations, loot tables, optional item custom components                      | High                          |
+| NPC dialogue          | Safe, non-combat townsfolk who guide the player                            | Custom NPC entities plus interaction event and Action/Message forms                                                | Medium-high                   |
+| Five fluids           | Water/lava gameplay plus deferred exotic fluids                            | Vanilla water/lava for 1.0; exotic fluids deferred                                                                 | Intent-first                  |
+| Airship flight        | Earned flight, helm control, shared ship space                             | Rideable flying entity using `minecraft:input_air_controlled`; entity variants and seat definitions                | High fantasy, medium physics  |
+| Ship builder          | Construct a wooden craft and improve its lift, propulsion, and modules     | Bounded Helm-centered block blueprint at the dock plus a validated persistent flight entity                        | High building, bounded flight |
+| Four prebuilt ships   | Increasing size/capability                                                 | Skiff, fighter, sailing ship, blimp variants or upgrade tiers                                                      | High                          |
+| World presets/lobby   | Choose world style before generation                                       | World-template variants or first-join setup form; defer advanced sliders                                           | Medium                        |
+| Determinism           | Same seed/config gives same content                                        | Seeded TypeScript PRNG, stable island IDs, versioned layout registry                                               | High                          |
+| Persistence           | World/player/ship state survives safely                                    | World, player, and entity dynamic properties with schema version and migration                                     | High                          |
 
 ## 6. Architecture
 
@@ -810,26 +829,52 @@ Exit criteria:
 - multiplayer loot policy is consistent and documented;
 - content registry validation rejects missing references.
 
-### Phase 5 — ship builder depth
+### Phase 5 — player-built skycraft and ship builder depth
 
-Estimated effort: 8–12 days.
+Estimated effort: multi-slice; implementation size depends on the bounded
+flight-renderer feasibility result.
+
+The existing Skiff/Skycutter frame, module, combat, ownership, docking, and
+recovery systems are the first substantial prototype. The target Phase 5
+builder is the player-built system in
+[`docs/SKYCRAFT_TECHNOLOGY_ROADMAP.md`](docs/SKYCRAFT_TECHNOLOGY_ROADMAP.md).
 
 Deliver:
 
-- at least two ship frames and visual variants up to the four reference archetypes;
-- module slots, atomic assembly, upgrades, and dismantling;
-- multiple seats and pilot arbitration;
-- health, damage feedback, docking, abandonment, and recovery;
-- cargo only if its loss/ownership rules are complete;
-- optional first cannon or shield prototype.
+- a fixed dock berth where players place approved wood blocks around exactly
+  one Helm and Ship Core;
+- deterministic connected-block scanning and a canonical, versioned blueprint;
+- separate block-count, mass, lift, engine, seat, hardpoint, and blueprint-byte
+  limits;
+- technology certifications that grow from a small raft into larger specialized
+  airframes;
+- compact Aether/Frostfire and high-lift dirigible technology branches;
+- earnable/purchasable reference blueprints that use the same validator,
+  materials, and technology rules as custom designs;
+- a bounded persistent flight entity that reflects the certified blueprint;
+- exact dock reconstruction with atomic launch, docking, and interruption
+  recovery;
+- multiple seats and server-authoritative pilot/crew permissions;
+- hull, subsystem damage, cargo, repair, combat, docking, abandonment, and
+  recovery rules that cannot duplicate blocks or cargo;
+- explicit coexistence/migration for existing Skiff and Skycutter saves; and
+- performance-derived caps for one-to-four nearby player-built craft.
 
 Exit criteria:
 
-- ship tiers create meaningful capability choices;
-- every ship can be recovered without admin commands;
-- pilot/passenger state survives reconnects safely;
+- a fresh Survival player builds and launches the first wooden raft without
+  commands;
+- invalid or overweight designs explain the exact problem and consume nothing;
+- compact, dirigible, cargo, expedition, and combat builds offer distinct
+  useful tradeoffs;
+- launch, reload, reconnect, docking, destruction, and recovery preserve one
+  authoritative blueprint without block or cargo duplication;
+- every mandatory technology and replacement component has a guaranteed,
+  recoverable progression source;
+- existing Skiff/Skycutter owners retain a recoverable craft;
 - ships do not accumulate as permanently ticking entities;
-- touch control is evaluated before freezing the flight design.
+- keyboard, controller, touch, two-to-four-player, BDS, and target-device
+  performance gates pass.
 
 ### Phase 6 — content-complete 1.0
 

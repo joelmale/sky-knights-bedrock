@@ -27,9 +27,12 @@ encounter table.
 
 ## Islands
 
-`Tier` is the minimum ship tier required to arrive safely. Tier 0 is the home
-island, tier 1 the starter skiff, tier 2 the Skycutter, tier 3 a refit
-Skycutter.
+`Tier` is the minimum travel capability required to arrive safely. In the
+shipping ladder, tier 1 is the starter Skiff, tier 2 the Skycutter, and tier 3 a
+refit Skycutter. In the planned custom ladder, those map to Apprentice Raft,
+Ember Skiff, and Specialist Airframe. Expedition and Masterwork certifications
+remain tier 3 and add capacity/specialization rather than unlocking otherwise
+unreachable Relic sources.
 
 | Island id        | Family   | Tier | Purpose                                                                                | Guaranteed reward                             | Status  |
 | ---------------- | -------- | ---: | -------------------------------------------------------------------------------------- | --------------------------------------------- | ------- |
@@ -86,6 +89,33 @@ share enemy health or loot families.
 | Biome shrine          | geometry built; relic and ambient content inactive       | ashfall_crater                 | partial |
 | Boss arena            | geometry built; Giant and completion objective inactive  | aether_sanctum                 | partial |
 
+## Skycraft construction and technology
+
+The shipping Skiff/Skycutter systems remain `built`. The player-built airframe
+direction is `planned` and must not be added to executable registries until the
+`0.4.0` feasibility gate passes. Component names below are design labels, not
+reserved runtime identifiers.
+
+| Capability                        | Progression/source                                     | Status  |
+| --------------------------------- | ------------------------------------------------------ | ------- |
+| Legacy Skiff and Skycutter        | Starter, Ember, and Frostspire path                    | built   |
+| Bounded owned dock berth          | Starter Dockmaster/Ship Core                           | planned |
+| Helm-centered connected wood scan | Apprentice Raft certification                          | planned |
+| Canonical block blueprint         | Dock validation and persistence                        | planned |
+| Mass, lift, thrust, and control   | Apprentice engineering rules                           | planned |
+| Downward/aft engine orientation   | Starter and Ember propulsion                           | planned |
+| Dockmaster reference blueprints   | Technology-gated plan/kit/construction order           | planned |
+| Player-saved personal blueprints  | Successful certified dock scan                         | planned |
+| Ember custom cutter               | Aether Crystal, iron, and redstone                     | planned |
+| Balloonwright/dirigible branch    | Sunspire gold/copper and Verdant renewable fabric/wood | planned |
+| Frostwright compact-lift branch   | Frostspire Froststeel and diamond                      | planned |
+| Expedition certification          | Glacier/Ashfall Relic Shards                           | planned |
+| Masterwork skycraft               | Aether Sanctum Aether Core                             | planned |
+
+Reference designs, provisional certification caps, component families, and
+validation gates are defined in
+[`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md).
+
 ## Items
 
 | Identifier                                                           | Purpose                            | Guaranteed | Status  |
@@ -118,7 +148,9 @@ Multiplayer policy: structure chests are shared and one-time. Guaranteed
 progression items are placed once per island content version and are not
 refilled per player.
 
-## Progression ladder
+## Progression ladders
+
+### Current implemented ladder
 
 Closure test asserts every `Guaranteed = yes` item is reachable from a fresh
 world holding nothing.
@@ -129,12 +161,24 @@ world holding nothing.
 | Stone          | starter_island abundant stone           | stone pickaxe, basic ship parts            |
 | Coal           | starter_island's 8 exposed coal ore     | smelting fuel, Ship Core, Thruster Module  |
 | Iron           | starter_island's 12 exposed iron ore    | Ship Core, Thruster Module, skiff          |
-| Gold/copper    | sunspire_reach                          | stronger weapons, faster frame             |
+| Gold/copper    | sunspire_reach                          | stronger weapons and Balloonwright systems |
 | Aether crystal | ember_outpost                           | Skycutter                                  |
-| Froststeel     | frostspire                              | refit modules                              |
+| Froststeel     | frostspire                              | refit modules and compact-lift engineering |
 | Diamond        | glacier_vault, ashfall_crater           | final tools, relic access                  |
 | Relic shard ×2 | glacier_vault, ashfall_crater           | aether_sanctum access                      |
 | Aether core    | aether_sanctum boss                     | completion objective                       |
+
+### Planned custom-skycraft capability mapping
+
+This mapping is a roadmap contract, not a built progression rule.
+
+| Travel tier | Custom certification | Guaranteed prerequisite                     | Required reach                        |
+| ----------: | -------------------- | ------------------------------------------- | ------------------------------------- |
+|           1 | Apprentice Raft      | Starter wood/coal/iron                      | Ember, Sunspire, Verdant              |
+|           2 | Ember Skiff          | Ember Aether Crystal/iron/redstone          | Frostspire                            |
+|           3 | Specialist Airframe  | Balloonwright or Frostwright specialization | Glacier Vault and Ashfall Crater      |
+|           3 | Expedition Skycraft  | Two Relic Shards                            | Aether Sanctum plus expanded capacity |
+|           3 | Masterwork Skycraft  | Aether Core                                 | Post-completion specialization        |
 
 ## Localization
 

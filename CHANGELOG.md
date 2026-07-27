@@ -4,6 +4,20 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
+## Skycraft architecture roadmap — 2026-07-26
+
+- Added the player-built skycraft technology roadmap: bounded wood-block
+  airframes, Helm-centered canonical blueprints, mass/lift/thrust rules,
+  directional engines, Airbag dirigibles, compact Aether craft, multiplayer
+  roles, atomic recovery, performance gates, and phased delivery.
+- Added technology-gated Dockmaster reference blueprints and personal blueprint
+  rules so players may buy/build tested designs without bypassing the same
+  materials, progression, validation, or ownership contracts as custom craft.
+- Revised the future Phase 5 direction while preserving the existing
+  Skiff/Skycutter as shipping prototypes and migration-compatible legacy craft.
+  No player-built skycraft runtime capability is claimed by this documentation
+  slice.
+
 ## [0.3.1] — 2026-07-26
 
 ### Added
