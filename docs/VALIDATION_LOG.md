@@ -37,7 +37,8 @@ Status meanings:
 | 2026-07-26 | `0.3.1` integrated source                               | `npm run verify`                                                             | Passed — 153 tests across 19 files, NBT fixture tests, production add-on, and both profiles                                                                    |
 | 2026-07-26 | `0.3.1` integrated source                               | `npm audit --audit-level=high`                                               | Passed — zero vulnerabilities                                                                                                                                  |
 | 2026-07-26 | `0.3.1` BDS harness                                     | BDS `1.26.34.3` two-boot pack load and one GameTest                          | Partial development evidence — dirty worktree; no content errors; exact skiff-seat `onTestPassed` marker; not a clean-commit release result                    |
-| 2026-07-26 | `0.3.1` BDS harness                                     | Independent BDS safety/release review                                        | Partial — initial smoke evidence valid; failure-safe cleanup and stricter content/result parsing were then hardened                                            |
+| 2026-07-26 | `0.3.1` BDS harness                                     | Independent BDS safety/release review                                        | Passed — no remaining stop-ship issues after failure-safe cleanup, exact result parsing, and atomic-write hardening                                            |
+| 2026-07-26 | `0.3.1` clean commit `9e725c0`                          | BDS `1.26.34.3` two-boot pack load and named skiff-seat GameTest             | Passed — `gitDirty: false`; no content errors; exact `onTestPassed` marker; properties restored; no process, lock, backup, or temporary file remained          |
 
 ## Hands-on development evidence
 
@@ -139,9 +140,9 @@ require the
 
 The `0.3.1` integrated automated gate is green: 153 host tests across 19 files,
 NBT fixture tests, production packaging, both profile builds, and a
-zero-vulnerability audit passed. The first BDS smoke also passed from the dirty
-development worktree, proving the exact selected server-side GameTest but not a
-clean release checkpoint. Minecraft client retesting remains pending.
+zero-vulnerability audit passed. A clean-commit BDS smoke at `9e725c0` also
+passed, proving the exact selected server-side GameTest and pack-load contract
+with `gitDirty: false`. Minecraft client retesting remains pending.
 
 ### Local deployment
 

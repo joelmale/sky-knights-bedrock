@@ -41,6 +41,9 @@ Validation evidence and pending hands-on gates are maintained in
   content errors and
   `skyknights:skiff_has_pilot_and_passenger_seats` reported the exact
   `onTestPassed` marker.
+- The hardened smoke passed again from clean commit `9e725c0` with
+  `gitDirty: false`; server properties were restored and no runner process,
+  lock, backup, or temporary properties file remained.
 - `npm audit --audit-level=high` reported zero vulnerabilities.
 
 ### Pending validation

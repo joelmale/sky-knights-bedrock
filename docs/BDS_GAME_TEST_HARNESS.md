@@ -32,9 +32,11 @@ identify:
 - GameTest profile/API version; and
 - the Minecraft client build used for any follow-up hands-on check.
 
-The initial implementation smoke was run from a dirty `0.3.1` worktree and is
-development evidence, not a release result tied to the older recorded Git
-commit. A release-gate run must record `gitDirty: false`.
+The initial implementation smoke was run from a dirty `0.3.1` worktree and was
+development evidence only. The hardened harness then passed from clean commit
+`9e725c0`, recording `gitDirty: false`, the exact named `onTestPassed` marker,
+no content errors, restored server properties, and no surviving process, lock,
+backup, or temporary properties file.
 
 Do not silently fall back to a different server or preview API version. A
 successful smoke run proves the selected server-side pack load and named

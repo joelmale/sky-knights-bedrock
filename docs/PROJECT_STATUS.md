@@ -165,9 +165,10 @@ Results:
 - GameTest profile: built;
 - npm vulnerabilities: 0;
 - local Behavior and Resource Pack deployment: passed;
-- opt-in BDS `1.26.34.3` dirty-worktree smoke: partial development pass — both
-  packs loaded without content errors and the named skiff-seat test emitted
-  the exact `onTestPassed` marker.
+- opt-in BDS `1.26.34.3` clean-commit smoke: passed — both packs loaded without
+  content errors, the named skiff-seat test emitted the exact `onTestPassed`
+  marker, `gitDirty: false` was recorded, server properties were restored, and
+  no runner process or temporary safety file remained.
 
 These checks prove repository consistency, not in-game behavior. The remaining
 Minecraft validation is explicitly tracked below.
