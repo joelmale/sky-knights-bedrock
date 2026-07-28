@@ -80,6 +80,18 @@ npm run test:bds:smoke
 The command is version-gated and separate from normal CI and client hands-on
 validation.
 
+The same guarded BDS root can create and full-height scan the stable sky-only
+source, then package it with the current production packs:
+
+```powershell
+npm run test:bds:void-source
+npm run world-template:void
+```
+
+See [`VOID_WORLD_TEMPLATE.md`](VOID_WORLD_TEMPLATE.md). Both commands operate
+only on runner-owned BDS worlds and generated repository output; they do not
+inspect or modify Minecraft client saves.
+
 ## Dependency audit note
 
 The repository-owned build commands use Node.js, TypeScript, esbuild, Prettier,

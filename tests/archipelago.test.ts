@@ -40,20 +40,25 @@ describe("archipelago planner", () => {
       expect(island.x * island.x + island.z * island.z).toBeGreaterThanOrEqual(
         ARCHIPELAGO_CONFIG.protectedRadius ** 2,
       );
+    }
 
-      for (const other of plan) {
-        if (island.id >= other.id) {
-          continue;
-        }
-
+    let nearestPairDistanceSquared = Number.POSITIVE_INFINITY;
+    for (let left = 0; left < plan.length; left += 1) {
+      for (let right = left + 1; right < plan.length; right += 1) {
+        const island = plan[left];
+        const other = plan[right];
         const dx = island.x - other.x;
         const dz = island.z - other.z;
-
-        expect(dx * dx + dz * dz).toBeGreaterThanOrEqual(
-          ARCHIPELAGO_CONFIG.minSpacing ** 2,
+        nearestPairDistanceSquared = Math.min(
+          nearestPairDistanceSquared,
+          dx * dx + dz * dz,
         );
       }
     }
+
+    expect(nearestPairDistanceSquared).toBeGreaterThanOrEqual(
+      ARCHIPELAGO_CONFIG.minSpacing ** 2,
+    );
   });
 
   it("assigns each island to its nearest deterministic biome cluster", () => {

@@ -1,6 +1,6 @@
 # Player-Built Skycraft Hands-On Test Plan
 
-> Build under test: `0.3.4`
+> Build under test: `0.3.5`
 >
 > Scope: integrated Skycraft prototype and every activation gate defined by
 > [`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md).
@@ -28,7 +28,7 @@ For an importable package instead:
 npm run mcaddon:production
 ```
 
-Confirm the behavior-pack description or `/skyknights:debug` reports `0.3.4`.
+Confirm the behavior-pack description or `/skyknights:debug` reports `0.3.5`.
 For script-only local-deploy changes, `/reload` may reload the pack, but use a
 full world exit/reopen for entity, block, recipe, resource-pack, manifest, or
 recovery testing.

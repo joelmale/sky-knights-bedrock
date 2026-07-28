@@ -44,16 +44,18 @@ accepting ADR-003.
 
 ## Stable world-template proof
 
-Create a dedicated Bedrock world using a void/empty preset, activate the stable
-pack, and let the starter-island job finish. Then package a copy:
+Build a fixed-seed void source with the sentinel-approved external BDS
+installation, scan its origin and distant chunks through the complete world
+height, and package the embedded stable packs:
 
 ```powershell
-npm run world-template -- --world "C:\path\to\the\world"
+npm run world-template:void
 ```
 
-The command copies the world into `dist/world-template`, embeds the compiled
-stable packs, writes the world pack references, and creates
-`sky_knights_void_world.mctemplate`. It never edits the source world.
+The command creates only runner-owned disposable worlds, freezes the validated
+source under `dist/world-template`, embeds the compiled stable packs, writes
+the world pack references, and creates `sky_knights_void_world.mctemplate`. It
+does not read or edit Minecraft client worlds.
 
 | Scenario                                       | Result |
 | ---------------------------------------------- | -----: |

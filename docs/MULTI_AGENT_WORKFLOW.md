@@ -76,10 +76,13 @@ behavior or release approval. Its contract includes:
 - retain logs, GameTest output, exit status, and timeout diagnostics as evidence;
 - report what the scripted scenario proves and what still needs a real client.
 
-The targeted verification is `npm run test:bds:smoke` plus focused host tests.
-The command is opt-in, version-gated, and evidence for only the named
-server-side scenario it runs. See
-[`BDS_GAME_TEST_HARNESS.md`](BDS_GAME_TEST_HARNESS.md).
+The targeted gameplay verification is `npm run test:bds:smoke` plus focused
+host tests. Void-template work may additionally use
+`npm run test:bds:void-source` and `npm run world-template:void` under the same
+external-root/sentinel constraints. Every command is opt-in, version-gated,
+and evidence only for its named server-side scenario. See
+[`BDS_GAME_TEST_HARNESS.md`](BDS_GAME_TEST_HARNESS.md) and
+[`VOID_WORLD_TEMPLATE.md`](VOID_WORLD_TEMPLATE.md).
 
 ### Independent BDS Safety/Release Reviewer
 

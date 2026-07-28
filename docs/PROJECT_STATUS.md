@@ -2,16 +2,18 @@
 
 > Last updated: 2026-07-27
 >
-> Current playtest version: `0.3.4`
+> Current playtest version: `0.3.5`
 >
 > Stable API baseline: Minecraft Bedrock 1.26.30+, `@minecraft/server` 2.8.0,
 > `@minecraft/server-ui` 2.1.0
 >
 > Current state: the `0.2.0` legacy ship/combat loop, `0.3.1` deterministic
 > realm stabilization, the bounded player-built Skycraft prototype, and the
-> `0.3.4` clustered procedural-template archipelago are integrated. Automated
-> repository evidence and independent QA are green; Minecraft, multiplayer,
-> input, migration, performance, and device gates remain.
+> `0.3.4` clustered procedural-template archipelago, the `0.3.5` visible
+> starter-stone correction, and the automated fixed-seed void-world template
+> pipeline are integrated. Repository and dedicated-server evidence are green;
+> clean-client template import, Minecraft gameplay, multiplayer, input,
+> migration, performance, and device gates remain.
 
 This is the authoritative implementation tracker. The roadmap describes the
 target product; this document records what the repository currently delivers.
@@ -22,10 +24,10 @@ in [`VALIDATION_LOG.md`](VALIDATION_LOG.md).
 
 | Roadmap milestone                           | Status                                       | Evidence and remaining work                                                                                                                                                                                                                                                                                                                                                         |
 | ------------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase 0 — capability proofs                 | Substantially implemented                    | Stable packs, entity flight, authored structures, persistence, GameTest, a version-gated BDS smoke runner, world-template packager, and opt-in custom-dimension profile exist. SimulatedPlayer depth, controller/touch, clean-client template import, and the complete capability matrix remain open.                                                                               |
+| Phase 0 — capability proofs                 | Substantially implemented                    | Stable packs, entity flight, authored structures, persistence, GameTest, version-gated BDS smoke and void-source runners, a packaged fixed-seed void template, and an opt-in custom-dimension profile exist. SimulatedPlayer depth, controller/touch, clean-client template import, and the complete capability matrix remain open.                                                   |
 | Phase 1 — production scaffold               | Implemented                                  | Repeatable lint/build/test/deploy/package commands, startup registry validation, structured logging, diagnostics, CI, and fixed dynamic-property repositories are present.                                                                                                                                                                                                          |
 | Phase 2 — gray-box vertical loop            | Implemented and hands-on exercised           | Solid home island, Dockmaster, crafting, Ember expedition, starter skiff, rescue, persistence, and safe return were exercised during development. Full multiplayer/input matrix remains open.                                                                                                                                                                                       |
-| Phase 3 — deterministic sky realm           | Runtime/content integrated; hands-on pending | Schema 5, deterministic authored layout, three pinned and five seeded progression islands, plus a bounded clustered field of four ambient template families, persistent placement, obstruction safety, retry/backoff, safe arrival, guaranteed caches, discovery, and progression closure exist. Void-template, performance, reload, and client migration evidence remain.          |
+| Phase 3 — deterministic sky realm           | Runtime/content integrated; hands-on pending | Schema 5, deterministic authored layout, three pinned and five seeded progression islands, a bounded clustered field of four ambient families, and a BDS-validated fixed-seed void template exist. Placement, obstruction safety, retry/backoff, safe arrival, guaranteed caches, discovery, and progression closure are integrated. Client import, performance, reload, and migration evidence remain. |
 | Phase 4 — progression/combat/NPC depth      | Partially implemented                        | Guaranteed Crystal/Froststeel progression, tutorial, Dockmaster, Frostspire Warden, and Ashwing Raider exist. Full tool ladder, four NPC roles, structure set, creature roster, and named weapons remain.                                                                                                                                                                           |
 | Phase 5 — player-built skycraft             | Integrated prototype; external gates pending | Helm-connected custom airframes, canonical blueprints, mass/lift technology, directional engines, authored proxies, atomic reconstruction/recovery, five certifications, 18 components, eight references, personal saves, roles, damage/repair, and combat are integrated. Physical cargo, navigation, shared-dock depth, retrofit, final content/art, and acceptance gates remain. |
 | Phases 6–7 — content complete and hardening | Not started as milestones                    | Packaging infrastructure exists, but final art/content, balance, localization breadth, performance, device matrix, migrations from public builds, and release-candidate checks remain.                                                                                                                                                                                              |
@@ -65,7 +67,7 @@ not require them.
 | Advanced modules   | Armored Hull, Frostfire Engine, Expanded Cargo Hold, Aether Cannon, Shield Projector |
 | Encounters         | Ember Guardian, Frostspire Warden, Ashwing Raider                                    |
 | GameTests          | 4 registered; 1 executed by the opt-in BDS smoke harness                             |
-| Host tests         | 224 passed across 39 files at the `0.3.4` procedural-archipelago gate                |
+| Host tests         | 228 passed across 40 files at the `0.3.5` void-template integration gate               |
 | Developer commands | `debug`, `skiff`, `skycutter`, `island`, `raider`, `recover`, test bench, objective  |
 
 ## Systems implemented
@@ -80,6 +82,10 @@ not require them.
 - Guarded two-boot BDS `1.26.34.3` smoke validation with fixed managed paths,
   exact module/pack bindings, NBT fixture coverage, content-error rejection,
   retained artifacts, and exact GameTest pass markers.
+- Guarded BDS void-source creation with fixed seed, Survival/debug defaults,
+  a starter-dock spawn, disabled experiments, complete-height origin and
+  distant-chunk scans, restart persistence, source hashing, and recoverable
+  publication.
 - Local one-shot or watched deployment to Minecraft Bedrock GDK folders.
 - CI verification workflow.
 - No current npm audit findings; only the exact pinned esbuild install script
@@ -179,6 +185,7 @@ The current development source has passed:
 npm run verify
 npm audit --audit-level=high
 npm run test:bds:smoke
+npm run world-template:void
 ```
 
 Results:
@@ -186,7 +193,7 @@ Results:
 - non-mutating generated-structure verification: passed;
 - formatting/lint: passed;
 - TypeScript/stable bundle: passed;
-- host tests: 224 passed across 39 files;
+- host tests: 228 passed across 40 files;
 - BDS NBT fixture tests: passed;
 - production `.mcaddon`: built;
 - experimental profile: built;
@@ -195,6 +202,12 @@ Results:
 - opt-in BDS `1.26.34.3` working-tree smoke: passed — both packs loaded without
   content errors and the named skiff-seat test passed. This smoke does not
   inspect the starter prospect in a real client.
+- opt-in BDS void-source gate: passed — 17 chunks and 1,671,168 blocks were
+  scanned through Y=-64..319 across a restart, all were air, and the frozen
+  source retained its fixed seed, Survival/debug defaults, disabled
+  experiments, and starter-dock spawn;
+- packaged `.mctemplate`: built and structurally inspected with both stable
+  packs bound at `0.3.5`; clean-client import remains pending.
 
 These checks prove repository consistency, not in-game behavior. The remaining
 Minecraft validation is explicitly tracked below.
@@ -238,9 +251,10 @@ Minecraft validation is explicitly tracked below.
 - Five seeded structures now have deterministic placement, discovery, and
   guaranteed gray-box caches. Their final custom creature/boss and reveal
   presentation remain incomplete.
-- The intended stable sky-only distribution remains a void-world template, but
-  no source world or `.mctemplate` artifact is supplied yet; the custom
-  dimension is experimental.
+- The stable sky-only template can now be generated locally as
+  `dist/world-template/sky_knights_void_world.mctemplate`; generated world
+  databases are intentionally not committed. Clean-client import and reload
+  acceptance remain pending, and the custom dimension remains experimental.
 - A normal Overworld continues generating vanilla land below the islands.
   Sky-only presentation requires a new void-world template; existing worlds
   are not destructively cleared or silently converted.
@@ -251,7 +265,7 @@ Minecraft validation is explicitly tracked below.
 
 ## Next recommended work
 
-1. Create a clean void source world, package it with `npm run world-template`,
+1. Import the generated `sky_knights_void_world.mctemplate` on a clean client
    and execute the procedural archipelago hands-on plan.
 2. Execute and record the Phase 3 stabilization plan on a fresh world and a
    backed-up schema-4 world copy.
@@ -281,6 +295,7 @@ Minecraft validation is explicitly tracked below.
 | [`DECISIONS.md`](DECISIONS.md)                                             | Accepted architecture decisions                                    |
 | [`MULTI_AGENT_WORKFLOW.md`](MULTI_AGENT_WORKFLOW.md)                       | Vendor-neutral central/specialist/QA workflow                      |
 | [`BDS_GAME_TEST_HARNESS.md`](BDS_GAME_TEST_HARNESS.md)                     | Opt-in server smoke setup, ownership, evidence, and limits         |
+| [`AI_HANDOFF.md`](AI_HANDOFF.md)                                           | Current checkpoint, takeover commands, and recommended next slice  |
 | [`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md)         | Player-built airframes, lift/engine tech, blueprints, and gates    |
 | [`SKYCRAFT_IMPLEMENTATION_STATUS.md`](SKYCRAFT_IMPLEMENTATION_STATUS.md)   | Exact integrated, gated, and pending Skycraft capability map       |
 | [`SKYCRAFT_HANDS_ON_TEST_PLAN.md`](SKYCRAFT_HANDS_ON_TEST_PLAN.md)         | Skycraft Minecraft, multiplayer, input, migration, and device plan |

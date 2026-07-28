@@ -49,6 +49,19 @@ export const STARTER_RESOURCE_MINIMUMS = {
   "minecraft:iron_ore": 12,
 };
 
+// A small surface boulder makes the vanilla wood-pick -> cobblestone ->
+// stone-pick progression visible without asking a new player to guess that
+// the grass island has a buried stone core. Five exposed blocks leave a
+// two-block margin after the three cobblestone needed for the first stone
+// pickaxe.
+export const STARTER_BOULDER_BLOCKS = [
+  { x: 15, y: 12, z: 11 },
+  { x: 16, y: 12, z: 11 },
+  { x: 15, y: 12, z: 12 },
+  { x: 16, y: 12, z: 12 },
+  { x: 15, y: 13, z: 11 },
+];
+
 // The first iron and coal pairs form an adjacent surface prospect beside the
 // workshop clearing. Each visible block has a second ore directly underneath,
 // teaching the player where to dig without requiring a dangerous cliff search.
@@ -96,6 +109,9 @@ function buildIndices() {
       surface: BLOCK.grass,
     },
     stamps: [
+      ...STARTER_BOULDER_BLOCKS.map((block) =>
+        blockStamp({ index: BLOCK.stone, ...block }),
+      ),
       ...STARTER_PROSPECTS.map((prospect) => blockStamp(prospect)),
       blockStamp({ index: BLOCK.craftingTable, x: 12, y: 12, z: 7 }),
       blockStamp({ index: BLOCK.furnace, x: 13, y: 12, z: 7 }),

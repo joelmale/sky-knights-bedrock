@@ -43,7 +43,7 @@ Pass when:
 - the Content Log has no pack, script, entity, recipe, texture, geometry, or
   structure errors;
 - debug reports world schema `5`, `activeJob=none`,
-  `starter_island:v4`, `ember_outpost:v4`, and `frostspire:v2`;
+  `starter_island:v6`, `ember_outpost:v4`, and `frostspire:v2`;
 - the starter island is a continuous solid mass with no ordinary walking
   surface gaps;
 - Ember Outpost is present near `X=84, Z=0`;

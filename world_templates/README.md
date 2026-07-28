@@ -5,21 +5,31 @@ The stable add-on places authored floating-island structures in
 generator of an ordinary Overworld, so a world created from the normal preset
 continues generating vanilla terrain below the Sky Knights structures.
 
-The stable sky-only distribution is therefore a **new void-world template**:
+The stable sky-only distribution is therefore a **new void-world template**.
+The preferred path is now the automated, BDS-validated build:
 
-1. Create a dedicated empty/void Bedrock world in Minecraft or Bedrock Editor.
-2. Confirm newly explored chunks contain no ordinary Overworld land.
-3. Activate the stable Sky Knights Behavior and Resource Packs.
-4. Exit the world cleanly and retain an untouched backup of its folder.
-5. Package a copy from the repository root:
+```powershell
+npm run world-template:void
+```
 
-   ```powershell
-   npm run world-template -- --world "<world folder>"
-   ```
+This command creates and validates a disposable source world without touching
+the Minecraft client's save folders. See
+[`../docs/VOID_WORLD_TEMPLATE.md`](../docs/VOID_WORLD_TEMPLATE.md).
 
-The packager validates `level.dat`, leaves the source world untouched, embeds
-the compiled Behavior and Resource Packs, writes the required world pack
-references, and produces:
+The direct packager remains available for the canonical generated source:
+
+```powershell
+npm run world-template -- --world "dist/world-template/source"
+```
+
+This low-level command is not a shortcut for an arbitrary client-created
+"empty" world. It strictly requires the fixed seed, canonical air-layer
+generator, Survival/debug defaults, starter-dock spawn, disabled experiments,
+matching `level.dat_old` and `levelname.txt`, and no live `session.lock`. Use
+`npm run world-template:void` to create that source safely.
+
+The packager leaves its accepted source untouched, embeds the compiled Behavior
+and Resource Packs, writes the required world pack references, and produces:
 
 ```text
 dist/world-template/sky_knights_void_world.mctemplate
@@ -35,6 +45,6 @@ generated terrain must be preserved. The existing add-on-only path remains a
 development compatibility mode, while the template is the intended sky-only
 experience.
 
-The separate experimental profile can register a void custom dimension, but it
-remains a capability proof until Beta API, reload, copy, multiplayer, and
-device gates pass.
+The separate experimental profile can register a void custom dimension through
+the current stable API, but that profile remains a capability proof until its
+migration, reload, copy, multiplayer, and device gates pass.

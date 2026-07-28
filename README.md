@@ -15,8 +15,8 @@ The repository is based on Microsoft/Mojang's TypeScript starter, updated for Mi
 - Blockception's Minecraft Bedrock Development VS Code extension
 
 Minecraft Creator Tools (`mctools.dev` or its CLI) is optional. The build does not require it.
-Bedrock Dedicated Server `1.26.34.3` is optional and used only by the opt-in
-GameTest smoke harness.
+Bedrock Dedicated Server `1.26.34.3` is optional and used by the opt-in
+GameTest smoke and validated void-template workflows.
 
 ## First setup
 
@@ -81,6 +81,7 @@ npm run lint                  Lint TypeScript
 npm test                      Run host-side unit tests
 npm run test:bds:unit         Test the Bedrock level.dat/NBT tooling
 npm run test:bds:smoke        Run the opt-in BDS/GameTest smoke harness
+npm run test:bds:void-source  Build and full-height scan an isolated void source
 npm run check                 Lint, build, and test
 npm run local-deploy          Build/deploy and watch for changes
 npm run build:profiles        Build opt-in experimental and GameTest packs
@@ -92,7 +93,8 @@ npm run mcaddon:production    Build a production .mcaddon
 npm run structures:generate   Rewrite authored structures from deterministic sources
 npm run structures:check      Verify checked-in structures without rewriting them
 npm run world-template -- --world "<path>"
-                              Package a copy of a void source world
+                              Package a canonical validated void source
+npm run world-template:void   Build, validate, and package the void realm
 npm run verify                Run all checks and package production output
 ```
 
@@ -100,6 +102,7 @@ Packaged output is written to:
 
 ```text
 dist/packages/sky_knights.mcaddon
+dist/world-template/sky_knights_void_world.mctemplate
 ```
 
 ## Project layout
@@ -118,6 +121,7 @@ See [BEDROCK_ADDON_ROADMAP.md](BEDROCK_ADDON_ROADMAP.md) for the full implementa
 ## Project tracking
 
 - [Current implementation status](docs/PROJECT_STATUS.md)
+- [AI development handoff and next slice](docs/AI_HANDOFF.md)
 - [Version changelog](CHANGELOG.md)
 - [Automated and hands-on validation log](docs/VALIDATION_LOG.md)
 - [Architecture decisions](docs/DECISIONS.md)
@@ -147,9 +151,20 @@ creating the required test-root sentinel or running:
 npm run test:bds:smoke
 ```
 
+The same sentinel-approved external BDS installation can build and validate
+the packaged sky-only world without reading or changing Minecraft client
+worlds:
+
+```powershell
+npm run world-template:void
+```
+
+See the [void-world template guide](docs/VOID_WORLD_TEMPLATE.md) for its safety
+contract, automated evidence, and clean-client acceptance steps.
+
 ## Playable Dockyard Refit and Airship Combat slice
 
-The `0.3.4` playtest build retains the `0.2.0` two-expedition survival
+The `0.3.5` playtest build retains the `0.2.0` two-expedition survival
 progression into dockyard refitting and airship combat:
 
 1. Start on a solid Verdant home island and assemble a two-seat starter skiff.
@@ -183,21 +198,28 @@ in order: starter island, Ember Outpost, then Frostspire. The initial player is
 held until the starter island passes its readiness and integrity checks, then is
 moved to the safe dock automatically. Transient generation failures retry with
 backoff. This behavior is covered by automated verification but remains pending
-Minecraft hands-on acceptance for `0.3.4`.
+Minecraft hands-on acceptance for `0.3.5`.
 
 The starter island now visibly supplies the first-skiff route: two oak trees
 (8 logs), 12 iron ore, 8 coal ore, abundant stone, and a placed crafting table
 and furnace. One iron block and one coal block sit adjacent in the walkable
 surface near the workshop, with more ore directly underneath, so the first
-mining route no longer depends on finding a cliff-face seam. The player still
-crafts the Ship Core, Canvas Bundles, and Thruster Module from those raw
-resources; the Dockmaster does not grant ship components directly.
+mining route no longer depends on finding a cliff-face seam. A five-block
+surface boulder beside the workshop supplies visible stone for the first wooden
+pickaxe and stone pickaxe. The player still crafts the Ship Core, Canvas
+Bundles, and Thruster Module from those raw resources; the Dockmaster does not
+grant ship components directly.
 
 The stable add-on cannot replace normal Overworld terrain generation. A
 regular world therefore continues generating vanilla land below the high
 islands. The intended sky-only presentation uses a new void-world template,
 where the authored and procedural-template structures are the landmass.
 Existing normal worlds are never cleared or silently converted.
+
+`npm run world-template:void` now creates that template from an isolated,
+fixed-seed BDS world, scans origin and newly generated distant chunks through
+the complete Overworld height, and embeds the stable packs. Clean-client
+Minecraft import remains a hands-on release gate.
 
 `0.3.4` adds a bounded procedural archipelago around the protected authored
 realm. More than 900 possible deterministic locations are divided into

@@ -30,7 +30,7 @@ Pass when:
   lines.
 - There are no holes through the ordinary walking surface.
 - The player starts and recovers safely at the dock.
-- Debug reports schema `5`, `activeJob=none`, `starter_island:v4`,
+- Debug reports schema `5`, `activeJob=none`, `starter_island:v6`,
   `ember_outpost:v4`, and `frostspire:v2`.
 - The Content Log contains no script, registry, structure, recipe, or texture
   errors.
@@ -42,8 +42,9 @@ judging the migration.
 
 Use Survival mode and do not use `/give` or `/skyknights:skiff`.
 
-1. Confirm the workshop has two visible oak trees (8 logs), 12 exposed iron
-   ore, 8 exposed coal ore, abundant stone, a crafting table, and a furnace.
+1. Confirm the workshop has two visible oak trees (8 logs), a five-block
+   surface stone boulder, 12 iron ore, 8 coal ore, a crafting table, and a
+   furnace.
 2. Harvest logs and craft planks, sticks, a wooden pickaxe, then a stone
    pickaxe. Use the placed crafting table and furnace; do not need to dismantle
    the dock or workshop.

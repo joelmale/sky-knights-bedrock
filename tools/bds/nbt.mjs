@@ -425,3 +425,8 @@ export function setString(compound, name, value) {
 export function setInt(compound, name, value) {
   compound.set(name, { type: TAG.Int, value });
 }
+
+/** Set a Long tag from a BigInt-compatible value. */
+export function setLong(compound, name, value) {
+  compound.set(name, { type: TAG.Long, value: BigInt(value) });
+}

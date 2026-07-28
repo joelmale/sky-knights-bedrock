@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DOCKYARD } from "../scripts/config/constants";
 import { islandDefinition } from "../scripts/config/islands";
 import {
+  STARTER_BOULDER_BLOCKS,
   STARTER_RESOURCE_MINIMUMS,
   island as authoredStarterIsland,
 } from "../tools/structures/starter_island.mjs";
@@ -32,6 +33,11 @@ const starterStructure = authoredStarterIsland as {
 const inspection = starterStructure.inspect();
 const [starterWidth, starterHeight, starterDepth] = starterStructure.size;
 const minimums = STARTER_RESOURCE_MINIMUMS as Record<string, number>;
+const boulderBlocks = STARTER_BOULDER_BLOCKS as {
+  x: number;
+  y: number;
+  z: number;
+}[];
 
 function blockCount(typeId: string): number {
   const paletteIndex = inspection.palette.indexOf(typeId);
@@ -171,6 +177,19 @@ describe("starter island resource contract", () => {
     expect(blockTypeAt(10, 11, 9)).toBe("minecraft:coal_ore");
     expect(blockTypeAt(10, 12, 9)).toBe("minecraft:air");
     expect(blockTypeAt(10, 10, 9)).toBe("minecraft:coal_ore");
+  });
+
+  it("places a visible boulder with enough stone for the first stone pickaxe", () => {
+    expect(boulderBlocks.length).toBeGreaterThanOrEqual(3);
+
+    for (const block of boulderBlocks) {
+      expect(block.y).toBeGreaterThan(11);
+      expect(blockTypeAt(block.x, block.y, block.z)).toBe("minecraft:stone");
+    }
+
+    expect(exposedBlockCount("minecraft:stone")).toBeGreaterThanOrEqual(
+      boulderBlocks.length,
+    );
   });
 
   it("covers the complete first-skiff recipe and survival-tool budget", () => {

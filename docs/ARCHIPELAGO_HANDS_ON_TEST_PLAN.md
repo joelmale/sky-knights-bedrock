@@ -1,6 +1,6 @@
 # Procedural Archipelago Hands-On Test Plan
 
-> Build under test: `0.3.4`
+> Build under test: `0.3.5`
 >
 > Automated status is not Minecraft acceptance. Record the exact commit,
 > Minecraft version, world type, device, input method, and Content Log result.
@@ -12,12 +12,16 @@ Run:
 ```powershell
 npm ci
 npm run verify
-npm run local-deploy -- --once
+npm run world-template:void
 ```
 
 `npm ci` is needed only after a fresh clone or dependency/lockfile change. Use
-a fresh void/empty world for the intended presentation. A normal Overworld is
-useful only for the compatibility session; it will retain vanilla terrain.
+the generated
+`dist/world-template/sky_knights_void_world.mctemplate` for the intended
+presentation: double-click it, then create a new world from **Sky Knights: Void
+Realm** under imported templates. The stable packs are already embedded; do
+not activate a second standalone copy. A normal Overworld is useful only for
+the compatibility session and will retain vanilla terrain.
 
 Enable cheats, **Content Log File**, and **Content Log GUI**. Activate the Sky
 Knights Behavior Pack and its Resource Pack.
@@ -26,12 +30,13 @@ Knights Behavior Pack and its Resource Pack.
 
 1. Create a fresh world and enter it without running a Sky Knights command.
 2. Wait for automatic arrival at the starter dock.
-3. Confirm the surface iron and coal prospect is visible beside the workshop.
+3. Confirm the five-block stone boulder and the surface iron/coal prospect are
+   visible beside the workshop.
 4. Run `/skyknights:debug`.
 
 Pass when:
 
-- debug reports `Sky Knights debug v0.3.4`;
+- debug reports `Sky Knights debug v0.3.5`;
 - starter island, Ember Outpost, and Frostspire complete automatically;
 - `activeJob=none` after bootstrap settles;
 - debug includes an `archipelago=<count>/384` line;

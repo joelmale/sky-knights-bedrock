@@ -3,7 +3,7 @@
 > Central integration tracker for
 > [`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md).
 >
-> Playtest build: `0.3.4`
+> Playtest build: `0.3.5`
 >
 > Branch: `codex/skycraft-program`
 >

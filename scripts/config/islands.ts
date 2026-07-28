@@ -382,7 +382,7 @@ const STARTER_ISLAND_DEFINITION: IslandDefinition = {
   tier: 0,
   structureId: ISLAND_STRUCTURE_IDS.starter_island,
   dimensionId: LAYOUT.dimensionId,
-  contentVersion: 5,
+  contentVersion: 6,
   size: { x: 31, y: 16, z: 23 },
   placement: "pinned",
   gameplayActivation: "ready",

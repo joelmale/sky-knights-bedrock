@@ -69,7 +69,7 @@ Expected:
 - Island generation causes no visible hitch longer than one second.
 - Debug output reports schema `5`, islands
   `starter_island,ember_outpost,frostspire`, versions
-  `starter_island:v4,ember_outpost:v4,frostspire:v2`, `activeJob=none`, a saved
+  `starter_island:v6,ember_outpost:v4,frostspire:v2`, `activeJob=none`, a saved
   seed, a dynamic-property byte count, and the detected control scheme.
 
 Capture a screenshot of the island, the debug output, and the relevant Content
@@ -252,14 +252,15 @@ not block the stable Strategy A release.
 
 ### 11. World-template import
 
-Close Minecraft before copying the source world, then run:
+Build the validated template:
 
 ```powershell
-npm run world-template -- --world "C:\path\to\the\world"
+npm run world-template:void
 ```
 
 Import `dist/world-template/sky_knights_void_world.mctemplate` on a clean
-client.
+client. The packs are embedded, so do not install or activate a duplicate
+standalone `.mcaddon` for this session.
 
 Pass when:
 

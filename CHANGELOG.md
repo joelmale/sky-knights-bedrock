@@ -4,6 +4,55 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
+## [0.3.5] — 2026-07-27
+
+### Added
+
+- Added `npm run world-template:void`, which builds a fixed-seed Survival void
+  source in an isolated sentinel-approved BDS installation, verifies
+  full-height origin and distant chunks across a restart, and packages the
+  current stable packs as `sky_knights_void_world.mctemplate`.
+- Added a stable localized world-template manifest, short embedded-pack paths,
+  exact world pack bindings, strict source metadata validation, and rejection
+  of live or uncleanly closed source worlds.
+
+### Fixed
+
+- Added a five-block exposed stone boulder beside the starter workshop so the
+  wooden-pickaxe to stone-pickaxe progression no longer depends on guessing
+  that stone is buried beneath the grass.
+- Added an authored-structure regression contract requiring every boulder
+  block to be above the grass surface, exposed, and mineable.
+- Bumped the starter island content version to 6. An unmodified schema-5
+  starter island may rebuild; player-modified and conservatively protected
+  islands are never automatically overwritten.
+
+### Changed
+
+- Bumped the add-on, stable packs, and GameTest dependency profile to `0.3.5`
+  so the corrective playtest package is identifiable through
+  `/skyknights:debug`.
+
+### Validation
+
+- `npm run verify` passed with 228 tests across 40 files, deterministic
+  structures, TypeScript, NBT, the production `.mcaddon`, and both opt-in
+  profiles.
+- `npm audit --audit-level=high` reported zero vulnerabilities.
+- BDS `1.26.34.3` loaded the `0.3.5` packs and passed the named skiff-seat
+  smoke test.
+- BDS `1.26.34.3` verified 1,671,168 air blocks across 17 full-height chunks
+  and two boots. The final packaged source has seed `1702740741`, Survival
+  mode, enabled debug commands, disabled experiments, and starter-dock spawn
+  `(10, 161, 1)`.
+- The 138,918-byte template contains 118 sorted root entries with no wrapper
+  directory; SHA-256 is
+  `9f9cfbf6292245df8ffb16a7fb248ed2af2f5665439c7c087b3c44c0461adb7c`.
+- Visible placement and mining of the boulder remain a Minecraft hands-on
+  acceptance check.
+- Clean-client template import, starter arrival, save/reopen, and distant
+  exploration remain Minecraft hands-on acceptance checks.
+
 ## [0.3.4] — 2026-07-27
 
 ### Added

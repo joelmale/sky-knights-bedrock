@@ -196,10 +196,12 @@ workshop blocks, because a false probe can leave a visibly placed island queued
 and correctly defer safe arrival.
 
 The `0.3.3` corrective patch replaces the misleading cliff-only visibility
-contract with the walkable-surface prospect. Starter island content version 5
-allows an already schema-5 island tracked as unmodified to rebuild.
-Player-modified islands remain protected and require a fresh world to validate
-the new authored terrain.
+contract with the walkable-surface prospect. The `0.3.5` correction adds a
+five-block exposed stone boulder beside the workshop so the wooden-pick to
+stone-pick route is visible rather than merely possible through the buried
+core. Starter island content version 6 allows an already schema-5 island
+tracked as unmodified to rebuild. Player-modified islands remain protected and
+require a fresh world to validate the new authored terrain.
 Because schema 4 and earlier did not record terrain edits, every island already
 generated before a schema-5 migration is conservatively marked protected when
 its layout record is created.
@@ -328,3 +330,17 @@ islands and protected-space guarantees remain under the persisted planner.
 
 The detailed contract and experimental proof gate are in
 [`PROCEDURAL_ARCHIPELAGO.md`](PROCEDURAL_ARCHIPELAGO.md).
+
+The stable template source is created by a guarded external-BDS workflow rather
+than by editing a client save. It pins the world seed and Survival/debug
+defaults, writes the canonical one-air flat layer, removes only the
+runner-owned pre-patch database while the server is stopped, then reopens and
+freezes the result. A separate copy is scanned at the origin and in newly
+generated distant chunks through Y=-64..319 across a restart before the
+current stable packs are embedded. The package uses stable template UUIDs,
+short embedded-pack paths, exact world pack references, sorted root archive
+entries, and no random-seed opt-in.
+
+This automation establishes a reviewable sky-only source and packaging
+contract. It does not replace clean-client import, rendering, reload,
+multiplayer, input, or performance acceptance.

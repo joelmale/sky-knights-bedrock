@@ -1,0 +1,32 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Sky Knights Void Source Validator",
+    "description": "Opt-in BDS-only validator for an all-air source world.",
+    "uuid": "522285f4-72b1-40a5-984b-a95e028d6c27",
+    "version": [0, 1, 0],
+    "min_engine_version": [1, 26, 30]
+  },
+  "modules": [
+    {
+      "description": "Void validation data",
+      "type": "data",
+      "uuid": "0aaf5ce7-59b2-409d-a714-c14492f4e1fa",
+      "version": [0, 1, 0]
+    },
+    {
+      "description": "Full-height void validation script",
+      "type": "script",
+      "language": "javascript",
+      "uuid": "a1663f7d-2761-4e24-9930-f086079f90d9",
+      "version": [0, 1, 0],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "2.8.0"
+    }
+  ]
+}

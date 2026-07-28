@@ -36,7 +36,7 @@ unreachable Relic sources.
 
 | Island id        | Family   | Tier | Purpose                                                                                | Guaranteed reward                             | Status |
 | ---------------- | -------- | ---: | -------------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
-| `starter_island` | verdant  |    0 | Home, dock, Dockmaster, 2 oak trees, exposed coal/iron, stone, crafting table, furnace | raw starter resources for ship part materials | built  |
+| `starter_island` | verdant  |    0 | Home, dock, Dockmaster, 2 oak trees, exposed coal/iron, surface stone boulder, crafting table, furnace | raw starter resources for ship part materials | built  |
 | `ember_outpost`  | volcanic |    1 | First expedition, ruin, guardian                                                       | 1 Aether Crystal, 24 iron, 8 redstone         | built  |
 | `frostspire`     | tundra   |    2 | Range-gated raid, warden                                                               | 16 Froststeel, 2 diamond                      | built  |
 | `sunspire_reach` | desert   |    1 | Seeded structure and guaranteed Balloonwright metal cache; custom goblins remain later | 16 gold ingot, 8 copper                       | built  |
@@ -159,7 +159,7 @@ world holding nothing.
 | Tier           | Source                                  | Unlocks                                    |
 | -------------- | --------------------------------------- | ------------------------------------------ |
 | Wood           | starter_island's two oak trees (8 logs) | starter tools, canvas bundles, dock repair |
-| Stone          | starter_island abundant stone           | stone pickaxe, basic ship parts            |
+| Stone          | starter island's exposed 5-block boulder and core | stone pickaxe, basic ship parts   |
 | Coal           | starter_island's 8 exposed coal ore     | smelting fuel, Ship Core, Thruster Module  |
 | Iron           | starter_island's 12 exposed iron ore    | Ship Core, Thruster Module, skiff          |
 | Gold/copper    | sunspire_reach                          | stronger weapons and Balloonwright systems |

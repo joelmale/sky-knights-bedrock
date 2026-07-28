@@ -78,11 +78,12 @@ have vanilla land below the high islands. The intended presentation requires a
 new void source world packaged with:
 
 ```powershell
-npm run world-template -- --world "C:\path\to\void-world"
+npm run world-template:void
 ```
 
-The repository does not yet contain that source world or a checked-in
-`.mctemplate`.
+This guarded command creates and scans the source with external BDS, then
+writes the generated `.mctemplate` under `dist/world-template`. World databases
+and packages remain generated output rather than checked-in source.
 
 ## Bedrock feature-rule comparison
 
