@@ -95,12 +95,26 @@ export async function packageWorldTemplate({
   const manifest = await readJson(
     path.join(rootDirectory, "world_templates", "manifest.json"),
   );
+  const packaged = await readJson(path.join(rootDirectory, "package.json"));
+  const expectedVersion = packaged.version.split(".").map(Number);
+
   if (
-    !validateTemplateManifest(manifest) ||
+    expectedVersion.length !== 3 ||
+    expectedVersion.some((part) => !Number.isInteger(part) || part < 0)
+  ) {
+    throw new Error(
+      `package.json version "${packaged.version}" is not a three-part version.`,
+    );
+  }
+
+  if (
+    !validateTemplateManifest(manifest, expectedVersion) ||
     !validPackManifest(behaviorManifest) ||
     !validPackManifest(resourceManifest)
   ) {
-    throw new Error("Template or embedded pack manifest contract failed.");
+    throw new Error(
+      `Template or embedded pack manifest contract failed at version ${expectedVersion.join(".")}.`,
+    );
   }
   const uuids = [
     manifest.header.uuid,

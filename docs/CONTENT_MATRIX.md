@@ -36,7 +36,7 @@ unreachable Relic sources.
 
 | Island id        | Family   | Tier | Purpose                                                                                | Guaranteed reward                             | Status |
 | ---------------- | -------- | ---: | -------------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
-| `starter_island` | verdant  |    0 | Home, dock, Dockmaster, 2 oak trees, exposed coal/iron, surface stone boulder, crafting table, furnace | raw starter resources for ship part materials | built  |
+| `starter_island` | verdant  |    0 | Home, dock, Dockmaster, 4 oak trees, 6 visible surface ore columns, 10-block stone boulder, crafting table, furnace | 2.5x the raw resources the first-skiff route spends | built  |
 | `ember_outpost`  | volcanic |    1 | First expedition, ruin, guardian                                                       | 1 Aether Crystal, 24 iron, 8 redstone         | built  |
 | `frostspire`     | tundra   |    2 | Range-gated raid, warden                                                               | 16 Froststeel, 2 diamond                      | built  |
 | `sunspire_reach` | desert   |    1 | Seeded structure and guaranteed Balloonwright metal cache; custom goblins remain later | 16 gold ingot, 8 copper                       | built  |

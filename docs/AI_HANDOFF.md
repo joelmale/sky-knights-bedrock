@@ -4,9 +4,9 @@
 >
 > Branch: `codex/procedural-archipelago`
 >
-> HEAD before the current uncommitted checkpoint: `f92d9c8`
+> HEAD: `82c3398` (the `0.3.5` checkpoint is committed and pushed)
 >
-> Playtest version: `0.3.5`
+> Playtest version: `0.3.6`
 
 ## Read this first
 
@@ -17,10 +17,14 @@ owns integration, documentation, full verification, and the final commit.
 Substantial slices use bounded specialists with disjoint file ownership and an
 independent read-only QA role.
 
-The working tree intentionally contains an integrated, uncommitted `0.3.5`
-checkpoint. Do not reset, clean, regenerate, or overwrite it before reviewing
-`git status`, `git diff`, and this document. Generated files under `dist/` are
-ignored and may be rebuilt; tracked source and documentation are authoritative.
+The `0.3.5` checkpoint is committed as `82c3398` and pushed; `main` was
+fast-forwarded to it. Generated files under `dist/` are ignored and may be
+rebuilt; tracked source and documentation are authoritative.
+
+`0.3.6` is a playtest-driven correction slice on top of it. Read the
+[`VALIDATION_LOG.md`](VALIDATION_LOG.md) hands-on section before changing
+starter content: it records the first real Minecraft session and what it
+falsified.
 
 ## Product and architecture state
 
@@ -57,17 +61,25 @@ Authoritative detail lives in:
 - [`PROCEDURAL_ARCHIPELAGO.md`](PROCEDURAL_ARCHIPELAGO.md) — island-field
   planner and placement design.
 
-## Current uncommitted `0.3.5` checkpoint
+## Current `0.3.6` checkpoint
 
 ### Starter-resource correction
 
-The starter island now has a five-block exposed stone boulder beside the
-workshop. It complements the visible surface iron/coal prospect, two oak trees,
-crafting table, and furnace so the player can make a wooden pickaxe, mine three
-cobblestone, make a stone pickaxe, and reach the first ship without guessing
-where stone is buried.
+The starter island supplies at least 2.5x what the command-free first-skiff
+route spends, and supplies it where a player on foot can reach it: 18 iron ore,
+8 coal ore, 16 oak logs across four trees, and a ten-block exposed stone
+boulder beside the workshop. Six ore columns break the grass surface — four
+iron and two coal — each continuing straight down, with shallow pockets three
+to four blocks under the clearing. No starter ore sits on the tapered underside
+or the sheer side faces.
 
-The starter island content version is 6 and package/pack versions are `0.3.5`.
+The minimums are derived in `tools/structures/starter_island.mjs` from
+`STARTER_RESOURCE_REQUIREMENTS` and a single `STARTER_RESOURCE_MARGIN`
+constant, so retuning a recipe cannot quietly erode the buffer. The generator
+throws if ore is placed below the reachable band, outside the body, or with
+fewer than four visible iron and two visible coal outcrops.
+
+The starter island content version is 7 and package/pack versions are `0.3.6`.
 Unmodified generated islands may rebuild; player-modified and conservatively
 protected islands are not silently overwritten.
 
@@ -91,7 +103,7 @@ Canonical source defaults are:
 
 - seed `1702740741`;
 - Survival (`GameType=0`, forced);
-- cheats and commands enabled for `0.3.5` GameDirectors test commands;
+- cheats and commands enabled for `0.3.6` GameDirectors test commands;
 - starter-dock spawn `(10, 161, 1)`;
 - localized name **Sky Knights: Void Realm**; and
 - no enabled or previously used experiments.
@@ -99,7 +111,7 @@ Canonical source defaults are:
 The packager independently rejects non-void metadata, wrong defaults, missing
 finalization files, enabled experiments, and a live `session.lock`. It writes a
 root `world_template` manifest, embeds the packs as `sk_bp` and `sk_rp`, and
-binds their exact `0.3.5` UUID/version pairs.
+binds their exact `0.3.6` UUID/version pairs.
 
 See [`VOID_WORLD_TEMPLATE.md`](VOID_WORLD_TEMPLATE.md) for the build and safety
 contract.
@@ -117,18 +129,16 @@ npm run test:bds:smoke
 
 Results:
 
-- 228 host tests across 40 files;
+- 231 host tests across 40 files;
 - generated structures, formatting, TypeScript, stable bundle, BDS NBT
   fixtures, production `.mcaddon`, and both opt-in profiles passed;
 - npm reported zero vulnerabilities;
 - the named BDS skiff-seat GameTest passed;
 - the void runner checked 17 chunks and 1,671,168 blocks through Y=-64..319
   across two boots; every checked block was air;
-- source SHA-256:
-  `a299a218ee146c607bb6735bbf3fcd343a1f623f657151948e50c074b12577b2`;
-- the final `.mctemplate` is 138,918 bytes with 118 sorted root entries, no
-  wrapper folder, and SHA-256
-  `9f9cfbf6292245df8ffb16a7fb248ed2af2f5665439c7c087b3c44c0461adb7c`.
+- the final `0.3.6` `.mctemplate` is 139,426 bytes with 118 sorted root
+  entries, no wrapper folder, and SHA-256
+  `a05a446df94776161dc9e1c4efb6bb2ea984b8bcd8773d1a6ec252b821326811`.
 
 The generated import file is:
 
@@ -143,7 +153,8 @@ Automation does not prove:
 - clean-client `.mctemplate` import;
 - client-side pack binding, rendering, starter generation, or automatic
   arrival after creating a world from the template;
-- the visible boulder's complete wooden-pickaxe to stone-pickaxe mining route;
+- the complete wooden-pickaxe to stone-pickaxe to seven-ingot mining route, or
+  that a first-time player finds the six visible ore outcrops without help;
 - save/quit/reopen, world copy, `/reload`, schema migration, or
   player-modified island protection in a real client;
 - archipelago clustering, obstruction behavior, exploration pacing, or
@@ -153,6 +164,25 @@ Automation does not prove:
 
 Do not describe these as passed until their focused hands-on sessions are
 recorded in [`VALIDATION_LOG.md`](VALIDATION_LOG.md).
+
+## What the first playtest changed
+
+The `0.3.5` session failed on two things, both fixed in `0.3.6`:
+
+1. **Starter iron was unreachable, not merely scarce.** The island held twelve
+   iron blocks against a seven-ingot route, but ten sat on the tapered
+   underside. The contract counted placed ore instead of reachable ore. Every
+   starter resource now carries a uniform 2.5x margin over an explicit
+   requirement table, all ore sits in the surface-reachable band, and the
+   generator refuses to build an island that violates either rule.
+2. **The session ran on the wrong world type.** A normal Infinite world with
+   the development packs was used instead of a world created from the template,
+   so the reported Overworld terrain was the documented compatibility mode.
+   The packaged template was re-inspected and was correct. `/skyknights:debug`
+   now opens with a `below=` line so the world type is unmistakable.
+
+The general lesson for future contracts: assert what a player can obtain, not
+what the generator emitted.
 
 ## Recommended next slice
 
@@ -166,7 +196,7 @@ progression closure**, not more content.
    embedded.
 3. Run Sessions A-C of
    [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md),
-   including automatic starter arrival, `Sky Knights debug v0.3.5`, no vanilla
+   including automatic starter arrival, `Sky Knights debug v0.3.6`, `below=void`, no vanilla
    land, starter boulder/iron/coal visibility, first pickaxes, first skiff, and
    nearby/distant island generation.
 4. Save, close, reopen, and run the persistence/obstruction checks in Sessions

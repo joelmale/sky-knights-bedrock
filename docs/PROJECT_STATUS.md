@@ -2,7 +2,7 @@
 
 > Last updated: 2026-07-27
 >
-> Current playtest version: `0.3.5`
+> Current playtest version: `0.3.6`
 >
 > Stable API baseline: Minecraft Bedrock 1.26.30+, `@minecraft/server` 2.8.0,
 > `@minecraft/server-ui` 2.1.0
@@ -10,10 +10,15 @@
 > Current state: the `0.2.0` legacy ship/combat loop, `0.3.1` deterministic
 > realm stabilization, the bounded player-built Skycraft prototype, and the
 > `0.3.4` clustered procedural-template archipelago, the `0.3.5` visible
-> starter-stone correction, and the automated fixed-seed void-world template
-> pipeline are integrated. Repository and dedicated-server evidence are green;
-> clean-client template import, Minecraft gameplay, multiplayer, input,
-> migration, performance, and device gates remain.
+> starter-stone correction, the automated fixed-seed void-world template
+> pipeline, and the `0.3.6` reachable 2.5x starter resource budget are
+> integrated. Repository and dedicated-server evidence are green; clean-client
+> template import, Minecraft gameplay, multiplayer, input, migration,
+> performance, and device gates remain.
+>
+> One partial hands-on session has been recorded. It failed on starter iron
+> supply and was run on the wrong world type; both causes are fixed in `0.3.6`
+> and the session must be rerun.
 
 This is the authoritative implementation tracker. The roadmap describes the
 target product; this document records what the repository currently delivers.
@@ -67,7 +72,7 @@ not require them.
 | Advanced modules   | Armored Hull, Frostfire Engine, Expanded Cargo Hold, Aether Cannon, Shield Projector |
 | Encounters         | Ember Guardian, Frostspire Warden, Ashwing Raider                                    |
 | GameTests          | 4 registered; 1 executed by the opt-in BDS smoke harness                             |
-| Host tests         | 228 passed across 40 files at the `0.3.5` void-template integration gate               |
+| Host tests         | 231 passed across 40 files at the `0.3.6` starter-margin gate                          |
 | Developer commands | `debug`, `skiff`, `skycutter`, `island`, `raider`, `recover`, test bench, objective  |
 
 ## Systems implemented
@@ -193,7 +198,7 @@ Results:
 - non-mutating generated-structure verification: passed;
 - formatting/lint: passed;
 - TypeScript/stable bundle: passed;
-- host tests: 228 passed across 40 files;
+- host tests: 231 passed across 40 files;
 - BDS NBT fixture tests: passed;
 - production `.mcaddon`: built;
 - experimental profile: built;
@@ -207,10 +212,15 @@ Results:
   source retained its fixed seed, Survival/debug defaults, disabled
   experiments, and starter-dock spawn;
 - packaged `.mctemplate`: built and structurally inspected with both stable
-  packs bound at `0.3.5`; clean-client import remains pending.
+  packs bound at `0.3.6`; 139,426 bytes, SHA-256
+  `a05a446df94776161dc9e1c4efb6bb2ea984b8bcd8773d1a6ec252b821326811`;
+  clean-client import remains pending.
 
-These checks prove repository consistency, not in-game behavior. The remaining
-Minecraft validation is explicitly tracked below.
+These checks prove repository consistency, not in-game behavior. They did not
+catch either `0.3.5` playtest defect: the resource contract counted ore the
+generator placed rather than ore a player can reach, and no check could observe
+which world type a tester had opened. Both now have host-side or in-game
+guards. The remaining Minecraft validation is explicitly tracked below.
 
 ## Open validation gates
 
@@ -234,6 +244,7 @@ Minecraft validation is explicitly tracked below.
 | `0.3.3` starter resource visibility and Apprentice recovery          | Pending              | [`SKYCRAFT_HANDS_ON_TEST_PLAN.md`](SKYCRAFT_HANDS_ON_TEST_PLAN.md), Sessions A–D                                               |
 | `0.3.3` reference/personal-blueprint material accounting             | Pending              | Skycraft plan, Session E                                                                                                       |
 | `0.3.4` procedural archipelago and void presentation                 | Pending              | [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md)                                                       |
+| `0.3.6` reachable starter resource route to the first ship           | Pending — retest     | Archipelago plan, Sessions A and A2; `0.3.5` failed on iron supply                                                             |
 | Advanced proxy/cap/device profile                                    | Pending/gated        | Skycraft plan, Sessions F and J; normal activation remains disabled                                                            |
 | Skycraft damage/repair/combat and multiplayer permissions            | Pending              | Skycraft plan, Sessions G–H                                                                                                    |
 | Skycraft progression and legacy coexistence                          | Pending              | Skycraft plan, Session I                                                                                                       |
@@ -265,8 +276,9 @@ Minecraft validation is explicitly tracked below.
 
 ## Next recommended work
 
-1. Import the generated `sky_knights_void_world.mctemplate` on a clean client
-   and execute the procedural archipelago hands-on plan.
+1. Import the generated `0.3.6` `sky_knights_void_world.mctemplate` on a clean
+   client, confirm `/skyknights:debug` reports `below=void`, and execute the
+   procedural archipelago hands-on plan starting from Sessions A and A2.
 2. Execute and record the Phase 3 stabilization plan on a fresh world and a
    backed-up schema-4 world copy.
 3. Run the Skycraft BDS pack-load/reconstruction/restart matrix and add one

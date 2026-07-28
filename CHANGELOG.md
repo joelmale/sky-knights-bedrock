@@ -4,6 +4,63 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
+## [0.3.6] — 2026-07-27
+
+### Fixed
+
+- Raised every starter-island resource to at least 2.5x what the command-free
+  first-skiff route actually spends. The `0.3.5` playtest reached the Ship Core
+  recipe with two iron because ten of the island's twelve iron blocks sat on
+  the tapered underside, which cannot be mined before the skiff that iron pays
+  for. Iron is now 18 blocks, coal 8, exposed boulder stone 10, and standing
+  oak 16.
+- Moved all starter ore into the band reachable by digging down from the
+  walkable surface. Six ore columns now break the grass with open sky above
+  them — four iron and two coal — each continuing straight down, plus shallow
+  pockets three to four blocks under the clearing. No starter ore is placed on
+  the island's underside or sheer side faces.
+- Added a third and fourth oak tree so the wood margin is carried in standing
+  trees rather than in a buffer the player has to guess at.
+
+### Added
+
+- Derived the starter resource minimums from an explicit route-requirement
+  table and a single `2.5` margin constant, so a recipe retune cannot silently
+  erode the buffer. The generator refuses to build an island that places ore
+  below the reachable band, floats ore outside the body, or drops below four
+  visible iron and two visible coal outcrops.
+- Pinned world-template archive entries to a fixed timestamp so packaging
+  identical content twice produces a byte-identical file. Recorded SHA-256
+  values previously changed on every run and identified only which build wrote
+  the artifact.
+- Derived the world-template manifest contract version from `package.json`
+  instead of a hard-coded literal, which had turned the `0.3.6` bump into a
+  packaging failure.
+- Added a `below=` line to `/skyknights:debug` reporting whether the space
+  under the authored realm is void or ordinary terrain. The `0.3.5` playtest
+  was run on a normal Infinite world with the development packs instead of a
+  world created from the packaged template, and nothing in game said so.
+
+### Changed
+
+- Bumped the add-on, stable packs, world template, and GameTest dependency
+  profile to `0.3.6`.
+- Bumped the starter island content version to 7. An unmodified schema-5
+  starter island rebuilds with the new prospects; player-modified and
+  conservatively protected islands are never automatically overwritten.
+
+### Validation
+
+- `npm run verify` passed with 231 tests across 40 files, deterministic
+  structures, TypeScript, NBT, the production `.mcaddon`, and both opt-in
+  profiles.
+- The starter island generates 18 iron ore, 8 coal ore, 16 oak logs, and a
+  ten-block exposed boulder, with six ore columns visible in the grass surface.
+- The packaged `.mctemplate` is 139,426 bytes with SHA-256
+  `a05a446df94776161dc9e1c4efb6bb2ea984b8bcd8773d1a6ec252b821326811`.
+- Visible discovery and the complete mining route remain Minecraft hands-on
+  acceptance checks.
+
 ## [0.3.5] — 2026-07-27
 
 ### Added

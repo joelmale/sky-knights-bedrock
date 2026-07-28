@@ -43,6 +43,64 @@ function commandPlayer(source: unknown): Player | undefined {
   return source instanceof Player ? source : undefined;
 }
 
+// Heights well below the authored realm, spread across the Overworld range. A
+// world created from the void template has nothing here; a normal world keeps
+// vanilla terrain, which is a supported compatibility mode but not the
+// intended presentation.
+const VOID_PROBE_HEIGHTS = [128, 96, 64, 32, 0, -32];
+const VOID_PROBE_OFFSETS = [-16, 0, 16];
+
+/**
+ * Reports whether the space beneath the realm is empty.
+ *
+ * The `0.3.5` playtest was run on a normal Infinite world with the development
+ * packs rather than on a world created from the packaged template, and nothing
+ * in game said so. This line makes the world type self-evident before a tester
+ * spends a session on the wrong presentation.
+ */
+function describeTerrainBelowRealm(player: Player): string {
+  const origin = player.location;
+  let checked = 0;
+  let solid = 0;
+
+  for (const dx of VOID_PROBE_OFFSETS) {
+    for (const dz of VOID_PROBE_OFFSETS) {
+      for (const y of VOID_PROBE_HEIGHTS) {
+        let block;
+
+        try {
+          block = player.dimension.getBlock({
+            x: Math.floor(origin.x) + dx,
+            y,
+            z: Math.floor(origin.z) + dz,
+          });
+        } catch {
+          // An unloaded or out-of-range probe is not evidence either way.
+          continue;
+        }
+
+        if (block === undefined) {
+          continue;
+        }
+
+        checked += 1;
+
+        if (!block.isAir) {
+          solid += 1;
+        }
+      }
+    }
+  }
+
+  if (checked === 0) {
+    return "unknown (no loaded probe)";
+  }
+
+  return solid === 0
+    ? `void (${checked} probes clear)`
+    : `§cvanilla terrain§r (${solid}/${checked} probes solid — not the void template)`;
+}
+
 export function registerDevelopmentCommands(
   registry: CustomCommandRegistry,
   worldRepository: WorldStateRepository,
@@ -370,6 +428,7 @@ function sendDebugReport(
   ]);
 
   player.sendMessage(`§bSky Knights debug v${ADDON_VERSION}§r`);
+  player.sendMessage(`below=${describeTerrainBelowRealm(player)}`);
   player.sendMessage(
     `schema=${state.schemaVersion} seed=${state.seed} worldSeed=${state.worldSeed} profile=${state.worldProfile} layoutVersion=${state.layoutVersion} control=${player.getControlScheme()}`,
   );

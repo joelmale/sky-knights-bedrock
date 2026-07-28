@@ -21,6 +21,8 @@ afterEach(async () => {
     roots.splice(0).map((root) => rm(root, { recursive: true, force: true })),
   );
 });
+const FIXTURE_VERSION = [0, 3, 5];
+
 async function fixture() {
   const root = await mkdtemp(path.join(tmpdir(), "sky-template-"));
   roots.push(root);
@@ -30,7 +32,16 @@ async function fixture() {
     await writeFile(file, value);
   };
   const pack = (uuid: string) =>
-    JSON.stringify({ format_version: 2, header: { uuid, version: [0, 3, 5] } });
+    JSON.stringify({
+      format_version: 2,
+      header: { uuid, version: FIXTURE_VERSION },
+    });
+  // The packager reads its expected template version from the repository root
+  // it is given, so the fixture root must carry one.
+  await write(
+    "package.json",
+    JSON.stringify({ version: FIXTURE_VERSION.join(".") }),
+  );
   await write("behavior_packs/sk_bp/manifest.json", pack(ids.behavior));
   await write("resource_packs/sk_rp/manifest.json", pack(ids.resource));
   await write("dist/scripts/main.js", "export {};");
@@ -41,13 +52,13 @@ async function fixture() {
       header: {
         name: "pack.name",
         description: "pack.description",
-        version: [0, 3, 5],
+        version: FIXTURE_VERSION,
         uuid: ids.template,
         base_game_version: [1, 26, 30],
         lock_template_options: true,
       },
       modules: [
-        { type: "world_template", version: [0, 3, 5], uuid: ids.module },
+        { type: "world_template", version: FIXTURE_VERSION, uuid: ids.module },
       ],
     }),
   );
@@ -123,7 +134,7 @@ describe("world template packager", () => {
     expect(entries["behavior_packs/stale/old.txt"]).toBeUndefined();
     expect(entries["world_behavior_pack_history.json"]).toBeUndefined();
     expect(JSON.parse(strFromU8(entries["world_behavior_packs.json"]))).toEqual(
-      [{ pack_id: ids.behavior, version: [0, 3, 5] }],
+      [{ pack_id: ids.behavior, version: FIXTURE_VERSION }],
     );
     expect(
       strFromU8(
@@ -132,6 +143,29 @@ describe("world template packager", () => {
     ).toBe("old");
     expect(Object.keys(entries)).toEqual([...Object.keys(entries)].sort());
   });
+  // A SHA-256 recorded as evidence is worthless if repacking identical content
+  // changes it. fflate stamps the current time onto every entry unless told
+  // otherwise, so this pins the archive to a fixed timestamp.
+  it("packages identical content to a byte-identical archive", async () => {
+    const paths = await fixture();
+    const build = async () =>
+      readFile(
+        (
+          await packageWorldTemplate({
+            rootDirectory: paths.root,
+            sourceWorld: paths.source,
+            outputRoot: paths.output,
+          })
+        ).templatePath,
+      );
+
+    const first = new Uint8Array(await build());
+    const second = new Uint8Array(await build());
+
+    expect(second.length).toBe(first.length);
+    expect([...second]).toEqual([...first]);
+  });
+
   it("rejects incomplete sources and overlap", async () => {
     const paths = await fixture();
     await rm(path.join(paths.source, "level.dat"));

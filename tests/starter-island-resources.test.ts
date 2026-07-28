@@ -4,7 +4,11 @@ import { DOCKYARD } from "../scripts/config/constants";
 import { islandDefinition } from "../scripts/config/islands";
 import {
   STARTER_BOULDER_BLOCKS,
+  STARTER_RESOURCE_MARGIN,
   STARTER_RESOURCE_MINIMUMS,
+  STARTER_RESOURCE_REQUIREMENTS,
+  STARTER_SURFACE_OUTCROPS,
+  STARTER_TREES,
   island as authoredStarterIsland,
 } from "../tools/structures/starter_island.mjs";
 
@@ -33,11 +37,25 @@ const starterStructure = authoredStarterIsland as {
 const inspection = starterStructure.inspect();
 const [starterWidth, starterHeight, starterDepth] = starterStructure.size;
 const minimums = STARTER_RESOURCE_MINIMUMS as Record<string, number>;
+const requirements = STARTER_RESOURCE_REQUIREMENTS as Record<string, number>;
+const margin = STARTER_RESOURCE_MARGIN as number;
 const boulderBlocks = STARTER_BOULDER_BLOCKS as {
   x: number;
   y: number;
   z: number;
 }[];
+const surfaceOutcrops = STARTER_SURFACE_OUTCROPS as {
+  index: number;
+  x: number;
+  z: number;
+  depth: number;
+}[];
+const trees = STARTER_TREES as { x: number; z: number }[];
+
+// The walkable grass layer. Ore a player can see stands in this layer with
+// open sky above it.
+const SURFACE_Y = 11;
+const ORE_TYPES = ["minecraft:iron_ore", "minecraft:coal_ore"];
 
 function blockCount(typeId: string): number {
   const paletteIndex = inspection.palette.indexOf(typeId);
@@ -146,14 +164,30 @@ describe("starter island resource contract", () => {
     }
   });
 
-  it("contains a visible-workshop resource budget with a safety margin", () => {
-    expect(minimums).toEqual({
-      "minecraft:oak_log": 8,
-      "minecraft:stone": 16,
-      "minecraft:coal_ore": 8,
-      "minecraft:iron_ore": 12,
+  it("derives every minimum from the route requirement and a 2.5x margin", () => {
+    expect(margin).toBe(2.5);
+    expect(requirements).toEqual({
+      "minecraft:oak_log": 5,
+      "minecraft:stone": 4,
+      "minecraft:coal_ore": 3,
+      "minecraft:iron_ore": 7,
     });
 
+    for (const typeId in requirements) {
+      expect(minimums[typeId], typeId).toBe(
+        Math.ceil(requirements[typeId] * margin),
+      );
+    }
+
+    expect(minimums).toEqual({
+      "minecraft:oak_log": 13,
+      "minecraft:stone": 10,
+      "minecraft:coal_ore": 8,
+      "minecraft:iron_ore": 18,
+    });
+  });
+
+  it("contains a visible-workshop resource budget with a safety margin", () => {
     for (const typeId in minimums) {
       expect(blockCount(typeId), typeId).toBeGreaterThanOrEqual(
         minimums[typeId],
@@ -164,27 +198,74 @@ describe("starter island resource contract", () => {
     expect(blockCount("minecraft:furnace")).toBeGreaterThanOrEqual(1);
     expect(blockTypeAt(12, 12, 7)).toBe("minecraft:crafting_table");
     expect(blockTypeAt(13, 12, 7)).toBe("minecraft:furnace");
-    expect(blockTypeAt(7, 12, 7)).toBe("minecraft:oak_log");
-    expect(blockTypeAt(17, 12, 15)).toBe("minecraft:oak_log");
-    expect(exposedBlockCount("minecraft:iron_ore")).toBeGreaterThanOrEqual(1);
-    expect(exposedBlockCount("minecraft:coal_ore")).toBeGreaterThanOrEqual(1);
+    expect(exposedBlockCount("minecraft:iron_ore")).toBeGreaterThanOrEqual(4);
+    expect(exposedBlockCount("minecraft:coal_ore")).toBeGreaterThanOrEqual(2);
+
+    for (const tree of trees) {
+      expect(blockTypeAt(tree.x, 12, tree.z)).toBe("minecraft:oak_log");
+    }
+
+    expect(trees.length * 4).toBeGreaterThanOrEqual(
+      minimums["minecraft:oak_log"],
+    );
   });
 
-  it("places adjacent iron and coal prospects in the walkable surface", () => {
-    expect(blockTypeAt(9, 11, 9)).toBe("minecraft:iron_ore");
-    expect(blockTypeAt(9, 12, 9)).toBe("minecraft:air");
-    expect(blockTypeAt(9, 10, 9)).toBe("minecraft:iron_ore");
-    expect(blockTypeAt(10, 11, 9)).toBe("minecraft:coal_ore");
-    expect(blockTypeAt(10, 12, 9)).toBe("minecraft:air");
-    expect(blockTypeAt(10, 10, 9)).toBe("minecraft:coal_ore");
+  it("advertises every prospect in the walkable surface with ore beneath it", () => {
+    expect(surfaceOutcrops.filter((outcrop) => outcrop.depth >= 2).length).toBe(
+      surfaceOutcrops.length,
+    );
+
+    for (const outcrop of surfaceOutcrops) {
+      const typeId = blockTypeAt(outcrop.x, SURFACE_Y, outcrop.z);
+      expect(ORE_TYPES, `${outcrop.x},${outcrop.z}`).toContain(typeId);
+      expect(blockTypeAt(outcrop.x, SURFACE_Y + 1, outcrop.z)).toBe(
+        "minecraft:air",
+      );
+
+      for (let offset = 1; offset < outcrop.depth; offset += 1) {
+        expect(
+          blockTypeAt(outcrop.x, SURFACE_Y - offset, outcrop.z),
+          `${outcrop.x},${SURFACE_Y - offset},${outcrop.z}`,
+        ).toBe(typeId);
+      }
+    }
+  });
+
+  // The 0.3.5 playtest found only two iron because the surplus sat on the
+  // island's tapered underside, which cannot be mined before the ship the iron
+  // pays for. No ore may sit below the diggable band again.
+  it("keeps every ore block inside the band reachable from the surface", () => {
+    for (const typeId of ORE_TYPES) {
+      let found = 0;
+
+      for (let x = 0; x < starterWidth; x += 1) {
+        for (let y = 0; y < starterHeight; y += 1) {
+          for (let z = 0; z < starterDepth; z += 1) {
+            if (blockTypeAt(x, y, z) !== typeId) {
+              continue;
+            }
+
+            found += 1;
+            expect(y, `${typeId} at ${x},${y},${z}`).toBeGreaterThanOrEqual(7);
+          }
+        }
+      }
+
+      expect(found, typeId).toBe(minimums[typeId]);
+    }
   });
 
   it("places a visible boulder with enough stone for the first stone pickaxe", () => {
-    expect(boulderBlocks.length).toBeGreaterThanOrEqual(3);
+    expect(boulderBlocks.length).toBeGreaterThanOrEqual(
+      minimums["minecraft:stone"],
+    );
 
     for (const block of boulderBlocks) {
-      expect(block.y).toBeGreaterThan(11);
+      expect(block.y).toBeGreaterThan(SURFACE_Y);
       expect(blockTypeAt(block.x, block.y, block.z)).toBe("minecraft:stone");
+      expect(blockTypeAt(block.x, SURFACE_Y, block.z)).toBe(
+        "minecraft:grass_block",
+      );
     }
 
     expect(exposedBlockCount("minecraft:stone")).toBeGreaterThanOrEqual(
@@ -194,11 +275,11 @@ describe("starter island resource contract", () => {
 
   it("covers the complete first-skiff recipe and survival-tool budget", () => {
     const recipes = starterRecipes();
-    const requirements: Record<string, Record<string, number>> = {};
+    const recipeRequirements: Record<string, Record<string, number>> = {};
     const results: Record<string, number> = {};
 
     for (const recipe of recipes) {
-      requirements[recipe.description.identifier] =
+      recipeRequirements[recipe.description.identifier] =
         recipeIngredientCounts(recipe);
       results[recipe.result.item] = recipe.result.count ?? 1;
     }
@@ -213,7 +294,7 @@ describe("starter island resource contract", () => {
       "skyknights:canvas_bundle": 2,
       "skyknights:thruster_module": 1,
     });
-    expect(requirements).toEqual({
+    expect(recipeRequirements).toEqual({
       "skyknights:ship_core": {
         "minecraft:iron_ingot": 4,
         "minecraft:coal": 1,
@@ -229,11 +310,25 @@ describe("starter island resource contract", () => {
       },
     });
 
+    // The declared iron requirement must be exactly what the two iron recipes
+    // spend, so a recipe retune cannot silently erode the margin.
+    const routeIron =
+      recipeRequirements["skyknights:ship_core"]["minecraft:iron_ingot"] +
+      recipeRequirements["skyknights:thruster_module"]["minecraft:iron_ingot"];
+
+    expect(routeIron).toBe(requirements["minecraft:iron_ore"]);
+
     // Conservative closure: the player may craft a table, wooden pick, stone
     // pick, and furnace even though the island also supplies a workshop.
-    expect(blockCount("minecraft:iron_ore")).toBeGreaterThanOrEqual(7);
-    expect(blockCount("minecraft:coal_ore")).toBeGreaterThanOrEqual(3);
-    expect(blockCount("minecraft:stone")).toBeGreaterThanOrEqual(12);
-    expect(blockCount("minecraft:oak_log") * 4).toBeGreaterThanOrEqual(17);
+    for (const typeId in requirements) {
+      const supplied =
+        typeId === "minecraft:stone"
+          ? boulderBlocks.length
+          : blockCount(typeId);
+
+      expect(supplied / requirements[typeId], typeId).toBeGreaterThanOrEqual(
+        margin,
+      );
+    }
   });
 });

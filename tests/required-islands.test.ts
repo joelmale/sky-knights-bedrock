@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { islandDefinition } from "../scripts/config/islands";
 import { plannedIslandLayoutRecords } from "../scripts/generation/discovery";
 import { queueNextRequiredIsland } from "../scripts/generation/required-islands";
 import {
@@ -55,10 +56,13 @@ describe("required-island bootstrap sequence", () => {
     };
     const refreshed = queueNextRequiredIsland(stale);
 
+    // Read the packaged version rather than restating it, so a starter-island
+    // content bump does not have to be mirrored here.
     expect(refreshed.activeGeneration).toEqual({
       ...queued.activeGeneration,
-      contentVersion: 6,
+      contentVersion: islandDefinition("starter_island").contentVersion,
     });
+    expect(refreshed.activeGeneration?.contentVersion).toBeGreaterThan(3);
   });
 
   it("does not restamp a player-modified island after a version mismatch", () => {

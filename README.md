@@ -164,7 +164,7 @@ contract, automated evidence, and clean-client acceptance steps.
 
 ## Playable Dockyard Refit and Airship Combat slice
 
-The `0.3.5` playtest build retains the `0.2.0` two-expedition survival
+The `0.3.6` playtest build retains the `0.2.0` two-expedition survival
 progression into dockyard refitting and airship combat:
 
 1. Start on a solid Verdant home island and assemble a two-seat starter skiff.
@@ -198,17 +198,17 @@ in order: starter island, Ember Outpost, then Frostspire. The initial player is
 held until the starter island passes its readiness and integrity checks, then is
 moved to the safe dock automatically. Transient generation failures retry with
 backoff. This behavior is covered by automated verification but remains pending
-Minecraft hands-on acceptance for `0.3.5`.
+Minecraft hands-on acceptance for `0.3.6`.
 
-The starter island now visibly supplies the first-skiff route: two oak trees
-(8 logs), 12 iron ore, 8 coal ore, abundant stone, and a placed crafting table
-and furnace. One iron block and one coal block sit adjacent in the walkable
-surface near the workshop, with more ore directly underneath, so the first
-mining route no longer depends on finding a cliff-face seam. A five-block
-surface boulder beside the workshop supplies visible stone for the first wooden
-pickaxe and stone pickaxe. The player still crafts the Ship Core, Canvas
-Bundles, and Thruster Module from those raw resources; the Dockmaster does not
-grant ship components directly.
+The starter island supplies at least 2.5x what the first-skiff route spends,
+and supplies it where a player on foot can reach it: four oak trees (16 logs),
+18 iron ore, 8 coal ore, a ten-block surface boulder, and a placed crafting
+table and furnace. Six ore columns break the grass surface — four iron and two
+coal — each continuing straight down, with shallow pockets a few blocks under
+the clearing. No starter ore is placed on the island's underside, which cannot
+be mined before the ship that ore pays for. The player still crafts the Ship
+Core, Canvas Bundles, and Thruster Module from those raw resources; the
+Dockmaster does not grant ship components directly.
 
 The stable add-on cannot replace normal Overworld terrain generation. A
 regular world therefore continues generating vanilla land below the high

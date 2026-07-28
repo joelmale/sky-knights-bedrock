@@ -65,7 +65,8 @@ describe("Apprentice Raft starter resource closure", () => {
 
     // Legacy parts require 7 iron and 2 coal. Their placed wrappers add one
     // coal/cobblestone but no iron. Twelve deck planks plus wrapper/Helm/Sail
-    // ingredients fit in seven logs, leaving one authored log for tools.
+    // ingredients fit in seven logs, so the Apprentice route needs eight
+    // authored logs before the tool budget.
     expect(count("minecraft:iron_ore")).toBeGreaterThanOrEqual(7);
     expect(count("minecraft:coal_ore")).toBeGreaterThanOrEqual(3);
     expect(count("minecraft:oak_log")).toBeGreaterThanOrEqual(8);
@@ -73,6 +74,6 @@ describe("Apprentice Raft starter resource closure", () => {
       (STARTER_RESOURCE_MINIMUMS as Record<string, number>)[
         "minecraft:oak_log"
       ],
-    ).toBe(8);
+    ).toBeGreaterThanOrEqual(8);
   });
 });

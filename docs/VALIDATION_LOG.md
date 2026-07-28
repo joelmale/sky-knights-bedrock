@@ -179,6 +179,40 @@ Result: stable scripts built and both `0.2.0` packs deployed to:
 %APPDATA%\Minecraft Bedrock\Users\Shared\games\com.mojang\development_resource_packs\sky_knights
 ```
 
+## Hands-on sessions
+
+### 2026-07-27 — `0.3.5` starter-route playtest (partial, failed)
+
+| Field            | Value                                                            |
+| ---------------- | ---------------------------------------------------------------- |
+| Build            | `0.3.5`, commit `82c3398`                                        |
+| World            | `voidtest`, fresh normal **Infinite** Overworld (`Generator=1`)  |
+| Packs            | Development packs from `local-deploy`, not the packaged template |
+| Platform         | Windows, Minecraft Bedrock                                       |
+| Sessions covered | Archipelago plan Session A, partial                              |
+| Result           | **Failed** — two defects found                                   |
+
+Findings:
+
+1. **Insufficient starter iron.** The Ship Core recipe needs 4 iron ingots and
+   the Thruster Module 3, for 7 total. Only 2 iron were found. The island
+   contained 12 iron blocks, but 10 sat on the tapered underside and sheer side
+   faces, which are unreachable before the skiff that iron pays for. Fixed in
+   `0.3.6` by raising iron to 18, moving all ore into the surface-reachable
+   band, and applying a uniform 2.5x margin to every starter resource.
+2. **Wrong world type for the intended presentation.** Ordinary Overworld
+   terrain generated beneath the realm. The world was created as a normal
+   Infinite world with the development packs rather than from
+   `sky_knights_void_world.mctemplate`; no template had been imported. The
+   packaged template itself was inspected afterwards and is correct:
+   `Generator=2`, one `minecraft:air` layer, and no pre-generated chunks. Fixed
+   in `0.3.6` by adding a `below=` line to `/skyknights:debug` so the world type
+   is visible in game before a session is spent on the wrong presentation.
+
+Not covered: automatic arrival timing, `activeJob` settling, archipelago count,
+Content Log review, and every later session. Session A must be rerun in full on
+a world created from the `0.3.6` template.
+
 ## Current manual acceptance state
 
 The repository is ready for both the

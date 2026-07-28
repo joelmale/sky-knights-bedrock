@@ -1,9 +1,13 @@
 # Procedural Archipelago Hands-On Test Plan
 
-> Build under test: `0.3.5`
+> Build under test: `0.3.6`
 >
 > Automated status is not Minecraft acceptance. Record the exact commit,
 > Minecraft version, world type, device, input method, and Content Log result.
+>
+> The `0.3.5` attempt at this plan was run on a normal Infinite world with the
+> development packs, so its terrain observations did not apply. Confirm the
+> `below=` line in Session A before recording anything else.
 
 ## Preparation
 
@@ -26,22 +30,46 @@ the compatibility session and will retain vanilla terrain.
 Enable cheats, **Content Log File**, and **Content Log GUI**. Activate the Sky
 Knights Behavior Pack and its Resource Pack.
 
-## Session A — bootstrap and version
+## Session A — bootstrap, world type, and version
 
-1. Create a fresh world and enter it without running a Sky Knights command.
+1. Create a fresh world **from the imported template**, not a normal world with
+   the packs enabled, and enter it without running a Sky Knights command.
 2. Wait for automatic arrival at the starter dock.
-3. Confirm the five-block stone boulder and the surface iron/coal prospect are
-   visible beside the workshop.
-4. Run `/skyknights:debug`.
+3. Run `/skyknights:debug` and read the `below=` line first.
+4. Walk the island and count the ore that breaks the grass surface.
 
 Pass when:
 
-- debug reports `Sky Knights debug v0.3.5`;
+- debug reports `Sky Knights debug v0.3.6`;
+- debug reports `below=void`; stop and restart the session on a template world
+  if it reports vanilla terrain;
 - starter island, Ember Outpost, and Frostspire complete automatically;
 - `activeJob=none` after bootstrap settles;
 - debug includes an `archipelago=<count>/384` line;
 - no missing-structure, registry, ticking-area, watchdog, or script error
   appears in the Content Log.
+
+## Session A2 — starter resource route
+
+The `0.3.5` playtest reached the Ship Core recipe with two iron. `0.3.6` places
+18 iron, 8 coal, 16 logs, and a ten-block boulder, all reachable from the
+walkable surface.
+
+1. Without flying or using a command, locate the visible ore.
+2. Mine the boulder, craft a wooden then a stone pickaxe, and mine iron.
+3. Smelt and craft one Ship Core (4 ingots) and one Thruster Module (3 ingots).
+
+Pass when:
+
+- at least four iron and two coal outcrops are visible standing on the grass;
+- digging straight down under an outcrop yields more of the same ore;
+- the ten-block boulder is reachable and mineable;
+- four oak trees are standing;
+- both parts are crafted with iron left over, and no ore requires leaving the
+  island surface.
+
+Record the iron mined before the first Ship Core, and any resource the route
+still runs short of.
 
 ## Session B — nearby lazy generation
 
@@ -172,7 +200,8 @@ cap. Reaching all 384 islands is not required for the first hands-on pass.
 
 | Session                        | Result | Evidence/notes |
 | ------------------------------ | ------ | -------------- |
-| A — bootstrap/version          | [ ]    |                |
+| A — bootstrap/world type       | [ ]    |                |
+| A2 — starter resource route    | [ ]    |                |
 | B — lazy generation            | [ ]    |                |
 | C — family clusters            | [ ]    |                |
 | D — reload safety              | [ ]    |                |
@@ -183,3 +212,7 @@ cap. Reaching all 384 islands is not required for the first hands-on pass.
 The slice is ready for broader play only when Sessions A–F pass on a fresh void
 world and the Content Log is clean. Session G supplies the measurements needed
 to adjust density, radius, and the 384-island cap.
+
+Sessions A and A2 are the gate for everything after them: a wrong world type
+invalidates the terrain observations, and a starter route that cannot reach the
+first ship invalidates the progression ones.
