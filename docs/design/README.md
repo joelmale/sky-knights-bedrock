@@ -4,9 +4,9 @@ Machine-readable design output from planning phases. These are specifications,
 not implementation evidence. A spec here means the design was agreed, not that
 the code exists.
 
-| File                                                                   | Slice                       | Status                      |
-| ---------------------------------------------------------------------- | --------------------------- | --------------------------- |
-| [`archipelago_variety_spec.json`](archipelago_variety_spec.json)       | Ambient island variety      | Approved; implementation in progress |
+| File                                                             | Slice                  | Status                                              |
+| ---------------------------------------------------------------- | ---------------------- | --------------------------------------------------- |
+| [`archipelago_variety_spec.json`](archipelago_variety_spec.json) | Ambient island variety | Implemented in source; Minecraft acceptance pending |
 
 ## Ambient island variety
 
@@ -14,13 +14,13 @@ Replaces the four identical `15x10x13` ambient templates, which differed only
 by palette, with five tiers, five altitude bands, and a combinable component
 library.
 
-| Tier      | Footprint    | Share of generated islands   |
-| --------- | ------------ | ---------------------------- |
-| Islet     | 11x8x9       | 35%                          |
-| Standard  | 15x10x13     | 45%                          |
-| Crag      | 23x18x21     | 16%                          |
-| Landmark  | 39x30x35     | 4%                           |
-| Continent | 150x40x150   | exactly 6 sites per world    |
+| Tier      | Footprint  | Share of generated islands |
+| --------- | ---------- | -------------------------- |
+| Islet     | 11x8x9     | 35%                        |
+| Standard  | 15x10x13   | 45%                        |
+| Crag      | 23x18x21   | 16%                        |
+| Landmark  | 39x30x35   | 4%                         |
+| Continent | 150x40x150 | exactly 6 sites per world  |
 
 Key decisions:
 
@@ -46,6 +46,7 @@ That commit's message states the `wip/island-variety-partial` branch contains
 happened to be uncommitted in the working tree when the workflow ran. No agent
 touched them.
 
-The branch is still reference-only and unmerged, because it holds half-written
-generation code with no tests and no review. But it contains no agent
-misbehaviour, and the owner's art was restored to the working tree.
+The original planning branch was reference-only. Its contract is now
+implemented in the `0.3.8` source with automated review; Minecraft acceptance
+remains separate. The owner's unrelated art stayed preserved throughout the
+integration.

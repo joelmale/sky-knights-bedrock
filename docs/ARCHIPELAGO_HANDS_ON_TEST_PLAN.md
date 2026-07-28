@@ -1,6 +1,6 @@
 # Procedural Archipelago Hands-On Test Plan
 
-> Build under test: `0.3.6`
+> Build under test: `0.3.8`
 >
 > Automated status is not Minecraft acceptance. Record the exact commit,
 > Minecraft version, world type, device, input method, and Content Log result.
@@ -44,12 +44,12 @@ Knights Behavior Pack and its Resource Pack.
 
 Pass when:
 
-- debug reports `Sky Knights debug v0.3.6`;
+- debug reports `Sky Knights debug v0.3.8`;
 - debug reports `below=void`; stop and restart the session on a template world
   if it reports vanilla terrain;
 - starter island, Ember Outpost, and Frostspire complete automatically;
 - `activeJob=none` after bootstrap settles;
-- debug includes an `archipelago=<count>/384` line;
+- debug includes the bounded solo-island and continent counts;
 - no missing-structure, registry, ticking-area, watchdog, or script error
   appears in the Content Log.
 
@@ -79,13 +79,14 @@ still runs short of.
 
 1. Remain near the starter island for two minutes.
 2. Run `/skyknights:debug` every 30 seconds and record the ambient count.
-3. Fly at Y=175 toward the next coordinate reported by debug.
+3. Fly toward the next coordinate reported by debug, matching its altitude
+   instead of holding one fixed Y.
 4. Observe islands appearing ahead of the player.
 
 Pass when:
 
 - the ambient count increases without a developer generation command;
-- only one `a1_...` job is active at a time;
+- only one `a2_...` job is active at a time;
 - new islands remain outside the authored central realm;
 - no island stamps directly around a player or occupied craft;
 - entering a queued target before placement preserves the entity and skips that
@@ -96,10 +97,11 @@ Pass when:
 Record count after two minutes, longest visible hitch, and approximate client
 FPS before and during placement.
 
-## Session C — family clusters
+## Session C — family, tier, altitude, and rare-variant variety
 
-Visit the four broad planner quadrants around Y=175. The exact centers vary by
-world seed, but the reference layout places family clusters roughly around:
+Visit the four broad planner quadrants across the deep, low, mid, high, and
+crown altitude bands. The exact centers vary by world seed, but the reference
+layout places family clusters roughly around:
 
 | Quadrant               | Expected dominant family |
 | ---------------------- | ------------------------ |
@@ -108,14 +110,24 @@ world seed, but the reference layout places family clusters roughly around:
 | southwest (`-X`, `+Z`) | Tundra                   |
 | southeast (`+X`, `+Z`) | Volcanic                 |
 
-Sample at least ten islands in each quadrant between about 1,200 and 2,000
-blocks from the origin.
+Sample at least ten solo islands in each quadrant between about 1,200 and 2,000
+blocks from the origin. Visit at least one islet, Standard island, crag, and
+landmark. Then travel to one of the six continent sites on the outer ring and
+let its complete 21-part job finish.
 
 Pass when:
 
 - each quadrant is visually dominated by its expected palette;
 - all four palettes are readily distinguishable at normal flight distance;
-- island heights vary within the intended sky layer;
+- island origins visibly span multiple altitude bands rather than one shelf;
+- islets, Standard islands, crags, and landmarks have distinct silhouettes;
+- one continent reads as a rounded, continuous landmass with no open component
+  seams, contains a central massif, at least two lakes, a chasm, and a bridge,
+  and does not visibly place all 21 parts in one frozen frame;
+- volcanic burn islands are rare, an ember island keeps its oaks isolated from
+  eternal netherrack fire, and a reactive pyre eventually consumes its bounded
+  grove without restamping it;
+- no continent contains a burn variant;
 - no ambient island contains a Dockmaster, progression chest, custom entity,
   Aether Core, or Relic Shard.
 
@@ -124,16 +136,19 @@ sky color, and the biome readout are not expected to change in this slice.
 
 ## Session D — reload and duplicate safety
 
-1. While exploring new space, watch debug until an `a1_...` job is active.
+1. While exploring new space, watch debug until an `a2_...` job is active.
 2. Close the world during or immediately after visible placement.
 3. Reopen the same world.
 4. Return to that island and run debug.
 5. Repeat the close/reopen after at least 25 ambient islands exist.
+6. At a continent site, close once during the 21-part placement and reopen.
 
 Pass when:
 
 - the active job completes or safely retries;
 - the island is not duplicated, shifted, or partially overlaid;
+- the continent resumes after its persisted part cursor and finishes without
+  erasing or rejecting the components already placed;
 - the ambient count never decreases or double-increments for one ID;
 - no ticking area named `skyknights_generation_*` remains stuck;
 - dynamic property bytes remain below the configured world-document limit.
@@ -146,11 +161,11 @@ This is a cheats-enabled safety test.
 2. Wait for any already active job to finish, then run debug and confirm
    `paused=true activeJob=none`.
 3. Note the reported next ambient origin.
-4. Teleport about 32 blocks horizontally and 20 blocks above that origin to
-   load its chunks without entering the 15×10×13 target volume.
+4. Teleport far enough above and beside the reported bounds to load its chunks
+   without entering that tier's target volume.
 5. Use `/setblock <origin-x> <origin-y> <origin-z> gold_block` to place a
    conspicuous block inside the target volume.
-6. Run `/skyknights:recover` to leave the candidate's 48-block player-clearance
+6. Run `/skyknights:recover` to leave the candidate's reported player-clearance
    area.
 7. Run `/skyknights:archipelago_resume`.
 8. Wait for the planner to process the location.
@@ -197,8 +212,9 @@ Record:
 - memory or disconnect symptoms;
 - multiplayer observations if a second player explores another quadrant.
 
-Pass when generation remains responsive, restart-safe, and below the 384-island
-cap. Reaching all 384 islands is not required for the first hands-on pass.
+Pass when generation remains responsive, restart-safe, and below the 224-solo
+and two-continent lifetime caps. Reaching either cap is not required for the
+first hands-on pass.
 
 ## Acceptance record
 
@@ -207,7 +223,7 @@ cap. Reaching all 384 islands is not required for the first hands-on pass.
 | A — bootstrap/world type       | [ ]    |                |
 | A2 — starter resource route    | [ ]    |                |
 | B — lazy generation            | [ ]    |                |
-| C — family clusters            | [ ]    |                |
+| C — family/tier/altitude variety | [ ]    |                |
 | D — reload safety              | [ ]    |                |
 | E — occupied volume            | [ ]    |                |
 | F — normal world compatibility | [ ]    |                |
@@ -215,7 +231,7 @@ cap. Reaching all 384 islands is not required for the first hands-on pass.
 
 The slice is ready for broader play only when Sessions A–F pass on a fresh void
 world and the Content Log is clean. Session G supplies the measurements needed
-to adjust density, radius, and the 384-island cap.
+to adjust density, per-tier radii, and the two lifetime caps.
 
 Sessions A and A2 are the gate for everything after them: a wrong world type
 invalidates the terrain observations, and a starter route that cannot reach the

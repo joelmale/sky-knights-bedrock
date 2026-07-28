@@ -344,3 +344,65 @@ entries, and no random-seed opt-in.
 This automation establishes a reviewable sky-only source and packaging
 contract. It does not replace clean-client import, rendering, reload,
 multiplayer, input, or performance acceptance.
+
+## ADR-018 — Versioned island variety and resumable continents
+
+Status: accepted for the `0.3.8` ambient-island variety slice; Minecraft
+acceptance remains pending.
+
+The ambient planner advances from `a1` to `a2`. New solo islands select one of
+four weighted size tiers and one of five deterministic altitude bands. The
+planner also reserves six widely spaced continent sites, but deterministically
+activates at most two. A continent is a 150×40×150 composition of 21
+30×40×30 parts, roughly four times a Landmark island's footprint dimensions.
+It does not count against the separate 224-solo cap.
+
+Existing `a1` terrain is inert: it is not relocated, restamped, or counted
+against the `a2` caps. A valid `a1` job that was already in flight may finish
+against its original Standard template. This narrowly preserves interrupted
+generation without reactivating old planned terrain.
+
+Generation jobs gain optional ordered parts and a monotonic part cursor without
+a world-schema bump. Single-part jobs retain their existing representation.
+Multipart jobs preflight their complete footprint, place and verify one
+contiguous row at a time, checkpoint after every part, and pause five ticks
+between placements. On resume, an already valid current part advances the
+cursor instead of being mistaken for player obstruction. Checkpointed parts
+are not revalidated into overwriting or retrying after a player edits them;
+remaining parts still receive a complete preflight plus just-in-time race
+checks. The ticking area therefore remains bounded to one row rather than the
+whole continent.
+
+Structure composition follows an explicit replacement contract. `-1` means
+"do not overwrite the destination" and is used at open seams; declared
+`minecraft:air` is an intentional carve and is emitted after solid blocks.
+Component integrity probes are rotated with their placement and must remain
+inside authored body material. Solo templates, feature templates, component
+templates, and dual-use templates are categorized in the machine-readable
+variety specification and verified against the emitted structure modules.
+
+Every template also owns a complete local safe-dock coordinate. Automated
+checks require solid non-hazardous footing with two clear blocks above it.
+Runtime translates this coordinate from the logical footprint, including
+continents whose persisted job origin is the first component rather than the
+150×150 bounding-box corner.
+
+Two approved planning dimensions were reduced when generator assertions proved
+them incompatible with their own budgets. `comp_lake` uses a sealed 6×5,
+two-deep basin instead of 8×7×4 to stay under 420 liquid blocks.
+`comp_ridge` uses a radius-8, height-16 peak instead of radius 11 to stay under
+11,000 solid blocks. The implemented values supersede the earlier planning
+notes and are recorded in the machine-readable specification.
+
+Only volcanic Crag and Landmark solo islands evaluate burn variants. Eternal
+embers use a deterministic 1-in-8 gate. A bounded reactive oak pyre uses a
+1-in-16 gate only after the ember gate misses and only on Landmarks, making the
+variants mutually exclusive and rare. Continents never evaluate either burn
+gate.
+
+The rescue threshold moves from Y=64 to Y=20 because legal deep-band islands
+can begin near Y=60. Basic-ship range remains horizontal-only, so altitude
+variation does not consume flight range. These choices, the planner weights,
+component layout, and hands-on gates are specified in
+[`design/archipelago_variety_spec.json`](design/archipelago_variety_spec.json)
+and [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md).

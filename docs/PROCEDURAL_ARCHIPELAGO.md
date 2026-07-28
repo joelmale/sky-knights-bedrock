@@ -1,6 +1,7 @@
 # Procedural Archipelago Architecture
 
-> Status: integrated in playtest build `0.3.4`; Minecraft acceptance pending.
+> Status: island-variety run 2 integrated in `0.3.8` source; Minecraft
+> acceptance pending.
 
 ## Decision
 
@@ -18,37 +19,67 @@ and recovery guarantees the project needs.
 
 ## Current implementation
 
-The stable pack contains four ambient structure templates:
+The stable pack contains a deterministic 26-template ambient library grouped by
+role:
 
-| Family   | Structure                     | Palette identity                     |
-| -------- | ----------------------------- | ------------------------------------ |
-| Verdant  | `skyknights:ambient_verdant`  | grass, dirt, stone, oak vegetation   |
-| Desert   | `skyknights:ambient_desert`   | red sand, sandstone, dead vegetation |
-| Tundra   | `skyknights:ambient_tundra`   | snow, stone, ice, spruce vegetation  |
-| Volcanic | `skyknights:ambient_volcanic` | netherrack, blackstone, basalt       |
+| Role         | Contents                                                                                 |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| Solo         | Four islets, four byte-stable Standard islands, four base crags, and four base landmarks |
+| Feature      | Reusable relief, cave, lake, fall, bridge, ember-field, and bounded-pyre primitives      |
+| Component    | Six 30×40×30 coast/interior parts for assembling continents                              |
+| Dual         | `duo_mesa`, valid both as one solo landmark and as a continent interior                  |
+| Rare variant | Volcanic crag/landmark ember fields and the landmark reactive pyre                       |
 
-Each template is a deterministic 15×10×13 structure with a solid canonical
-body, five integrity probes, no dock, no container, no entity, and no
-progression-unique block. The ambient structures are scenery foundations; they
-do not replace the eight authored progression islands.
+The four original `ambient_*` structures are the Standard tier and remain
+byte-identical. All ambient content remains scenery-only: no authored dock,
+container, custom entity, or progression-unique reward is activated by this
+planner. Each template does carry safe-return metadata, verified against its
+emitted block indices for solid footing and two clear blocks; continent
+coordinates are translated from the logical 150×150 footprint rather than the
+first component's persisted origin.
+
+| Tier      | Footprint  | Solo roll | Placement model                                |
+| --------- | ---------- | --------: | ---------------------------------------------- |
+| Islet     | 11×8×9     |       35% | One cheap standalone structure                 |
+| Standard  | 15×10×13   |       45% | One original byte-stable ambient structure     |
+| Crag      | 23×18×21   |       16% | One peaked/cavern structure                    |
+| Landmark  | 39×30×35   |        4% | One large feature-rich structure               |
+| Continent | 150×40×150 |  separate | Twenty-one resumable parts on six sparse sites |
 
 The planner in `scripts/generation/archipelago.ts` provides:
 
 - a 57×57 bounded planning envelope, roughly 5,376 blocks across;
-- more than 900 possible islands for the reference seed;
+- more than 850 possible solo islands for the reference seed;
 - four deterministic family clusters;
 - a 460-block protected radius around the authored central realm;
-- 96-block cells, conservative non-overlap, and Y=145–163 altitude bands;
-- a 48-block player clearance so a new island is never stamped around an
-  observer;
-- compact `a1_<x>_<z>` IDs that can be rederived without storing every
+- 96-block cells and per-tier clearance radii with at least 12 blocks between
+  reserved silhouettes;
+- five overlapping altitude bands spanning origin Y=60–290, with the highest
+  structures clamped to top Y=314;
+- six deterministic continent sites on a jittered ring roughly 2,300 blocks
+  from the center, with a 5×5-cell suppression zone around each;
+- per-island observer clearance from 48 blocks for small islands to 137 blocks
+  for continents;
+- compact `a2_<x>_<z>` IDs that can be rederived without storing every
   coordinate;
 - lazy radius queries rather than materializing the complete plan at runtime;
-- a first-release cap of 384 persisted ambient islands.
+- separate lifetime caps of 224 solo islands and two continents.
 
-The `a1` identifier prefix is permanently paired with planner version 1.
-Changing the authored-island layout version cannot move an already queued or
-generated ambient island. A future layout must use a new ambient ID version.
+The `a1` identifier prefix remains permanently paired with the original flat
+planner. Existing `a1` terrain and generated IDs stay intact but become inert:
+the new planner neither relocates nor restamps them. Run 2 uses `a2`, and a
+future selection change that reinterprets coordinates must use another prefix.
+
+Altitude is deterministic integer math. Each solo tier chooses from a weighted
+subset of deep, low, mid, high, and crown bands, then applies a small
+coordinate-derived ridge term so neighboring cells slope together instead of
+forming unrelated shelves. Continents occupy base Y=96–128 as the low floor of
+the world.
+
+Only volcanic crags and landmarks evaluate burn gates. The eternal ember gate
+is checked first at 1-in-8; only a miss can reach the 1-in-16 reactive-pyre
+gate, which is landmark-only. The variants therefore cannot coincide, remain
+under two percent of the full plan, and never appear on a continent.
 
 ## Runtime behavior
 
@@ -57,20 +88,28 @@ every 40 ticks:
 
 1. collect players in the configured archipelago dimension;
 2. find the nearest ungenerated planned island within 512 horizontal blocks;
-3. reject candidates within 48 horizontal blocks of any player;
+3. reject candidates inside that island's per-tier observer clearance;
 4. persist one generation job;
-5. load the complete target volume with a ticking area;
-6. refuse to stamp over any occupied volume;
-7. recheck the loaded target for players, craft, or other entities immediately
-   before placement and preserve/skip that candidate if one is present;
-8. place the family `.mcstructure`;
-9. verify its integrity probes;
+5. load the complete solo target, or preflight every remaining continent part
+   one row at a time;
+6. refuse to stamp any continent part if a later remaining part is already
+   occupied, so no partial continent is created;
+7. recheck each loaded target for players, craft, blocks, or other entities
+   immediately before placement and preserve/skip that candidate if one is
+   present;
+8. place the resolved solo structure, or resume the continent at its persisted
+   part cursor with five ticks between parts;
+9. verify the solo probes, or each newly handled part while its row remains
+   loaded without retry-gating earlier checkpointed player edits;
 10. checkpoint and mark the island generated.
 
 Only one global generation job runs at a time. A crash after placement but
 before the checkpoint accepts an intact structure without restamping it. A
-player or vanilla block found in an ungenerated target volume causes that
-location to be recorded as skipped, preserving the existing blocks.
+continent persists its next-part cursor after every component, so a restart
+recognizes a valid placement made just before a missed cursor save and never
+treats a partial continent as finished. A player or vanilla block found in any
+ungenerated target volume causes that location to be recorded as skipped,
+preserving the existing blocks.
 
 The stable target is currently `minecraft:overworld` so the add-on remains
 installable without custom-dimension migration. A normal Overworld will still
@@ -144,44 +183,26 @@ planner for progression-critical islands rather than replace it.
 
 ## Template roles and large-island composition
 
-The current four ambient templates are **standalone** islands. Their unused NBT
-cells have block index `-1`, meaning “do not place a block here.” They are not
-explicit `minecraft:air` cells. This non-destructive empty space behaves like a
-structure-void mask and lets a template be placed without clearing everything
-inside its rectangular bounds.
+Every new structure follows the normative `-1` contract:
 
-Future templates should declare one of three roles:
+- palette index `-1` is structure void and leaves the existing world untouched;
+- the final palette entry is explicit `minecraft:air` and force-clears only a
+  declared cave, chasm, basin headroom, fall column, socket, fire standoff, or
+  continent seam interior;
+- solo air may never escape the island silhouette;
+- every solo structure keeps at least 70% of its rectangular volume as
+  structure void.
 
-| Role         | Contract                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------------------------ |
-| `standalone` | A complete safe island with no required neighbor                                                             |
-| `module`     | A cliff lobe, underside, plateau, cave, spire, bridge root, or biome cap that requires compatible connectors |
-| `hybrid`     | A complete small island that is also sealed and aligned for optional modules                                 |
+Continents tile 30×40×30 parts edge-to-edge with zero overlap. A frozen border
+shell makes every interior seam share the same core, surface, and cleared
+headroom profile; features cannot write into that shell except through the one
+fixed bridge-abutment window. The four 5×5 grid corners are omitted, twelve
+rotated coast parts round the perimeter, and nine interior slots guarantee a
+central ridge, at least two lakes, one chasm, and one bridge.
 
-Large and massive islands should be deterministic **module graphs**, not one
-enormous opaque structure:
-
-1. choose a size class and silhouette grammar from the world seed;
-2. reserve the complete maximum bounds before placing anything;
-3. select a core or hybrid island;
-4. attach lobes and vertical pieces through typed, rotation-aware connectors;
-5. add a surface cap, cave/underside pieces, and one optional landmark;
-6. validate connector closure, solidity, travel lanes, and the final bounds;
-7. place the approved graph through resumable stages.
-
-Structure-void cells are important because module bounds can overlap without
-erasing blocks already placed by another module. They do not solve connection,
-collision, or ownership by themselves. Every module needs connector metadata,
-a claimed local bounding box, allowed rotations, and compatibility rules.
-
-Explicit `minecraft:air` should be rare. It is appropriate only when a module
-intentionally carves a cave or doorway inside a newly reserved, known-owned
-volume. Using explicit air around an ordinary module could erase another
-module, vanilla terrain, or player work.
-
-The first modular slice should add multiple small and medium silhouettes before
-attempting a massive class. Exact block/volume thresholds remain provisional
-until BDS and weakest-device placement measurements exist.
+`duo_mesa` is the only dual-role structure. Its seam shell reads as an
+intentional cliff when placed alone and aligns with the same frozen component
+contract when selected inside a continent.
 
 ## Adding an ambient island variant
 

@@ -1,12 +1,10 @@
 # AI Development Handoff
 
-> Snapshot date: 2026-07-27
+> Snapshot date: 2026-07-28
 >
 > Branch: `codex/procedural-archipelago`
 >
-> HEAD: `82c3398` (the `0.3.5` checkpoint is committed and pushed)
->
-> Playtest version: `0.3.6`
+> Source/playtest version: `0.3.8`
 
 ## Read this first
 
@@ -17,14 +15,15 @@ owns integration, documentation, full verification, and the final commit.
 Substantial slices use bounded specialists with disjoint file ownership and an
 independent read-only QA role.
 
-The `0.3.5` checkpoint is committed as `82c3398` and pushed; `main` was
-fast-forwarded to it. Generated files under `dist/` are ignored and may be
-rebuilt; tracked source and documentation are authoritative.
+The branch contains the `0.3.8` island-variety checkpoint. Generated files
+under `dist/` are ignored and may be rebuilt; tracked source and documentation
+are authoritative. Inspect `git status` and preserve unrelated owner-authored
+work.
 
-`0.3.6` is a playtest-driven correction slice on top of it. Read the
-[`VALIDATION_LOG.md`](VALIDATION_LOG.md) hands-on section before changing
-starter content: it records the first real Minecraft session and what it
-falsified.
+Read the [`VALIDATION_LOG.md`](VALIDATION_LOG.md) hands-on section before
+changing starter or archipelago content. The latest Minecraft archipelago
+evidence is still `0.3.6`; the `0.3.8` variety planner has host evidence but
+still needs Sessions C-G in a real client.
 
 ## Product and architecture state
 
@@ -42,9 +41,11 @@ The current implementation includes:
 - a bounded player-built Skycraft prototype with wood airframes, Helm/Core
   scanning, mass/lift/thrust/certification rules, reference blueprints,
   authored moving proxies, roles, damage/repair, persistence, and combat;
-- a bounded deterministic procedural archipelago with more than 900 candidate
-  cells, four clustered visual families, lazy one-job placement, occupied-space
-  protection, and a 384-outcome persistence cap; and
+- a bounded deterministic procedural archipelago with more than 850 solo
+  candidates, four clustered visual families, four weighted size tiers, five
+  altitude bands, rare bounded burn variants, six sparse continent sites,
+  resumable 21-part continent placement, occupied-space protection, and
+  separate 224-solo/two-continent caps; and
 - a stable strategy of scripted `.mcstructure` island placement over a packaged
   void Overworld. The opt-in custom dimension and native biome feature rules
   remain experiments rather than release authority.
@@ -61,7 +62,28 @@ Authoritative detail lives in:
 - [`PROCEDURAL_ARCHIPELAGO.md`](PROCEDURAL_ARCHIPELAGO.md) — island-field
   planner and placement design.
 
-## Current `0.3.6` checkpoint
+## Current `0.3.8` checkpoint
+
+### Ambient island variety
+
+New ambient IDs use planner version `a2`. Existing `a1` terrain stays where it
+was and does not consume the new caps; a valid interrupted `a1` job can still
+finish against its frozen Standard template. Solo islands select Islet,
+Standard, Crag, or Landmark templates across deterministic Deep, Low, Mid,
+High, and Crown altitude bands.
+
+The planner exposes six widely spaced continent sites and generates at most
+two. Each continent is a 150×40×150 composition of 21 seam-safe components.
+Jobs persist a monotonic part cursor, load and verify one row at a time, pause
+five ticks between placements, and safely recognize a component placed just
+before an interrupted cursor save.
+
+The structure library distinguishes solo, feature, component, and dual-use
+content. Structure void preserves destination blocks outside silhouettes and
+at open seams; explicit air is limited to intentional carves, basins, falls,
+fire standoffs, sockets, and interior seam clearance. Rare volcanic ember and
+bounded oak-pyre variants are mutually exclusive and never selected for
+continents.
 
 ### Starter-resource correction
 
@@ -79,9 +101,9 @@ constant, so retuning a recipe cannot quietly erode the buffer. The generator
 throws if ore is placed below the reachable band, outside the body, or with
 fewer than four visible iron and two visible coal outcrops.
 
-The starter island content version is 7 and package/pack versions are `0.3.6`.
-Unmodified generated islands may rebuild; player-modified and conservatively
-protected islands are not silently overwritten.
+The starter island content version remains 7. Unmodified generated islands may
+rebuild; player-modified and conservatively protected islands are not silently
+overwritten.
 
 ### Packaged void realm
 
@@ -118,33 +140,27 @@ contract.
 
 ## Latest verification evidence
 
-The current integrated working tree passed:
+The `0.3.8` combined working tree passed:
 
 ```powershell
-npm run world-template:void
 npm run verify
 npm audit --audit-level=high
-npm run test:bds:smoke
 ```
 
 Results:
 
-- 231 host tests across 40 files;
-- generated structures, formatting, TypeScript, stable bundle, BDS NBT
+- 265 host tests across 45 files;
+- all 35 generated structures, formatting, TypeScript, stable bundle, BDS NBT
   fixtures, production `.mcaddon`, and both opt-in profiles passed;
 - npm reported zero vulnerabilities;
-- the named BDS skiff-seat GameTest passed;
-- the void runner checked 17 chunks and 1,671,168 blocks through Y=-64..319
-  across two boots; every checked block was air;
-- the final `0.3.6` `.mctemplate` is 139,426 bytes with 118 sorted root
-  entries, no wrapper folder, and SHA-256
-  `a05a446df94776161dc9e1c4efb6bb2ea984b8bcd8773d1a6ec252b821326811`.
+- 39 focused tests cover planner/runtime/structure/persistence/multipart
+  behavior, including full-footprint preflight, stale-cursor recovery,
+  checkpointed-player-edit preservation, and structure-verified safe docks.
 
-The generated import file is:
-
-```text
-dist/world-template/sky_knights_void_world.mctemplate
-```
+The last BDS smoke, full-height void scan, and packaged-template evidence remain
+the historical `0.3.6` results in [`VALIDATION_LOG.md`](VALIDATION_LOG.md).
+They were not rerun and do not prove `0.3.8` continent placement, fire,
+rendering, reload, or performance.
 
 ## What is not yet proven
 
@@ -157,8 +173,9 @@ Automation does not prove:
   that a first-time player finds the six visible ore outcrops without help;
 - save/quit/reopen, world copy, `/reload`, schema migration, or
   player-modified island protection in a real client;
-- archipelago clustering, obstruction behavior, exploration pacing, or
-  weakest-device performance;
+- `0.3.8` tier/altitude readability, burn behavior, continent seams,
+  interrupted multipart placement, obstruction behavior, exploration pacing,
+  or weakest-device performance;
 - multiplayer, controller, or touch behavior; or
 - the full player-built Skycraft acceptance matrix.
 
@@ -186,21 +203,22 @@ what the generator emitted.
 
 ## Recommended next slice
 
-The immediate slice should be **Void Realm client acceptance and first-flight
-progression closure**, not more content.
+The immediate slice should be **`0.3.8` island-variety client acceptance**, not
+more archipelago content.
 
 1. Run `npm run world-template:install` and restart Minecraft. Double-clicking
    the `.mctemplate` does nothing on this machine: no Minecraft file extension
    is registered with Windows.
 2. In Minecraft, create a new world from **Sky Knights: Void Realm** under
    templates. Do not add the standalone `.mcaddon`; both packs are embedded.
-3. Run Sessions A-C of
+3. Confirm `/skyknights:debug` reports `v0.3.8` and `below=void`, then run
+   Sessions C-G of
    [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md),
-   including automatic starter arrival, `Sky Knights debug v0.3.6`, `below=void`, no vanilla
-   land, starter boulder/iron/coal visibility, first pickaxes, first skiff, and
-   nearby/distant island generation.
-4. Save, close, reopen, and run the persistence/obstruction checks in Sessions
-   D-F.
+   recording family/tier/altitude variety, rare burns, one continent,
+   save/close/reopen during continent placement, occupied-volume preservation,
+   exploration pacing, and placement hitch.
+4. Keep the earlier `0.3.6` Sessions A, A2, and B as historical evidence; rerun
+   them only if bootstrap, starter content, or the template changes.
 5. Record the Minecraft version, platform, input, exact Git commit or dirty
    checkpoint, Content Log result, and every failure before changing code.
 6. Implement only reproducible import, bootstrap, progression, obstruction, or
@@ -241,4 +259,3 @@ Before committing this checkpoint, the next central architect must:
    changes after this handoff;
 4. update evidence with any Minecraft results; and
 5. make one intentional checkpoint commit only when the user authorizes it.
-

@@ -37,7 +37,7 @@ export const IDENTIFIERS = {
   airshipFlight: "skyknights:airship_flight",
 } as const;
 
-export const ADDON_VERSION = "0.3.7";
+export const ADDON_VERSION = "0.3.8";
 
 function pinnedIsland(id: string): {
   definition: IslandDefinition;
@@ -302,7 +302,10 @@ export const TEST_BENCH = {
   ],
 } as const;
 
-export const VOID_RESCUE_Y = 64;
+// The varied archipelago can place deep-band islets as low as Y=60. Keep the
+// rescue plane below every legal island so standing on one never looks like a
+// void fall, while still recovering an actual fall well above world bottom.
+export const VOID_RESCUE_Y = 20;
 export const RECOVERY_INTERVAL_TICKS = 10;
 export const BASIC_SHIP_RANGE = 150;
 export const BASIC_SHIP_WARNING_RANGE = 130;

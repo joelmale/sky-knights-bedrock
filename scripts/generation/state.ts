@@ -41,6 +41,38 @@ export function markStructurePlaced(state: WorldState): WorldState {
   };
 }
 
+/**
+ * Persists multipart placement progress without ever moving the checkpoint
+ * backwards. Legacy single-structure jobs intentionally have no cursor.
+ */
+export function advancePartCursor(
+  state: WorldState,
+  jobId: string,
+  cursor: number,
+): WorldState {
+  const job = state.activeGeneration;
+
+  if (job === undefined || job.id !== jobId || job.parts === undefined) {
+    return state;
+  }
+
+  const current = job.partCursor ?? 0;
+  const requested = Number.isFinite(cursor) ? Math.trunc(cursor) : current;
+  const nextCursor = Math.min(job.parts.length, Math.max(current, requested));
+
+  if (nextCursor === current) {
+    return state;
+  }
+
+  return {
+    ...state,
+    activeGeneration: {
+      ...job,
+      partCursor: nextCursor,
+    },
+  };
+}
+
 export function completeGeneration(state: WorldState): WorldState {
   const job = state.activeGeneration;
 

@@ -79,16 +79,17 @@ share enemy health or loot families.
 
 ## Structures
 
-| Structure             | Contents                                                                   | Placement                      | Status  |
-| --------------------- | -------------------------------------------------------------------------- | ------------------------------ | ------- |
-| Starter dock/workshop | dock, Dockmaster, launch berths, crafting table, furnace                   | starter_island                 | built   |
-| Small ruin            | loot chest, guardian                                                       | ember_outpost                  | built   |
-| Frost tower           | loot chest, warden                                                         | frostspire                     | built   |
-| Wood hut              | geometry built; tier-1 chest content inactive                              | sunspire_reach, verdant_hollow | partial |
-| Watchtower            | geometry built; encounter and chest content inactive                       | glacier_vault                  | partial |
-| Biome shrine          | geometry built; relic and ambient content inactive                         | ashfall_crater                 | partial |
-| Boss arena            | geometry built; Giant and completion objective inactive                    | aether_sanctum                 | partial |
-| Ambient island bodies | four solid palette-specific templates without progression loot or entities | bounded procedural archipelago | built   |
+| Structure             | Contents                                                                                              | Placement                      | Status  |
+| --------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------ | ------- |
+| Starter dock/workshop | dock, Dockmaster, launch berths, crafting table, furnace                                              | starter_island                 | built   |
+| Small ruin            | loot chest, guardian                                                                                  | ember_outpost                  | built   |
+| Frost tower           | loot chest, warden                                                                                    | frostspire                     | built   |
+| Wood hut              | geometry built; tier-1 chest content inactive                                                         | sunspire_reach, verdant_hollow | partial |
+| Watchtower            | geometry built; encounter and chest content inactive                                                  | glacier_vault                  | partial |
+| Biome shrine          | geometry built; relic and ambient content inactive                                                    | ashfall_crater                 | partial |
+| Boss arena            | geometry built; Giant and completion objective inactive                                               | aether_sanctum                 | partial |
+| Ambient solo islands  | islet, Standard, crag, landmark, and rare volcanic burn variants without progression loot or entities | bounded procedural archipelago | built   |
+| Continent kit         | six seam-safe component roles plus dual-purpose `duo_mesa`; 21 parts per continent                    | six sparse planner sites       | built   |
 
 ## Skycraft construction and technology
 

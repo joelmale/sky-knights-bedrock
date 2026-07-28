@@ -7,6 +7,7 @@ import {
   WorldStateRepository,
 } from "../scripts/persistence/repositories";
 import {
+  migrateWorldState,
   parsePlayerState,
   parseShipState,
 } from "../scripts/persistence/schema";
@@ -146,6 +147,122 @@ describe("WorldStateRepository", () => {
       islandVersions: { starter_island: 3, frostspire: 1 },
       skyRaiderEncounter: { status: "dormant" },
       migrations: ["world:v2->v3", "world:v3->v4", "world:v4->v5"],
+    });
+  });
+
+  it("preserves validated multipart generation checkpoints without a schema bump", () => {
+    const state = migrateWorldState(
+      {
+        schemaVersion: 5,
+        seed: 12,
+        worldSeed: deriveWorldSeed(12, "standard"),
+        worldProfile: "standard",
+        layoutVersion: LAYOUT.layoutVersion,
+        generatedIslandIds: [],
+        islandVersions: {},
+        islandLayout: {},
+        activeGeneration: {
+          id: "a2_p24_p0",
+          contentVersion: 2,
+          structureId: "skyknights:comp_plain",
+          dimensionId: "minecraft:overworld",
+          origin: { x: 0, y: 96, z: 0 },
+          stage: "queued",
+          attempts: 3,
+          parts: [
+            {
+              structureId: "skyknights:comp_plain",
+              origin: { x: 0, y: 96, z: 0 },
+              rotation: "None",
+              row: 0,
+              integrityBlock: {
+                offset: { x: 15, y: 20, z: 15 },
+                typeId: "minecraft:grass_block",
+              },
+            },
+          ],
+          partCursor: 1,
+        },
+        skyRaiderEncounter: { status: "dormant" },
+        migrations: ["world:v4->v5"],
+      },
+      () => 99,
+    );
+
+    expect(state.schemaVersion).toBe(5);
+    expect(state.activeGeneration).toMatchObject({
+      id: "a2_p24_p0",
+      partCursor: 1,
+      parts: [
+        {
+          structureId: "skyknights:comp_plain",
+          rotation: "None",
+          row: 0,
+        },
+      ],
+    });
+  });
+
+  it("drops malformed multipart checkpoints while retaining legacy jobs", () => {
+    const malformed = migrateWorldState(
+      {
+        schemaVersion: 5,
+        seed: 12,
+        worldSeed: deriveWorldSeed(12, "standard"),
+        worldProfile: "standard",
+        layoutVersion: LAYOUT.layoutVersion,
+        generatedIslandIds: [],
+        islandVersions: {},
+        islandLayout: {},
+        activeGeneration: {
+          id: "a2_p24_p0",
+          contentVersion: 2,
+          structureId: "skyknights:comp_plain",
+          dimensionId: "minecraft:overworld",
+          origin: { x: 0, y: 96, z: 0 },
+          stage: "queued",
+          attempts: 0,
+          parts: [],
+        },
+        skyRaiderEncounter: { status: "dormant" },
+        migrations: [],
+      },
+      () => 99,
+    );
+    const legacy = migrateWorldState(
+      {
+        schemaVersion: 5,
+        seed: 12,
+        worldSeed: deriveWorldSeed(12, "standard"),
+        worldProfile: "standard",
+        layoutVersion: LAYOUT.layoutVersion,
+        generatedIslandIds: [],
+        islandVersions: {},
+        islandLayout: {},
+        activeGeneration: {
+          id: "starter_island",
+          contentVersion: 3,
+          structureId: "skyknights:starter_island",
+          dimensionId: "minecraft:overworld",
+          origin: { x: -7, y: 154, z: -7 },
+          stage: "queued",
+          attempts: 0,
+        },
+        skyRaiderEncounter: { status: "dormant" },
+        migrations: [],
+      },
+      () => 99,
+    );
+
+    expect(malformed.activeGeneration).toBeUndefined();
+    expect(legacy.activeGeneration).toEqual({
+      id: "starter_island",
+      contentVersion: 3,
+      structureId: "skyknights:starter_island",
+      dimensionId: "minecraft:overworld",
+      origin: { x: -7, y: 154, z: -7 },
+      stage: "queued",
+      attempts: 0,
     });
   });
 });

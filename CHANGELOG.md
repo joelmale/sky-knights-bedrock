@@ -4,6 +4,77 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
+## [0.3.8] — 2026-07-28
+
+### Added
+
+- Added the approved ambient island variety library:
+  - four cheap 11×8×9 islets;
+  - four byte-stable 15×10×13 Standard islands;
+  - four 23×18×21 base crags and one rare ember crag;
+  - four 39×30×35 base landmarks, one rare ember landmark, and one bounded
+    reactive-pyre landmark;
+  - six 30×40×30 continent components and the dual-purpose `duo_mesa`.
+- Added deterministic solo tiers weighted 35% islet, 45% Standard, 16% crag,
+  and 4% landmark, plus five overlapping altitude bands spanning origin
+  Y=60–290. Per-tier ridge jitter gives neighboring cells coherent vertical
+  drift, and the top clamp preserves five blocks below the build ceiling.
+- Added six sparse deterministic continent sites. Each continent is assembled
+  from 21 seam-safe parts on an omitted-corner 5×5 grid, guaranteeing a central
+  ridge, two lakes, a chasm, and a bridge. At most two continents generate in
+  one world.
+- Added rare mutually exclusive volcanic burn gates. Eternal ember variants
+  use isolated netherrack fire; the landmark-only reactive pyre ships with a
+  finite oak fuel zone and two sealed lava cups, then terminates without
+  restamping.
+
+### Changed
+
+- Ambient planner IDs moved from `a1` to `a2`. Existing `a1` terrain and
+  generated history remain untouched and do not consume the new 224-solo or
+  two-continent caps. A valid in-flight `a1` job can still finish against its
+  original deterministic Standard template.
+- Generation jobs now support optional multipart plans and a monotonic
+  `partCursor` without changing world schema 5. Continent parts place five
+  ticks apart, persist after every part, load one grid row at a time, and
+  resume without treating their own completed parts as obstructions.
+- Observer clearance, structure size, integrity probes, verified local
+  safe-dock coordinates, and obstruction bounds now resolve per island instead
+  of using one Standard template constant.
+- Lowered the void-rescue plane from Y=64 to Y=20 so legal deep-band islands at
+  Y=60–63 cannot trigger recovery. Basic craft range remains horizontal, so the
+  larger altitude spread does not consume its range budget.
+- Bumped the add-on, stable packs, world template, and GameTest dependency
+  profile to `0.3.8`.
+
+### Structure safety
+
+- New generators enforce the normative emptiness contract: `-1` leaves the
+  world untouched, while explicit `minecraft:air` force-clears only declared
+  caves, basins, falls, sockets, fire standoffs, or continent seam interiors.
+- Per-tier solid, air, liquid, occupancy, and 70% solo-void budgets fail at
+  structure build time. Component border shells and bridge abutments are
+  frozen so independently placed parts cannot erase or gap their neighbors.
+- Multipart jobs preflight every remaining component before placing part 0,
+  then repeat per-part checks to catch races. Checkpointed parts preserve later
+  player edits without blocking completion, and a component placed just before
+  an interrupted cursor save is recognized rather than restamped.
+- The component budgets resolved two contradictory planning dimensions:
+  `comp_lake` uses a sealed 6×5×2 basin under the 420-liquid ceiling, and
+  `comp_ridge` uses a radius-8, height-16 peak under the 11,000-solid ceiling.
+- Added host coverage for all 22 new emitting modules, planner/runtime
+  determinism, burn rarity and safety guards, continent composition, rotated
+  probes, multipart persistence and preflight, verified safe docks, legacy
+  `a1` recovery, and independent caps.
+
+### Validation
+
+- Automated repository, package, dependency-audit, and independent QA evidence
+  is recorded in `docs/VALIDATION_LOG.md`.
+- Altitude readability, burn behavior, continent placement hitch, interrupted
+  multipart resume, seams, and weakest-device performance remain Minecraft
+  hands-on gates.
+
 ## [0.3.7] — 2026-07-28
 
 ### Fixed

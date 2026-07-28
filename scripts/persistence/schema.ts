@@ -19,18 +19,29 @@ export interface DockLocation {
 
 export type GenerationStage = "queued" | "structure_placed";
 
+export interface GenerationPart {
+  structureId: string;
+  origin: BlockVector;
+  rotation: "None" | "Rotate90" | "Rotate180" | "Rotate270";
+  row: number;
+  integrityBlock: {
+    offset: BlockVector;
+    typeId: string;
+  };
+}
+
 export interface GenerationJob {
   id: string;
   contentVersion: number;
   structureId: string;
   dimensionId: string;
-  origin: {
-    x: number;
-    y: number;
-    z: number;
-  };
+  origin: BlockVector;
   stage: GenerationStage;
   attempts: number;
+  /** Undefined preserves the legacy single-structure placement path. */
+  parts?: readonly GenerationPart[];
+  /** The next multipart structure index to place. */
+  partCursor?: number;
 }
 
 interface WorldStateV1 {
@@ -515,6 +526,94 @@ function islandLayoutRecords(
   return result;
 }
 
+function parsedBlockVector(value: unknown): BlockVector | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const coordinates = [value.x, value.y, value.z];
+
+  if (
+    !coordinates.every(
+      (coordinate) =>
+        typeof coordinate === "number" && Number.isFinite(coordinate),
+    )
+  ) {
+    return undefined;
+  }
+
+  return {
+    x: value.x as number,
+    y: value.y as number,
+    z: value.z as number,
+  };
+}
+
+function generationPart(value: unknown): GenerationPart | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const origin = parsedBlockVector(value.origin);
+  const integrityBlock = value.integrityBlock;
+  const row = value.row;
+
+  if (
+    typeof value.structureId !== "string" ||
+    origin === undefined ||
+    (value.rotation !== "None" &&
+      value.rotation !== "Rotate90" &&
+      value.rotation !== "Rotate180" &&
+      value.rotation !== "Rotate270") ||
+    typeof row !== "number" ||
+    !Number.isSafeInteger(row) ||
+    row < 0 ||
+    !isRecord(integrityBlock) ||
+    typeof integrityBlock.typeId !== "string"
+  ) {
+    return undefined;
+  }
+
+  const offset = parsedBlockVector(integrityBlock.offset);
+
+  if (offset === undefined) {
+    return undefined;
+  }
+
+  return {
+    structureId: value.structureId,
+    origin,
+    rotation: value.rotation,
+    row,
+    integrityBlock: {
+      offset,
+      typeId: integrityBlock.typeId,
+    },
+  };
+}
+
+function generationParts(
+  value: unknown,
+): readonly GenerationPart[] | undefined {
+  if (!Array.isArray(value) || value.length === 0) {
+    return undefined;
+  }
+
+  const parts: GenerationPart[] = [];
+
+  for (const entry of value) {
+    const part = generationPart(entry);
+
+    if (part === undefined) {
+      return undefined;
+    }
+
+    parts.push(part);
+  }
+
+  return parts;
+}
+
 function generationJob(value: unknown): GenerationJob | undefined {
   if (!isRecord(value)) {
     return undefined;
@@ -533,6 +632,27 @@ function generationJob(value: unknown): GenerationJob | undefined {
     return undefined;
   }
 
+  const hasParts = value.parts !== undefined;
+  const parts = hasParts ? generationParts(value.parts) : undefined;
+
+  if (hasParts && parts === undefined) {
+    return undefined;
+  }
+
+  const partCursor = value.partCursor;
+
+  if (partCursor !== undefined) {
+    if (
+      parts === undefined ||
+      typeof partCursor !== "number" ||
+      !Number.isSafeInteger(partCursor) ||
+      partCursor < 0 ||
+      partCursor > parts.length
+    ) {
+      return undefined;
+    }
+  }
+
   return {
     id: value.id,
     contentVersion: Math.max(
@@ -548,6 +668,12 @@ function generationJob(value: unknown): GenerationJob | undefined {
     },
     stage,
     attempts: Math.max(0, Math.trunc(finiteNumber(value.attempts, 0))),
+    ...(parts === undefined
+      ? {}
+      : {
+          parts,
+          ...(partCursor === undefined ? {} : { partCursor }),
+        }),
   };
 }
 

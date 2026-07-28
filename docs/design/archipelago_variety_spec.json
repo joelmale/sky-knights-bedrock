@@ -1,13 +1,18 @@
 {
+  "implementationStatus": {
+    "state": "implemented in 0.3.8; Minecraft acceptance pending",
+    "supersedesPlanningNotesWhereDifferent": true,
+    "budgetDrivenResolutions": [
+      "comp_lake uses radiusX 6, radiusZ 5, depth 2. The originally approved 8x7x4 basin exceeded the component's 420-liquid ceiling.",
+      "comp_ridge uses baseY 21, height 16, baseRadius 8, capDepth 4. The originally approved radius 11 profile exceeded the 11,000-solid component ceiling."
+    ],
+    "safeDockResolution": "Every template carries a full local {x,y,z} feet coordinate verified against its emitted indices: the footing is solid and non-hazardous and the feet/head cells are air or structure void. Runtime translates that coordinate from the logical footprint, including continent jobs whose persisted origin is part 0 rather than the 150x150 bounding-box corner."
+  },
   "tiers": [
     {
       "id": "islet",
       "label": "Islet",
-      "footprint": [
-        11,
-        8,
-        9
-      ],
+      "footprint": [11, 8, 9],
       "boxCells": 792,
       "bodyTopY": 3,
       "bodySpec": "canonicalIslandBody([11,8,9]) -> centerX 5, centerZ 4, topY 3, growthX 1, growthZ 1",
@@ -23,12 +28,7 @@
       "clearanceRadius": 14,
       "heightRadius": 8,
       "minObserverClearance": 48,
-      "families": [
-        "verdant",
-        "desert",
-        "tundra",
-        "volcanic"
-      ],
+      "families": ["verdant", "desert", "tundra", "volcanic"],
       "modules": [
         "islet_verdant",
         "islet_desert",
@@ -41,11 +41,7 @@
     {
       "id": "standard",
       "label": "Standard",
-      "footprint": [
-        15,
-        10,
-        13
-      ],
+      "footprint": [15, 10, 13],
       "boxCells": 1950,
       "bodyTopY": 5,
       "bodySpec": "canonicalIslandBody([15,10,13]) - UNCHANGED, existing modules keep byte-identical output",
@@ -60,12 +56,7 @@
       "clearanceRadius": 16,
       "heightRadius": 9,
       "minObserverClearance": 48,
-      "families": [
-        "verdant",
-        "desert",
-        "tundra",
-        "volcanic"
-      ],
+      "families": ["verdant", "desert", "tundra", "volcanic"],
       "modules": [
         "ambient_verdant",
         "ambient_desert",
@@ -78,11 +69,7 @@
     {
       "id": "crag",
       "label": "Crag",
-      "footprint": [
-        23,
-        18,
-        21
-      ],
+      "footprint": [23, 18, 21],
       "boxCells": 8694,
       "bodyTopY": 9,
       "bodySpec": "taperedEllipsoidBody({centerX:11, centerZ:10, topY:9, growthX:8, growthZ:7, baseRadiusX:3, baseRadiusZ:2}) - deliberately NOT canonicalIslandBody, whose topY would be 13 and leave only 4 layers of headroom",
@@ -97,12 +84,7 @@
       "clearanceRadius": 22,
       "heightRadius": 13,
       "minObserverClearance": 48,
-      "families": [
-        "verdant",
-        "desert",
-        "tundra",
-        "volcanic"
-      ],
+      "families": ["verdant", "desert", "tundra", "volcanic"],
       "modules": [
         "crag_verdant",
         "crag_desert",
@@ -115,11 +97,7 @@
     {
       "id": "landmark",
       "label": "Landmark",
-      "footprint": [
-        39,
-        30,
-        35
-      ],
+      "footprint": [39, 30, 35],
       "boxCells": 40950,
       "bodyTopY": 14,
       "bodySpec": "taperedEllipsoidBody({centerX:19, centerZ:17, topY:14, growthX:15, growthZ:14, baseRadiusX:3, baseRadiusZ:2}) -> radiusAt(14) = [18,16], body spans x 1..37, z 1..33",
@@ -133,12 +111,7 @@
       "clearanceRadius": 33,
       "heightRadius": 19,
       "minObserverClearance": 57,
-      "families": [
-        "verdant",
-        "desert",
-        "tundra",
-        "volcanic"
-      ],
+      "families": ["verdant", "desert", "tundra", "volcanic"],
       "modules": [
         "landmark_verdant",
         "landmark_desert",
@@ -152,11 +125,7 @@
     {
       "id": "continent",
       "label": "Continent",
-      "footprint": [
-        150,
-        40,
-        150
-      ],
+      "footprint": [150, 40, 150],
       "boxCells": "21 parts x 36000 = 756000 iterated cells",
       "bodySpec": "composed - see continent.grid. Per-component body is defined by the shared local-Y datum in continent_shared.mjs, not by taperedEllipsoidBody.",
       "approxSolidBlocks": "~180000 total across 21 parts",
@@ -469,11 +438,7 @@
       "owner": "Engineer B",
       "emitsStructure": true,
       "structureId": "skyknights:comp_coast",
-      "size": [
-        30,
-        40,
-        30
-      ],
+      "size": [30, 40, 30],
       "rationale": "Outer ring edge. Local -Z border is the OUTWARD (coast) face; the +Z, -X and +X borders use the interior seam profile. Placed with rotation None/90/180/270 so one module serves all 12 edge slots. Footprint is square so rotation about the structure origin is exact."
     },
     {
@@ -482,11 +447,7 @@
       "owner": "Engineer B",
       "emitsStructure": true,
       "structureId": "skyknights:comp_plain",
-      "size": [
-        30,
-        40,
-        30
-      ]
+      "size": [30, 40, 30]
     },
     {
       "path": "tools/structures/comp_lake.mjs",
@@ -494,11 +455,7 @@
       "owner": "Engineer B",
       "emitsStructure": true,
       "structureId": "skyknights:comp_lake",
-      "size": [
-        30,
-        40,
-        30
-      ]
+      "size": [30, 40, 30]
     },
     {
       "path": "tools/structures/comp_ridge.mjs",
@@ -506,11 +463,7 @@
       "owner": "Engineer B",
       "emitsStructure": true,
       "structureId": "skyknights:comp_ridge",
-      "size": [
-        30,
-        40,
-        30
-      ],
+      "size": [30, 40, 30],
       "rationale": "Continental massif. Always occupies the center slot (2,2)."
     },
     {
@@ -519,11 +472,7 @@
       "owner": "Engineer B",
       "emitsStructure": true,
       "structureId": "skyknights:comp_chasm",
-      "size": [
-        30,
-        40,
-        30
-      ],
+      "size": [30, 40, 30],
       "rationale": "Cuts fully through the slab. Carries bridge abutments on its -X and +X borders at CONTINENT_BRIDGE_Y. Must contain NO lake (chasm and sealed basin are mutually exclusive in one component)."
     },
     {
@@ -532,11 +481,7 @@
       "owner": "Engineer B",
       "emitsStructure": true,
       "structureId": "skyknights:comp_bridge",
-      "size": [
-        30,
-        40,
-        30
-      ],
+      "size": [30, 40, 30],
       "rationale": "Chasm plus a landBridge spanning it, with matching abutments on -X/+X."
     },
     {
@@ -545,11 +490,7 @@
       "owner": "Engineer B",
       "emitsStructure": true,
       "structureId": "skyknights:duo_mesa",
-      "size": [
-        30,
-        40,
-        30
-      ],
+      "size": [30, 40, 30],
       "tier": "landmark | continent-interior",
       "rationale": "THE dual-purpose module. As a continent interior component it honours the full seam contract. As a solo landmark-tier island the planner simply places it alone - the seam shell reads as a clean cliff wall on all four sides, which is why the seam profile deliberately terminates in a solid vertical face rather than a ragged edge. Solo clearanceRadius 28, heightRadius 24."
     },
@@ -579,18 +520,10 @@
     },
     "grid": {
       "shape": "5 x 5 slots, slot index (i, j) with i,j in 0..4",
-      "componentSize": [
-        30,
-        40,
-        30
-      ],
+      "componentSize": [30, 40, 30],
       "pitch": 30,
       "overlap": "ZERO. Components abut; they never overlap.",
-      "totalFootprint": [
-        150,
-        40,
-        150
-      ],
+      "totalFootprint": [150, 40, 150],
       "omittedSlots": "the four grid corners (0,0), (0,4), (4,0), (4,4) are NOT placed at all - a 150x150 square continent would read as a slab; omitting the corners gives a rounded, believable landmass silhouette",
       "placedParts": 21,
       "slotOrigin": "origin = { x: continentX - 75 + i*30, y: baseY, z: continentZ - 75 + j*30 }",
@@ -714,7 +647,7 @@
     "scripts/generation/archipelago.ts - ArchipelagoIsland gains: `tier: ArchipelagoTier`, `size: {x,y,z}`, `heightRadius: number`, `variant?: 'ember' | 'pyre' | 'mesa'`, `parts?: readonly {structureId,origin,rotation,row}[]`. `radius` stays but is now resolved from the chosen template, not from a global constant.",
     "scripts/generation/archipelago.ts - ARCHIPELAGO_TEMPLATES stops being Record<family, template> and becomes Record<templateKey, template> where templateKey is `${tier}_${family}` plus the continent component keys and the burn variants. templateFor() takes (tier, family, variant). TEMPLATE_PROBES becomes per-tier (the current probe list is hardcoded to the 15x10x13 body: {7,0,6} core and four surface probes at y=5).",
     "scripts/generation/archipelago-runtime.ts - ARCHIPELAGO_CONTENT_VERSION: 1 -> 2.",
-    "scripts/generation/archipelago-runtime.ts line ~97 - `anchors.safeDock.y` is hardcoded to 6, which only made sense for the 10-tall standard template. It must become `template.dockY`, defined per tier: islet 4, standard 6, crag 10, landmark 15, duo_mesa/continent 21 (the surface datum). Getting this wrong drops the recovery teleport inside solid rock on every crag and landmark.",
+    "scripts/generation/archipelago-runtime.ts - Replace the unsafe center plus hardcoded-Y anchor with `template.safeDock`, a full local feet coordinate verified against each emitted structure. Translate it from the logical footprint so continent jobs remain correct even though job.origin is part 0 rather than the 150x150 bounding-box corner.",
     "scripts/generation/archipelago-runtime.ts - archipelagoOrigin() must use the per-island resolved size, not ARCHIPELAGO_TEMPLATES[family].size, and must return the multi-part `parts` array for continent sites.",
     "scripts/generation/archipelago-runtime.ts - archipelagoPersistenceBudgetBytes() slices to maxGeneratedIslands; it must also account for the fact that a continent contributes ONE id but 21 parts, so the budget projection is unchanged in size but the comment is now wrong.",
     "scripts/persistence/schema.ts - GenerationJob gains `parts?: readonly GenerationPart[]` and `partCursor?: number` (both optional; undefined = today's single-structure behaviour). ADD `export interface GenerationPart { structureId: string; origin: BlockVector; rotation: 'None'|'Rotate90'|'Rotate180'|'Rotate270'; row: number; integrityBlock: { offset: BlockVector; typeId: string }; }`. ADD `advancePartCursor(state, jobId, cursor): WorldState` next to markStructurePlaced in state.ts.",
@@ -820,7 +753,7 @@
         "standard": "radiusX 1, radiusZ 1, depth 2 (optional, <= 12 liquid cells)",
         "crag": "radiusX 3, radiusZ 3, depth 3",
         "landmark": "radiusX 5, radiusZ 4, depth 4",
-        "comp_lake": "radiusX 8, radiusZ 7, depth 4, carved DOWN from the surface datum y 20 into the 8-layer core slab (y 12..19), leaving 4 layers of slab below the floor - sealed by construction"
+        "comp_lake": "radiusX 6, radiusZ 5, depth 2, carved DOWN from the surface datum y 20; this budget-resolved basin remains sealed and stays within the 420-liquid component ceiling"
       },
       "liquidStates": "structureBuffer writes empty state compounds, so minecraft:water and minecraft:lava default to liquid_depth 0 = SOURCE blocks. That is exactly what a sealed basin needs and no state support is required."
     },
@@ -835,21 +768,14 @@
           "type": "bounded",
           "default": true,
           "description": "An underside solid spur carries a 3x3x2 sealed catch cup of linerIndex, 8 blocks below the rim, with liquidIndex inside and airIndex above. The fall is exactly 8 blocks long, visually reads as a waterfall pouring off the edge, and terminates in a settled pool that never updates again.",
-          "allowedOn": [
-            "crag",
-            "landmark",
-            "comp_coast"
-          ],
+          "allowedOn": ["crag", "landmark", "comp_coast"],
           "perIslandCap": 3
         },
         {
           "type": "void",
           "default": false,
           "description": "No cup. The column exits the structure's bottom face and the liquid falls into the void. The engine builds a static falling column down to the world floor and then stops; it costs a one-time settle and ~250-350 static liquid blocks that only exist while the island is in render distance. This is the hero shot and it is deliberately rationed.",
-          "allowedOn": [
-            "landmark",
-            "comp_coast"
-          ],
+          "allowedOn": ["landmark", "comp_coast"],
           "perIslandCap": 1
         }
       ],
@@ -865,7 +791,7 @@
       "sizesByTier": {
         "crag": "baseY 10, height 6..8, baseRadius 5, capDepth 2 (occupies y 10..17, the 8 free layers above the reduced crag topY of 9)",
         "landmark": "baseY 15, height 12..15, baseRadius 9, capDepth 3 (occupies y 15..29)",
-        "comp_ridge": "baseY 21, height 14..18, baseRadius 11, capDepth 4 (occupies y 21..39 above the continent surface datum)"
+        "comp_ridge": "baseY 21, height 16, baseRadius 8, capDepth 4 (occupies y 21..37 above the continent surface datum and stays within the 11,000-solid component ceiling)"
       },
       "whyCragTopYIsReduced": "canonicalIslandBody would give a 23x18x21 crag a topY of 13, leaving only 4 layers of headroom - not enough to read as peaked. The crag body is therefore built directly with taperedEllipsoidBody at topY 9, freeing 8 layers. This is the single most important shape decision for making crags feel different from standards."
     },

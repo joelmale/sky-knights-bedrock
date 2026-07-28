@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  advancePartCursor,
   completeGeneration,
   markStructurePlaced,
   queueGeneration,
@@ -13,6 +14,33 @@ const job = {
   structureId: "skyknights:starter_island",
   dimensionId: "minecraft:overworld",
   origin: { x: -7, y: 154, z: -7 },
+};
+
+const multipartJob = {
+  ...job,
+  id: "continent_a2_p24_p0",
+  parts: [
+    {
+      structureId: "skyknights:comp_plain",
+      origin: { x: 0, y: 96, z: 0 },
+      rotation: "None" as const,
+      row: 0,
+      integrityBlock: {
+        offset: { x: 15, y: 20, z: 15 },
+        typeId: "minecraft:grass_block",
+      },
+    },
+    {
+      structureId: "skyknights:comp_ridge",
+      origin: { x: 30, y: 96, z: 0 },
+      rotation: "Rotate90" as const,
+      row: 0,
+      integrityBlock: {
+        offset: { x: 15, y: 20, z: 15 },
+        typeId: "minecraft:stone",
+      },
+    },
+  ],
 };
 
 describe("generation checkpoints", () => {
@@ -43,5 +71,18 @@ describe("generation checkpoints", () => {
     expect(queueGeneration(completed, job, true).activeGeneration?.stage).toBe(
       "queued",
     );
+  });
+
+  it("advances multipart cursors monotonically without changing legacy jobs", () => {
+    const queued = queueGeneration(createWorldState(12), multipartJob);
+    const advanced = advancePartCursor(queued, multipartJob.id, 1);
+    const unchanged = advancePartCursor(advanced, multipartJob.id, 0);
+    const completed = advancePartCursor(unchanged, multipartJob.id, 99);
+    const legacy = queueGeneration(createWorldState(12), job);
+
+    expect(advanced.activeGeneration?.partCursor).toBe(1);
+    expect(unchanged).toBe(advanced);
+    expect(completed.activeGeneration?.partCursor).toBe(2);
+    expect(advancePartCursor(legacy, job.id, 1)).toBe(legacy);
   });
 });
