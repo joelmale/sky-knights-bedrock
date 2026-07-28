@@ -6,7 +6,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 import { build as esbuild } from "esbuild";
-import { zipSync } from "fflate";
+import { unzipSync, zipSync } from "fflate";
 import { format } from "prettier";
 import typescript from "typescript";
 
@@ -21,6 +21,7 @@ const resourcePackSource = path.join(root, "resource_packs", "sk_rp");
 const scriptsOutput = path.join(root, "dist", "scripts");
 const debugOutput = path.join(root, "dist", "debug");
 const packagesOutput = path.join(root, "dist", "packages");
+const TEMPLATE_INSTALL_NAME = "sky_knights_void_world";
 
 switch (command) {
   case "lint":
@@ -38,10 +39,13 @@ switch (command) {
   case "mcaddon":
     await createMcaddon(production);
     break;
+  case "install-template":
+    await installWorldTemplate();
+    break;
   default:
     throw new Error(
       "Use lint [--fix], build [--production], clean, " +
-        "local-deploy [--once], or mcaddon [--production].",
+        "local-deploy [--once], mcaddon [--production], or install-template.",
     );
 }
 
@@ -330,6 +334,66 @@ async function createMcaddon(isProduction) {
   process.stdout.write(
     `Built add-on: ${relative(path.join(packagesOutput, addonName))}\n`,
   );
+}
+
+/**
+ * Installs the built `.mctemplate` straight into the local Minecraft
+ * `world_templates` folder.
+ *
+ * Double-clicking a `.mctemplate` only works when Windows has a handler
+ * registered for the extension. The GDK Bedrock install on this project's
+ * reference machine registers none, so the file silently does nothing and the
+ * template never appears under Create New World. Extracting it here is the
+ * reliable developer path and needs no file association.
+ *
+ * This writes one directory it owns and never touches worlds or other packs.
+ */
+async function installWorldTemplate() {
+  const archivePath = path.join(
+    root,
+    "dist",
+    "world-template",
+    "sky_knights_void_world.mctemplate",
+  );
+  let archive;
+
+  try {
+    archive = await readFile(archivePath);
+  } catch {
+    throw new Error(
+      `No template at ${archivePath}. Run "npm run world-template:void" first.`,
+    );
+  }
+
+  const entries = unzipSync(new Uint8Array(archive));
+
+  if (entries["manifest.json"] === undefined) {
+    throw new Error("Template archive has no root manifest.json.");
+  }
+
+  const templatesRoot = path.join(
+    await resolveDeploymentRoot(),
+    "world_templates",
+  );
+  const target = path.join(templatesRoot, TEMPLATE_INSTALL_NAME);
+  assertChild(templatesRoot, target);
+  await rm(target, { recursive: true, force: true });
+
+  for (const name of Object.keys(entries).sort()) {
+    const destination = path.join(target, name);
+    assertChild(target, destination);
+
+    if (name.endsWith("/")) {
+      await mkdir(destination, { recursive: true });
+      continue;
+    }
+
+    await mkdir(path.dirname(destination), { recursive: true });
+    await writeFile(destination, entries[name]);
+  }
+
+  console.log(`Installed world template: ${target}`);
+  console.log("Restart Minecraft, then Play -> Create New -> Templates.");
 }
 
 async function resolveDeploymentRoot() {

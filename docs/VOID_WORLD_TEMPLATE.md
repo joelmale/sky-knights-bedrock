@@ -145,15 +145,42 @@ Overworld terrain that session reported.
 The manifest contract now reads its expected version from `package.json`
 instead of a hard-coded literal, so a version bump no longer breaks packaging.
 
+## Installing the template
+
+Double-clicking a `.mctemplate` only works when Windows has a handler
+registered for the extension. The GDK Bedrock install used by this project
+registers none — `.mctemplate`, `.mcworld`, `.mcaddon`, and `.mcpack` all have
+no `HKCR` entry and no `UserChoice` — so double-clicking does nothing at all,
+with no error, and the template never appears under Create New World.
+
+Use the direct install instead, which needs no file association:
+
+```powershell
+npm run world-template:install
+```
+
+It extracts the built archive into:
+
+```text
+%APPDATA%\Minecraft Bedrock\Users\Shared\games\com.mojang\world_templates\sky_knights_void_world
+```
+
+That is the same `com.mojang` root `local-deploy` writes development packs to.
+The command owns exactly that one directory, replaces it on each run, and never
+touches worlds or other packs. **Minecraft enumerates templates at startup, so
+restart the game after installing.**
+
+If a future Minecraft install does register the file associations,
+double-clicking the `.mctemplate` remains equivalent.
+
 ## Client acceptance
 
-1. Double-click `sky_knights_void_world.mctemplate`.
-2. Wait for Minecraft to report a successful import.
-3. Open **Play → Create New** and select **Sky Knights: Void Realm** under
-   imported templates.
-4. Create the world without adding the standalone `.mcaddon` a second time.
-5. Wait for arrival at the starter dock.
-6. Run `/skyknights:debug` and confirm `v0.3.6` and `below=void`.
-7. Explore below and beyond the authored realm and confirm there is no ordinary
+1. Run `npm run world-template:install` and restart Minecraft.
+2. Open **Play → Create New** and select **Sky Knights: Void Realm** under
+   templates.
+3. Create the world without adding the standalone `.mcaddon` a second time.
+4. Wait for arrival at the starter dock.
+5. Run `/skyknights:debug` and confirm `v0.3.6` and `below=void`.
+6. Explore below and beyond the authored realm and confirm there is no ordinary
    Overworld terrain.
-8. Save, close, reopen, and repeat the recovery and exploration checks.
+7. Save, close, reopen, and repeat the recovery and exploration checks.

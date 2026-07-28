@@ -30,6 +30,7 @@
     "structures:generate": "node tools/generate-structures.mjs",
     "structures:check": "node tools/generate-structures.mjs --check",
     "world-template": "npm run build && node tools/package-world-template.mjs",
+    "world-template:install": "node tools/project.mjs install-template",
     "world-template:void": "npm run build -- --production && npm run test:bds:void-source && node tools/package-world-template.mjs --world dist/world-template/source",
     "verify": "npm run structures:check && npm run check && npm run test:bds:unit && npm run mcaddon:production && npm run build:profiles",
     "enablemcloopback": "CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-1958404141-86561845-1752920682-3514627264-368642714-62675701-733520436",

@@ -95,6 +95,8 @@ npm run structures:check      Verify checked-in structures without rewriting the
 npm run world-template -- --world "<path>"
                               Package a canonical validated void source
 npm run world-template:void   Build, validate, and package the void realm
+npm run world-template:install
+                              Install the built template into Minecraft
 npm run verify                Run all checks and package production output
 ```
 

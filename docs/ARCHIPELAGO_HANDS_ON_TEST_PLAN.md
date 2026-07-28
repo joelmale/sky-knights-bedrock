@@ -17,15 +17,19 @@ Run:
 npm ci
 npm run verify
 npm run world-template:void
+npm run world-template:install
 ```
 
-`npm ci` is needed only after a fresh clone or dependency/lockfile change. Use
-the generated
-`dist/world-template/sky_knights_void_world.mctemplate` for the intended
-presentation: double-click it, then create a new world from **Sky Knights: Void
-Realm** under imported templates. The stable packs are already embedded; do
-not activate a second standalone copy. A normal Overworld is useful only for
-the compatibility session and will retain vanilla terrain.
+`npm ci` is needed only after a fresh clone or dependency/lockfile change.
+
+`world-template:install` extracts the built template into Minecraft's
+`world_templates` folder. Double-clicking the `.mctemplate` does nothing unless
+Windows has a handler registered for the extension, which the GDK Bedrock
+install does not. **Restart Minecraft afterwards** — templates are enumerated at
+startup — then create a new world from **Sky Knights: Void Realm** under
+templates. The stable packs are already embedded; do not activate a second
+standalone copy. A normal Overworld is useful only for the compatibility
+session and will retain vanilla terrain.
 
 Enable cheats, **Content Log File**, and **Content Log GUI**. Activate the Sky
 Knights Behavior Pack and its Resource Pack.

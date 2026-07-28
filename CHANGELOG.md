@@ -41,6 +41,14 @@ Validation evidence and pending hands-on gates are maintained in
   was run on a normal Infinite world with the development packs instead of a
   world created from the packaged template, and nothing in game said so.
 
+### Added
+
+- Added `npm run world-template:install`, which extracts the built template
+  directly into Minecraft's `world_templates` folder. Double-clicking a
+  `.mctemplate` does nothing when Windows has no handler registered for the
+  extension, which is the case on the GDK Bedrock install this project targets;
+  the file silently fails to import and never appears under Create New World.
+
 ### Changed
 
 - Bumped the add-on, stable packs, world template, and GameTest dependency

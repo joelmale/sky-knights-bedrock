@@ -189,11 +189,11 @@ what the generator emitted.
 The immediate slice should be **Void Realm client acceptance and first-flight
 progression closure**, not more content.
 
-1. Double-click
-   `dist/world-template/sky_knights_void_world.mctemplate`.
+1. Run `npm run world-template:install` and restart Minecraft. Double-clicking
+   the `.mctemplate` does nothing on this machine: no Minecraft file extension
+   is registered with Windows.
 2. In Minecraft, create a new world from **Sky Knights: Void Realm** under
-   imported templates. Do not add the standalone `.mcaddon`; both packs are
-   embedded.
+   templates. Do not add the standalone `.mcaddon`; both packs are embedded.
 3. Run Sessions A-C of
    [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md),
    including automatic starter arrival, `Sky Knights debug v0.3.6`, `below=void`, no vanilla
