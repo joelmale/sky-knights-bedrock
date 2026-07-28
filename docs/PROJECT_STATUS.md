@@ -16,9 +16,10 @@
 > template import, Minecraft gameplay, multiplayer, input, migration,
 > performance, and device gates remain.
 >
-> One partial hands-on session has been recorded. It failed on starter iron
-> supply and was run on the wrong world type; both causes are fixed in `0.3.6`
-> and the session must be rerun.
+> Archipelago hands-on Sessions A, A2, and B passed on a `0.3.6` void-template
+> world. Sessions C-G, the Phase 3 migration matrix, Skycraft acceptance, and
+> the device/multiplayer matrix remain. One open defect: the Dockmaster is not
+> handled when its dock deck is destroyed.
 
 This is the authoritative implementation tracker. The roadmap describes the
 target product; this document records what the repository currently delivers.
@@ -243,8 +244,9 @@ guards. The remaining Minecraft validation is explicitly tracked below.
 | Opt-in custom dimension                                              | Pending/non-blocking | Hands-on plan, Session 10                                                                                                      |
 | `0.3.3` starter resource visibility and Apprentice recovery          | Pending              | [`SKYCRAFT_HANDS_ON_TEST_PLAN.md`](SKYCRAFT_HANDS_ON_TEST_PLAN.md), Sessions A–D                                               |
 | `0.3.3` reference/personal-blueprint material accounting             | Pending              | Skycraft plan, Session E                                                                                                       |
-| `0.3.4` procedural archipelago and void presentation                 | Pending              | [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md)                                                       |
-| `0.3.6` reachable starter resource route to the first ship           | Pending — retest     | Archipelago plan, Sessions A and A2; `0.3.5` failed on iron supply                                                             |
+| `0.3.4` void presentation and lazy generation                        | Passed 2026-07-27    | Archipelago plan, Sessions A and B                                                                                             |
+| `0.3.6` reachable starter resource route to the first ship           | Passed 2026-07-27    | Archipelago plan, Sessions A and A2                                                                                            |
+| `0.3.4` archipelago clustering, reload, obstruction, and performance | Pending              | Archipelago plan, Sessions C-G; Session B passed                                                                               |
 | Advanced proxy/cap/device profile                                    | Pending/gated        | Skycraft plan, Sessions F and J; normal activation remains disabled                                                            |
 | Skycraft damage/repair/combat and multiplayer permissions            | Pending              | Skycraft plan, Sessions G–H                                                                                                    |
 | Skycraft progression and legacy coexistence                          | Pending              | Skycraft plan, Session I                                                                                                       |

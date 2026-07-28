@@ -181,6 +181,37 @@ Result: stable scripts built and both `0.2.0` packs deployed to:
 
 ## Hands-on sessions
 
+### 2026-07-27 — `0.3.6` void-template playtest (Sessions A, A2, B passed)
+
+| Field            | Value                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Build            | `0.3.6`, commit `bdbc1f3`                                             |
+| World            | Fresh world created from `sky_knights_void_world.mctemplate`          |
+| Packs            | Embedded template packs                                               |
+| Platform         | Windows, Minecraft Bedrock (exact version not captured)               |
+| Sessions covered | Archipelago plan A, A2, B                                             |
+| Result           | **Passed**                                                            |
+
+- Session A — bootstrap, world type, and version: passed.
+- Session A2 — starter resource route: passed. The 2.5x reachable resource
+  budget resolved the `0.3.5` iron failure.
+- Session B — nearby lazy generation: passed. Ambient islands appeared without
+  a developer command.
+
+The template had to be installed with `npm run world-template:install`; the
+double-click import path does nothing on this machine because no Minecraft file
+extension is registered with Windows.
+
+Not captured in this entry: exact Minecraft version, measured placement hitch,
+client FPS, and the Content Log transcript. Record those on the next session.
+
+Still open from this plan: Sessions C (family clusters), D (reload and
+duplicate safety), E (occupied-volume protection), F (normal-world
+compatibility), and G (exploration and cap).
+
+Defect found during the session, outside the plan: destroying the dock deck
+beneath the Dockmaster is not handled. See the open-defect note below.
+
 ### 2026-07-27 — `0.3.5` starter-route playtest (partial, failed)
 
 | Field            | Value                                                            |
@@ -212,6 +243,35 @@ Findings:
 Not covered: automatic arrival timing, `activeJob` settling, archipelago count,
 Content Log review, and every later session. Session A must be rerun in full on
 a world created from the `0.3.6` template.
+
+## Open defects
+
+### D-1 — the Dockmaster falls forever when its dock deck is destroyed
+
+Found 2026-07-27 during the `0.3.6` session. Not yet fixed.
+
+The Dockmaster stands at world `(12.5, 161, 0.5)`, which is starter-island
+local `(24, 12, 10)`, directly on the oak-plank dock deck. Reading the current
+code rather than observing the loop:
+
+- `dockmaster.json` sets `minecraft:physics` with `has_gravity: true`, so
+  removing the plank beneath it makes it fall;
+- its `minecraft:damage_sensor` declares `deals_damage: no` for all triggers,
+  so it cannot be killed — including by the void;
+- `ensureDockmaster` runs every 200 ticks and teleports any displaced
+  Dockmaster back to the dock anchor
+  (`scripts/gameplay/dockyard.ts`);
+- `shouldEnsureDockmaster` returns true whenever the island is recorded, so the
+  missing deck does not stop it.
+
+The predicted result is an indefinite ten-second fall-and-return loop with a
+`Displaced Dockmaster returned to the starter dock.` warning each cycle. This
+has not been confirmed in a client yet; confirm before fixing.
+
+Breaking the deck also marks the starter island `playerModified`, so the deck
+is never automatically restamped. Player recovery is not affected: the safe
+dock anchor at local `(21.5, 12, 10.5)` stands on island grass, not on the
+plank deck.
 
 ## Current manual acceptance state
 
