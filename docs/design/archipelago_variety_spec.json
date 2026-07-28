@@ -1,0 +1,934 @@
+{
+  "tiers": [
+    {
+      "id": "islet",
+      "label": "Islet",
+      "footprint": [
+        11,
+        8,
+        9
+      ],
+      "boxCells": 792,
+      "bodyTopY": 3,
+      "bodySpec": "canonicalIslandBody([11,8,9]) -> centerX 5, centerZ 4, topY 3, growthX 1, growthZ 1",
+      "approxSolidBlocks": 105,
+      "shareOfGeneratedIslands": "35% (tier roll 0..349 of 1000)",
+      "altitudeBandWeights": {
+        "deep": "0..24",
+        "low": "25..49",
+        "mid": "50..69",
+        "high": "70..89",
+        "crown": "90..99"
+      },
+      "clearanceRadius": 14,
+      "heightRadius": 8,
+      "minObserverClearance": 48,
+      "families": [
+        "verdant",
+        "desert",
+        "tundra",
+        "volcanic"
+      ],
+      "modules": [
+        "islet_verdant",
+        "islet_desert",
+        "islet_tundra",
+        "islet_volcanic"
+      ],
+      "features": "one shrub or single-block accent only. No lakes, no falls, no caves, no burn gates.",
+      "notes": "Filler / visual dust. Deliberately cheap so the common case costs almost nothing."
+    },
+    {
+      "id": "standard",
+      "label": "Standard",
+      "footprint": [
+        15,
+        10,
+        13
+      ],
+      "boxCells": 1950,
+      "bodyTopY": 5,
+      "bodySpec": "canonicalIslandBody([15,10,13]) - UNCHANGED, existing modules keep byte-identical output",
+      "approxSolidBlocks": 285,
+      "shareOfGeneratedIslands": "45% (tier roll 350..799)",
+      "altitudeBandWeights": {
+        "deep": "0..9",
+        "low": "10..39",
+        "mid": "40..74",
+        "high": "75..99"
+      },
+      "clearanceRadius": 16,
+      "heightRadius": 9,
+      "minObserverClearance": 48,
+      "families": [
+        "verdant",
+        "desert",
+        "tundra",
+        "volcanic"
+      ],
+      "modules": [
+        "ambient_verdant",
+        "ambient_desert",
+        "ambient_tundra",
+        "ambient_volcanic"
+      ],
+      "features": "existing content only (one tree/vent/shard + scatter accents). Optional single sealed 3x3 pond, depth 2, at most 12 liquid cells.",
+      "notes": "The four EXISTING ambient modules become this tier verbatim. Do not edit or rename them - renaming changes structureId and breaks live worlds. Zero-risk tier."
+    },
+    {
+      "id": "crag",
+      "label": "Crag",
+      "footprint": [
+        23,
+        18,
+        21
+      ],
+      "boxCells": 8694,
+      "bodyTopY": 9,
+      "bodySpec": "taperedEllipsoidBody({centerX:11, centerZ:10, topY:9, growthX:8, growthZ:7, baseRadiusX:3, baseRadiusZ:2}) - deliberately NOT canonicalIslandBody, whose topY would be 13 and leave only 4 layers of headroom",
+      "approxSolidBlocks": 1500,
+      "shareOfGeneratedIslands": "16% (tier roll 800..959)",
+      "altitudeBandWeights": {
+        "low": "0..19",
+        "mid": "20..54",
+        "high": "55..89",
+        "crown": "90..99"
+      },
+      "clearanceRadius": 22,
+      "heightRadius": 13,
+      "minObserverClearance": 48,
+      "families": [
+        "verdant",
+        "desert",
+        "tundra",
+        "volcanic"
+      ],
+      "modules": [
+        "crag_verdant",
+        "crag_desert",
+        "crag_tundra",
+        "crag_volcanic"
+      ],
+      "features": "mountainPeak (height 6..8, local y 10..17) + 1-2 spires + one caveTube (radius 1, roof depth >= 2) + optional sealed lake (radius 3x3, depth 3) + at most one BOUNDED rim fall. Void falls forbidden.",
+      "notes": "Tall and peaked: 8 free layers above the body top (y 10..17) is the whole point of the reduced topY. crag_volcanic is the only crag that carries the burn gates."
+    },
+    {
+      "id": "landmark",
+      "label": "Landmark",
+      "footprint": [
+        39,
+        30,
+        35
+      ],
+      "boxCells": 40950,
+      "bodyTopY": 14,
+      "bodySpec": "taperedEllipsoidBody({centerX:19, centerZ:17, topY:14, growthX:15, growthZ:14, baseRadiusX:3, baseRadiusZ:2}) -> radiusAt(14) = [18,16], body spans x 1..37, z 1..33",
+      "approxSolidBlocks": 6100,
+      "shareOfGeneratedIslands": "4% (tier roll 960..999); of that, a sub-roll hash([seed,ver,cellX,cellZ,'variant'])%5===0 selects duo_mesa instead of the family landmark",
+      "altitudeBandWeights": {
+        "mid": "0..29",
+        "high": "30..69",
+        "crown": "70..99"
+      },
+      "clearanceRadius": 33,
+      "heightRadius": 19,
+      "minObserverClearance": 57,
+      "families": [
+        "verdant",
+        "desert",
+        "tundra",
+        "volcanic"
+      ],
+      "modules": [
+        "landmark_verdant",
+        "landmark_desert",
+        "landmark_tundra",
+        "landmark_volcanic",
+        "duo_mesa (1 in 5)"
+      ],
+      "features": "mountainPeak height 12..15 (y 15..29), 2-3 spires, 1 sealed lake radius 5x4 depth 4, 1 bounded rim waterfall, at most 1 VOID rim fall, one caveTube network (3-5 nodes) plus one caveMouth, one landBridge across a chasm. landmark_volcanic additionally carries a lava pool + bounded lavafall and the burn gates.",
+      "notes": "Largest single-structure placement. 39x30x35 is legal (within 64x384x64) so it stays ONE place() call, but it is the hitch ceiling for non-continent content and must respect the 8500 solid-block budget. Altitude clamp applies here: effective maxY = min(band.maxY, 314 - 30) = 284 in the crown band."
+    },
+    {
+      "id": "continent",
+      "label": "Continent",
+      "footprint": [
+        150,
+        40,
+        150
+      ],
+      "boxCells": "21 parts x 36000 = 756000 iterated cells",
+      "bodySpec": "composed - see continent.grid. Per-component body is defined by the shared local-Y datum in continent_shared.mjs, not by taperedEllipsoidBody.",
+      "approxSolidBlocks": "~180000 total across 21 parts",
+      "shareOfGeneratedIslands": "NOT part of the tier roll. Exactly 6 sites per world on a fixed jittered hex ring at cell radius 24 (2304 blocks).",
+      "altitudeBandWeights": {
+        "continent": "fixed band, base Y 96..128 (roll hash([seed,ver,siteIndex,'altitude'])%33 + 96)"
+      },
+      "clearanceRadius": 113,
+      "heightRadius": 26,
+      "minObserverClearance": 137,
+      "families": [
+        "continent (family-neutral single palette - deliberate scoping decision, see notesForEngineers)"
+      ],
+      "modules": [
+        "comp_coast",
+        "comp_plain",
+        "comp_lake",
+        "comp_ridge",
+        "comp_chasm",
+        "comp_bridge",
+        "duo_mesa"
+      ],
+      "features": "per-continent guarantees: exactly 1 comp_ridge at the center slot (the massif), at least 2 comp_lake slots, at least 1 comp_chasm, at least 1 comp_bridge. 12 comp_coast edge slots each carry a rim taper and up to 3 of them carry a bounded rim waterfall. Burn gates are FORBIDDEN on continents.",
+      "notes": "Deliberately the low stratum: continents are the floor of the sky world, landmarks the middle, crown islets the ceiling. 150 blocks across at ~15 blocks/s cruise is ~10 s to cross, longer to explore. Top of a continent = 128 + 40 = 168, well clear of the mid/high bands above."
+    }
+  ],
+  "modules": [
+    {
+      "path": "tools/structures/assert.mjs",
+      "category": "shared-library",
+      "owner": "Engineer B",
+      "emitsStructure": false,
+      "exports": [
+        "assertCarveIsIntentional({name,size,body,indices,airIndex,carved})",
+        "assertSealedBasin({name,size,indices,liquidIndices,linerIndices,airIndex,spouts})",
+        "assertFallColumn({name,size,indices,airIndex,columns})",
+        "assertFireSafety({name,size,indices,fireIndex,flammableIndices})",
+        "assertPyreTermination({name,size,indices,flammableIndices,lavaIndex,linerIndices,zone,fuelBudget})",
+        "assertLeafSupport({name,size,indices,leafIndex,logIndex,maxDistance})",
+        "countIndices(indices) -> {void, air, solid, liquid, total}"
+      ],
+      "rationale": "NEW file so tools/structures/shape.mjs is never touched by either engineer. shape.mjs needs NO changes: carved cells are set to a real air palette index (>= 0), so the existing assertSolidBody still passes unmodified."
+    },
+    {
+      "path": "tools/structures/tier_shared.mjs",
+      "category": "shared-library",
+      "owner": "Engineer A",
+      "emitsStructure": false,
+      "exports": [
+        "defineTierIsland({id,family,tier,size,palette,body,strata,orePockets,stamps,carved,airIndex,probes})"
+      ],
+      "rationale": "The tier analogue of ambient_shared.mjs. Wraps buildIslandIndices + assertSolidBody + the new assert.mjs checks + the block-budget check, and emits the integrityBlocks probe list. MUST NOT import or modify ambient_shared.mjs."
+    },
+    {
+      "path": "tools/structures/continent_shared.mjs",
+      "category": "shared-library",
+      "owner": "Engineer B",
+      "emitsStructure": false,
+      "exports": [
+        "CONTINENT_SIZE = [30,40,30]",
+        "CONTINENT_PALETTE (frozen, index constants CBLOCK)",
+        "CONTINENT_DATUM = {rootMinY:4, rootMaxY:11, coreMinY:12, coreMaxY:19, surfaceY:20, reliefMaxY:39}",
+        "CONTINENT_BRIDGE_Y = 26",
+        "seamShellStamp(edgeRole)",
+        "assertSeamShell({name,indices,edgeRole})",
+        "defineContinentComponent({id,role,stamps,carved,bridgeAbutments})"
+      ],
+      "rationale": "Owns the seam contract. Every comp_* and duo_mesa module builds through defineContinentComponent, which writes the border shell itself and REFUSES any stamp that resolves inside the shell."
+    },
+    {
+      "path": "tools/structures/features/relief.mjs",
+      "category": "feature",
+      "owner": "Engineer A",
+      "emitsStructure": false,
+      "exports": [
+        "mountainPeak({centerX,centerZ,baseY,height,baseRadius,coreIndex,capIndex,capDepth})",
+        "spire({x,z,baseY,height,radius,index,flareIndex})",
+        "mesaStep({centerX,centerZ,y,radiusX,radiusZ,index})"
+      ]
+    },
+    {
+      "path": "tools/structures/features/burn.mjs",
+      "category": "feature",
+      "owner": "Engineer A",
+      "emitsStructure": false,
+      "exports": [
+        "emberField({cells,surfaceY,netherrackIndex,fireIndex})",
+        "pyreFuel({zone,lavaCups,fuelBudget,logIndex,leafIndex,lavaIndex,linerIndex,airIndex})"
+      ]
+    },
+    {
+      "path": "tools/structures/features/lake.mjs",
+      "category": "feature",
+      "owner": "Engineer B",
+      "emitsStructure": false,
+      "exports": [
+        "lakeBasin({centerX,centerZ,radiusX,radiusZ,surfaceY,depth,liquidIndex,linerIndex,airIndex}) -> {stamps, liquidCells, linerCells}"
+      ]
+    },
+    {
+      "path": "tools/structures/features/fall.mjs",
+      "category": "feature",
+      "owner": "Engineer B",
+      "emitsStructure": false,
+      "exports": [
+        "rimFall({spoutX,spoutZ,surfaceY,spillType,liquidIndex,linerIndex,airIndex,structureMinY}) -> {stamps, column}"
+      ]
+    },
+    {
+      "path": "tools/structures/features/carve.mjs",
+      "category": "feature",
+      "owner": "Engineer B",
+      "emitsStructure": false,
+      "exports": [
+        "caveTube({path,radius,airIndex,body,roofDepth})",
+        "caveMouth({x,y,z,radius,airIndex,body})",
+        "chasm({minX,maxX,centerZ,width,topY,bottomY,airIndex,body})",
+        "arch({x,z,y,span,airIndex,body})"
+      ]
+    },
+    {
+      "path": "tools/structures/features/bridge.mjs",
+      "category": "feature",
+      "owner": "Engineer B",
+      "emitsStructure": false,
+      "exports": [
+        "landBridge({fromX,fromZ,toX,toZ,y,width,archDepth,index,railIndex})",
+        "bridgeAbutment({edge,y,width,index})"
+      ]
+    },
+    {
+      "path": "tools/structures/islet_verdant.mjs",
+      "category": "solo",
+      "tier": "islet",
+      "family": "verdant",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:islet_verdant"
+    },
+    {
+      "path": "tools/structures/islet_desert.mjs",
+      "category": "solo",
+      "tier": "islet",
+      "family": "desert",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:islet_desert"
+    },
+    {
+      "path": "tools/structures/islet_tundra.mjs",
+      "category": "solo",
+      "tier": "islet",
+      "family": "tundra",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:islet_tundra"
+    },
+    {
+      "path": "tools/structures/islet_volcanic.mjs",
+      "category": "solo",
+      "tier": "islet",
+      "family": "volcanic",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:islet_volcanic"
+    },
+    {
+      "path": "tools/structures/ambient_verdant.mjs",
+      "category": "solo",
+      "tier": "standard",
+      "family": "verdant",
+      "owner": "NOBODY - frozen",
+      "emitsStructure": true,
+      "structureId": "skyknights:ambient_verdant",
+      "rationale": "Existing. Byte-identical output required."
+    },
+    {
+      "path": "tools/structures/ambient_desert.mjs",
+      "category": "solo",
+      "tier": "standard",
+      "family": "desert",
+      "owner": "NOBODY - frozen",
+      "emitsStructure": true,
+      "structureId": "skyknights:ambient_desert"
+    },
+    {
+      "path": "tools/structures/ambient_tundra.mjs",
+      "category": "solo",
+      "tier": "standard",
+      "family": "tundra",
+      "owner": "NOBODY - frozen",
+      "emitsStructure": true,
+      "structureId": "skyknights:ambient_tundra"
+    },
+    {
+      "path": "tools/structures/ambient_volcanic.mjs",
+      "category": "solo",
+      "tier": "standard",
+      "family": "volcanic",
+      "owner": "NOBODY - frozen",
+      "emitsStructure": true,
+      "structureId": "skyknights:ambient_volcanic"
+    },
+    {
+      "path": "tools/structures/crag_verdant.mjs",
+      "category": "solo",
+      "tier": "crag",
+      "family": "verdant",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:crag_verdant"
+    },
+    {
+      "path": "tools/structures/crag_desert.mjs",
+      "category": "solo",
+      "tier": "crag",
+      "family": "desert",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:crag_desert"
+    },
+    {
+      "path": "tools/structures/crag_tundra.mjs",
+      "category": "solo",
+      "tier": "crag",
+      "family": "tundra",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:crag_tundra"
+    },
+    {
+      "path": "tools/structures/crag_volcanic.mjs",
+      "category": "solo",
+      "tier": "crag",
+      "family": "volcanic",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:crag_volcanic",
+      "rationale": "Base (non-burning) volcanic crag."
+    },
+    {
+      "path": "tools/structures/crag_volcanic_ember.mjs",
+      "category": "solo",
+      "tier": "crag",
+      "family": "volcanic",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:crag_volcanic_ember",
+      "rationale": "Eternal-burn variant of crag_volcanic. Selected by the burn_eternal gate."
+    },
+    {
+      "path": "tools/structures/landmark_verdant.mjs",
+      "category": "solo",
+      "tier": "landmark",
+      "family": "verdant",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:landmark_verdant"
+    },
+    {
+      "path": "tools/structures/landmark_desert.mjs",
+      "category": "solo",
+      "tier": "landmark",
+      "family": "desert",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:landmark_desert"
+    },
+    {
+      "path": "tools/structures/landmark_tundra.mjs",
+      "category": "solo",
+      "tier": "landmark",
+      "family": "tundra",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:landmark_tundra"
+    },
+    {
+      "path": "tools/structures/landmark_volcanic.mjs",
+      "category": "solo",
+      "tier": "landmark",
+      "family": "volcanic",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:landmark_volcanic"
+    },
+    {
+      "path": "tools/structures/landmark_volcanic_ember.mjs",
+      "category": "solo",
+      "tier": "landmark",
+      "family": "volcanic",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:landmark_volcanic_ember",
+      "rationale": "Eternal-burn landmark. Selected by the burn_eternal gate."
+    },
+    {
+      "path": "tools/structures/landmark_volcanic_pyre.mjs",
+      "category": "solo",
+      "tier": "landmark",
+      "family": "volcanic",
+      "owner": "Engineer A",
+      "emitsStructure": true,
+      "structureId": "skyknights:landmark_volcanic_pyre",
+      "rationale": "Reactive-burn landmark. Selected by the burn_reactive gate. Ships unburnt; ignites on first player arrival."
+    },
+    {
+      "path": "tools/structures/comp_coast.mjs",
+      "category": "component",
+      "owner": "Engineer B",
+      "emitsStructure": true,
+      "structureId": "skyknights:comp_coast",
+      "size": [
+        30,
+        40,
+        30
+      ],
+      "rationale": "Outer ring edge. Local -Z border is the OUTWARD (coast) face; the +Z, -X and +X borders use the interior seam profile. Placed with rotation None/90/180/270 so one module serves all 12 edge slots. Footprint is square so rotation about the structure origin is exact."
+    },
+    {
+      "path": "tools/structures/comp_plain.mjs",
+      "category": "component",
+      "owner": "Engineer B",
+      "emitsStructure": true,
+      "structureId": "skyknights:comp_plain",
+      "size": [
+        30,
+        40,
+        30
+      ]
+    },
+    {
+      "path": "tools/structures/comp_lake.mjs",
+      "category": "component",
+      "owner": "Engineer B",
+      "emitsStructure": true,
+      "structureId": "skyknights:comp_lake",
+      "size": [
+        30,
+        40,
+        30
+      ]
+    },
+    {
+      "path": "tools/structures/comp_ridge.mjs",
+      "category": "component",
+      "owner": "Engineer B",
+      "emitsStructure": true,
+      "structureId": "skyknights:comp_ridge",
+      "size": [
+        30,
+        40,
+        30
+      ],
+      "rationale": "Continental massif. Always occupies the center slot (2,2)."
+    },
+    {
+      "path": "tools/structures/comp_chasm.mjs",
+      "category": "component",
+      "owner": "Engineer B",
+      "emitsStructure": true,
+      "structureId": "skyknights:comp_chasm",
+      "size": [
+        30,
+        40,
+        30
+      ],
+      "rationale": "Cuts fully through the slab. Carries bridge abutments on its -X and +X borders at CONTINENT_BRIDGE_Y. Must contain NO lake (chasm and sealed basin are mutually exclusive in one component)."
+    },
+    {
+      "path": "tools/structures/comp_bridge.mjs",
+      "category": "component",
+      "owner": "Engineer B",
+      "emitsStructure": true,
+      "structureId": "skyknights:comp_bridge",
+      "size": [
+        30,
+        40,
+        30
+      ],
+      "rationale": "Chasm plus a landBridge spanning it, with matching abutments on -X/+X."
+    },
+    {
+      "path": "tools/structures/duo_mesa.mjs",
+      "category": "dual",
+      "owner": "Engineer B",
+      "emitsStructure": true,
+      "structureId": "skyknights:duo_mesa",
+      "size": [
+        30,
+        40,
+        30
+      ],
+      "tier": "landmark | continent-interior",
+      "rationale": "THE dual-purpose module. As a continent interior component it honours the full seam contract. As a solo landmark-tier island the planner simply places it alone - the seam shell reads as a clean cliff wall on all four sides, which is why the seam profile deliberately terminates in a solid vertical face rather than a ragged edge. Solo clearanceRadius 28, heightRadius 24."
+    },
+    {
+      "path": "tools/generate-structures.mjs",
+      "category": "registry",
+      "owner": "Architect ONLY",
+      "emitsStructure": false,
+      "rationale": "The single shared file. Both engineers must NOT edit it. The architect adds the 20 new alphabetically-sorted imports and ISLAND_MODULES entries in one integration commit."
+    }
+  ],
+  "airVoidRule": "THE -1 CONTRACT (normative)\n\nTwo distinct emptiness values exist and they are NOT interchangeable:\n\n  -1                       = Bedrock STRUCTURE VOID. Placement leaves the existing block untouched.\n  palette index of \"minecraft:air\" = FORCE-CLEAR. Placement writes air over whatever was there.\n\nEvery module MUST declare an explicit `airIndex` in its palette (convention: the LAST palette entry, so existing index constants never shift) even if it emits zero air cells. tier_shared.mjs and continent_shared.mjs both require it.\n\nRULE 1 - VOID IS THE DEFAULT.\nEvery cell that is outside the island silhouette and outside every declared clearance envelope is -1. This must remain the overwhelming majority of cells (see blockBudgets.voidFloor). Never emit a rectangular block of air \"just to be safe\" - that is how you get a visible air box carved out of the sky when an island is placed near another.\n\nRULE 2 - AIR IS PERMITTED IN EXACTLY SIX SITUATIONS, AND NOWHERE ELSE.\n  (a) CARVED INTERIOR. A cell for which `body.contains(x,y,z)` is true but the design wants empty: caves, tunnels, arches, overhang undersides, lake bowls, crater interiors, chasms. Enforced by `assertCarveIsIntentional`: every in-body cell equal to airIndex must be reported true by the module's declared `carved(x,y,z)` predicate; every in-body cell equal to -1 still throws via the existing `assertSolidBody`. Because carved cells hold a real palette index (>= 0), shape.mjs needs NO modification.\n  (b) LIQUID HEADROOM. The single layer directly above any water or lava surface cell inside a basin. One layer only, never a column.\n  (c) FALL COLUMNS. Every cell of a declared rim-fall column from the spout down to its terminus, plus the one cell laterally outward of the spout. Enforced by `assertFallColumn`.\n  (d) SEAM SHELL INTERIORS. Inside a continent component's 1-block border shell, any cell the seam profile declares empty is air, not void, so a re-placed neighbour can never leave a stale block wedged in the seam. See RULE 4.\n  (e) FEATURE SOCKETS. Cells a host reserves for a feature that the feature does not fill (spire base collar, land-bridge abutment approach). Always inside the body, so they are covered by (a)'s carve predicate.\n  (f) PYRE / EMBER STANDOFF. The 1-block air gap between a sealed lava cup and its fuel, and the air cell a fire block occupies. Fire IS a block, so `minecraft:fire` is a palette entry, not air; the standoff gap around it is air.\n\nRULE 3 - AIR MUST NEVER LEAVE THE SILHOUETTE.\n`caveTube`, `caveMouth`, `chasm` and `arch` all take the `body` object and MUST test `body.contains()` per cell, writing airIndex only where it is true. A carve node whose radius reaches outside the body simply writes nothing there. This is the single most important rule for making components and neighbouring islands combine without punching holes in each other.\n\nRULE 4 - THE SEAM CONTRACT (continent components).\nComponents tile EDGE-TO-EDGE WITH ZERO OVERLAP: grid pitch equals component size (30). Cell x=29 of one component is adjacent to, never coincident with, cell x=0 of the next. Therefore seams need CONTINUITY, not overwrite semantics, and no component can ever erase another.\n\nContinuity is guaranteed by freezing the border shell:\n  - The border shell is every cell with local x in {0,29} OR z in {0,29}.\n  - NO stamp, carve, feature or ore pocket may resolve inside the border shell. `defineContinentComponent` throws if one does.\n  - The shell is written solely by `seamShellStamp(edgeRole)` from continent_shared.mjs, which depends ONLY on the edge role and the local y, never on the component's identity or on the position along the edge. Its profile is:\n        INTERIOR edge role:  y  0..3  -> -1\n                             y  4..11 -> -1            (root taper is inset, never on the seam)\n                             y 12..19 -> coreIndex     (8-layer core slab)\n                             y 20     -> surfaceIndex\n                             y 21..39 -> airIndex      (see below)\n        COAST edge role:     y  0..11 -> -1\n                             y 12..17 -> coreIndex     (rim is thinner, reads as a cliff)\n                             y 18..19 -> coreIndex\n                             y 20     -> surfaceIndex\n                             y 21..39 -> -1            (open sky above a coast; no air needed)\n  - Because both sides of every interior seam emit the identical 8-layer core + 1 surface column, the joint is invisible and gap-free by construction.\n  - The `y 21..39 -> airIndex` on INTERIOR seams is deliberate: it guarantees that if a neighbouring component is re-placed after a player has built on the seam, the seam column is cleared to a known state rather than leaving a half-block of stale geometry. It costs 19 air cells per shell column and is inside the budget.\n  - `assertSeamShell` re-reads the finished index array and verifies every shell cell equals the frozen profile. Run it in every comp_* and duo_mesa module.\n\nRULE 5 - BRIDGE ABUTMENTS ARE THE ONLY SEAM EXCEPTION, AND THEY ARE STILL FROZEN.\nA component that declares `bridgeAbutments: [\"-x\", \"+x\"]` replaces the shell profile on those two faces, over the fixed window z in [13,16] and y in [CONTINENT_BRIDGE_Y-1, CONTINENT_BRIDGE_Y] (that is y 25..26), with `bridgeAbutment(...)` deck blocks. The window is a compile-time constant so any two abutment-bearing components meet exactly. Everything outside that window on those faces still uses the frozen interior profile.\n\nRULE 6 - SOLO ISLANDS NEVER EMIT SEAM SHELLS.\nSolo tiers (islet/standard/crag/landmark) use RULE 1-3 only. Their outer surfaces are -1 because nothing is ever placed adjacent to them (the planner's clearance invariant guarantees a >= 12-block gap between clearance cylinders). duo_mesa placed solo keeps its seam shell, which reads as a deliberate mesa cliff.\n\nRULE 7 - PROHIBITED IN ALL CASES.\n  - Air anywhere strictly outside the body/silhouette on a solo island.\n  - -1 anywhere inside a solid body (already enforced).\n  - -1 anywhere inside a continent component's border shell (enforced by assertSeamShell, except where the profile itself specifies -1).\n  - Gravity-affected blocks (sand, red_sand, gravel, concrete_powder) directly above any air/carve cell: they will fall on placement. tier_shared.mjs runs a `assertNoUnsupportedGravityBlocks` pass over the desert and continent palettes.\n  - Leaves further than 4 blocks (taxicab) from an oak_log cell: structureBuffer writes `states: compound({})`, so oak_leaves get persistent_bit=false and will decay. Enforced by `assertLeafSupport`.",
+  "continent": {
+    "siteSelection": {
+      "count": "exactly 6 per world - deterministic, never 0, never 7",
+      "lattice": "fixed hexagonal ring at cell radius 24 (2304 blocks), CONTINENT_RING = [{24,0},{12,21},{-12,21},{-24,0},{-12,-21},{12,-21}]",
+      "jitter": "cellX = base.cellX + (r % 5) - 2; cellZ = base.cellZ + (Math.floor(r / 5) % 5) - 2, where r = hash([worldSeed, layoutVersion, siteIndex, 'continent'])",
+      "bounds": "max |cell| after jitter = 26 <= maxCellRadius 28. Min radial distance = 22 cells = 2112 blocks >> protectedRadius 460.",
+      "spacing": "base neighbour separation on the ring = 24 cells = 2304 blocks; worst-case after +-2 jitter on both sites = 20 cells = 1920 blocks. Two continent clearance radii = 226. Margin 8.5x.",
+      "rarityCheck": "6 sites across a 5376-block-wide field = one per ~2300 blocks, matching the fixed 4-6 / one-per-2500 decision."
+    },
+    "suppression": {
+      "rule": "deriveArchipelagoIsland returns undefined for any cell with Chebyshev distance <= 2 from a continent anchor cell, EXCEPT the anchor cell itself which returns the continent island.",
+      "zoneSize": "5x5 cells = 480x480 blocks cleared around each continent",
+      "proof": "nearest surviving ambient cell centre is at Chebyshev 3 = 288 blocks from the continent centre. Worst-case required clearance = continent radius 113 + landmark radius 33 = 146. Margin 1.97x.",
+      "cost": "6 sites x 24 suppressed cells x (1/3 density) = ~48 ambient islands removed from a ~1058-island plan (4.5%). Acceptable."
+    },
+    "grid": {
+      "shape": "5 x 5 slots, slot index (i, j) with i,j in 0..4",
+      "componentSize": [
+        30,
+        40,
+        30
+      ],
+      "pitch": 30,
+      "overlap": "ZERO. Components abut; they never overlap.",
+      "totalFootprint": [
+        150,
+        40,
+        150
+      ],
+      "omittedSlots": "the four grid corners (0,0), (0,4), (4,0), (4,4) are NOT placed at all - a 150x150 square continent would read as a slab; omitting the corners gives a rounded, believable landmass silhouette",
+      "placedParts": 21,
+      "slotOrigin": "origin = { x: continentX - 75 + i*30, y: baseY, z: continentZ - 75 + j*30 }",
+      "roleAssignment": {
+        "edge (Chebyshev distance 2 from (2,2), corners already removed) - 12 slots": "comp_coast, rotation = outward normal. Local -Z border is the coast face, so: j==0 -> Rotate180, j==4 -> None, i==0 -> Rotate90, i==4 -> Rotate270. For the 8 non-axial edge slots the outward normal is taken as the axis with the larger |offset|; ties cannot occur because grid corners are omitted.",
+        "interior (Chebyshev distance <= 1 from (2,2)) - 9 slots": "see interiorAssignment"
+      },
+      "interiorAssignment": {
+        "step1": "slot (2,2) is ALWAYS comp_ridge - the continental massif.",
+        "step2": "two distinct lake slots are forced: lakeA = LAKE_SLOTS[hash([seed,ver,site,'lakeA']) % 8]; lakeB = LAKE_SLOTS[(hash([seed,ver,site,'lakeB']) % 7 + indexOf(lakeA) + 1) % 8], where LAKE_SLOTS is the fixed sorted array of the 8 non-centre interior slots. Both get comp_lake.",
+        "step3": "one chasm slot and one bridge slot are forced from the remaining 6 by the same distinct-pick scheme with keys 'chasm' and 'bridge'.",
+        "step4": "the remaining 4 interior slots draw from FILL_KIT = [comp_plain, comp_plain, comp_ridge, duo_mesa] via FILL_KIT[hash([seed,ver,site,i,j,'fill']) % 4]. comp_plain appears twice so plains stay the common interior.",
+        "guarantee": "every continent has >= 2 lakes, >= 1 chasm, >= 1 land bridge, a central massif, and 1-3 mesas. Free permutation is safe because the seam contract makes any interior component abut any other."
+      },
+      "rotationNote": "world.structureManager.place accepts a 4th StructurePlaceOptions argument carrying `rotation` and `mirror`. Components are square (30x30) so rotation about the structure origin maps the footprint onto itself exactly - no origin correction is needed. Only comp_coast is ever rotated; interior components are always Rotation.None so that duo_mesa's solo and component forms are byte-identical."
+    },
+    "altitude": {
+      "band": "fixed 'continent' band",
+      "baseY": "96 + (hash([worldSeed, layoutVersion, siteIndex, 'altitude']) % 33)  -> 96..128",
+      "topY": "baseY + 39 -> 135..167",
+      "rationale": "Continents are the LOW stratum: the floor you fly over. Landmarks occupy mid/high/crown above them. This produces the legible vertical layering the owner asked for and keeps the tallest structure well clear of the 320 build ceiling."
+    },
+    "multiPartJob": {
+      "schemaChange": "ADDITIVE ONLY. GenerationJob gains two optional fields; every existing single-structure job is untouched and `parts === undefined` means exactly today's behaviour.",
+      "newTypes": "export interface GenerationPart { structureId: string; origin: BlockVector; rotation: 'None'|'Rotate90'|'Rotate180'|'Rotate270'; row: number; integrityBlock: { offset: BlockVector; typeId: string }; }  // added to GenerationJob: parts?: readonly GenerationPart[]; partCursor?: number;",
+      "backCompat": "job.structureId and job.origin continue to describe part 0, so any code that reads them (retry keys, logging, archipelagoGenerationJobForId equality check in service.ts registeredIsland) keeps working. The equality check in registeredIsland must additionally compare parts.length and partCursor is EXCLUDED from that comparison because it advances during placement.",
+      "serviceLoopChange": "service.ts around line 217 replaces the single `world.structureManager.place(job.structureId, dimension, job.origin)` with:\n\n  const parts = job.parts ?? [{ structureId: job.structureId, origin: job.origin, rotation: 'None', row: 0, integrityBlock: island.integrityBlocks[0] }];\n  for (let index = job.partCursor ?? 0; index < parts.length; index += 1) {\n    const part = parts[index];\n    if (registered.ambient && firstPartObstruction(part, dimension) !== undefined) { /* skip-and-complete, as today */ }\n    world.structureManager.place(part.structureId, dimension, part.origin, { rotation: ROTATION[part.rotation] });\n    await system.waitTicks(CONTINENT_PART_GAP_TICKS);\n    state = advancePartCursor(repository.load(), job.id, index + 1);\n    repository.save(state);\n  }\n\nCONTINENT_PART_GAP_TICKS = 5. 21 parts x 5 ticks = 105 ticks ~= 5.25 s to raise a continent.",
+      "restartSafety": "partCursor is persisted after EVERY part. On restart the loop resumes at exactly parts[partCursor]. A crash between place() and save() costs at most ONE duplicate placement, which is idempotent (identical blocks, identical origin, identical rotation) and therefore harmless. partCursor is never decreased. The job only advances to stage 'structure_placed' after partCursor === parts.length, so a half-built continent can never be mistaken for a finished one.",
+      "obstructionCheck": "The ambient firstStructureObstruction / firstStructureOccupant scans MUST become per-part and MUST be skipped for any part with index < partCursor - that part's own blocks are legitimately present and would otherwise abort the resume. This is a hard correctness requirement.",
+      "tickingArea": "loadIslandChunks currently opens ONE ticking area over the whole island bounds. A continent is 150x40x150 = 100 chunks, and manager.hasCapacity will refuse. REQUIRED CHANGE: for multi-part jobs open one ticking area PER GRID ROW (part.row, 5 rows of 150x40x30 = 20 chunks each), created before the row's first part and released after the row's last part and after that row's integrity verification.",
+      "integrityVerification": "Per part, using part.integrityBlock, verified while that part's row ticking area is still loaded. The whole-island integrityBlocks list on IslandDefinition becomes the concatenation of the 21 part probes, used only by the pre-placement `beforePlacement` shortcut."
+    }
+  },
+  "altitude": {
+    "range": "Y 60 .. Y 290 nominal (230-block spread), replacing the current flat 145..163",
+    "bands": [
+      {
+        "id": "deep",
+        "minY": 60,
+        "maxY": 112,
+        "span": 53,
+        "character": "below the old world floor; long dives, sparse islets"
+      },
+      {
+        "id": "low",
+        "minY": 100,
+        "maxY": 160,
+        "span": 61,
+        "character": "the working stratum; continents live at 96..128 just under it"
+      },
+      {
+        "id": "mid",
+        "minY": 150,
+        "maxY": 212,
+        "span": 63,
+        "character": "today's altitude, the familiar middle"
+      },
+      {
+        "id": "high",
+        "minY": 205,
+        "maxY": 268,
+        "span": 64,
+        "character": "thin air; crags and landmarks dominate"
+      },
+      {
+        "id": "crown",
+        "minY": 250,
+        "maxY": 290,
+        "span": 41,
+        "character": "the ceiling; rare, mostly islets and the odd crag"
+      }
+    ],
+    "bandsOverlap": "deliberate 6-13 block overlaps between adjacent bands so the world reads as continuous strata rather than five discrete shelves",
+    "perTierWeights": {
+      "islet": {
+        "deep": "0..24",
+        "low": "25..49",
+        "mid": "50..69",
+        "high": "70..89",
+        "crown": "90..99"
+      },
+      "standard": {
+        "deep": "0..9",
+        "low": "10..39",
+        "mid": "40..74",
+        "high": "75..99"
+      },
+      "crag": {
+        "low": "0..19",
+        "mid": "20..54",
+        "high": "55..89",
+        "crown": "90..99"
+      },
+      "landmark": {
+        "mid": "0..29",
+        "high": "30..69",
+        "crown": "70..99"
+      },
+      "continent": "fixed band 96..128, no roll over the five bands"
+    },
+    "bandSelector": "const bandRoll = hash([worldSeed, layoutVersion, cellX, cellZ, 'band']) % 100; then walk the tier's cumulative table in fixed array order.",
+    "jitterFunction": "export function archipelagoAltitude(worldSeed, layoutVersion, cellX, cellZ, tier, sizeY) {\n  const band = bandFor(worldSeed, layoutVersion, cellX, cellZ, tier);\n  const span = band.maxY - band.minY + 1;\n  const coarse = hash([worldSeed, layoutVersion, cellX, cellZ, 'altitude']) % span;\n  // Ridge term: neighbouring cells drift together, so the band reads as a\n  // sloping shelf instead of per-cell noise. Integer only, no trig, and the\n  // double-modulo keeps the result in -4..4 for negative cell coordinates.\n  const ridge = ((((cellX * 7 + cellZ * 13) % 9) + 9) % 9) - 4;\n  const ceiling = Math.min(band.maxY, ARCHIPELAGO_CONFIG.absoluteMaxTopY - sizeY + 1);\n  const floor = Math.max(band.minY, ARCHIPELAGO_CONFIG.absoluteMinY);\n  return Math.min(ceiling, Math.max(floor, band.minY + coarse + ridge));\n}",
+    "determinismNotes": "Only +, -, *, %, Math.floor, Math.min, Math.max. `hash` is the existing fnv1a32 wrapper in archipelago.ts. No Math.random, no Date.now, no trig, no exponentials.",
+    "clamps": {
+      "absoluteMaxTopY": 314,
+      "absoluteMinY": 60,
+      "why": "Overworld max buildable Y is 319. A crown-band landmark (sizeY 30) would otherwise reach 290+29 = 319 exactly, with no margin for a future taller tier. Clamping the ORIGIN so that origin + sizeY - 1 <= 314 keeps 5 blocks of headroom. Only crag and landmark ever hit this clamp (effective crown maxY becomes 285 for landmark, 297 for crag)."
+    },
+    "verticalNonIntersection": "Because altitude now varies by 230 blocks, 2D spacing alone is no longer sufficient. The planner invariant becomes: for any two planned islands A and B,\n  horizontalDistance(A,B) >= A.radius + B.radius + ARCHIPELAGO_CONFIG.minEdgeGap\n  OR |A.yCenter - B.yCenter| >= A.heightRadius + B.heightRadius + ARCHIPELAGO_CONFIG.minEdgeGap\nwhere yCenter = origin.y + floor(sizeY / 2). With cellSize 96 and the largest non-continent clearance radius 33, adjacent cells give 96 >= 33+33+12 = 78, so the horizontal branch alone always holds for the tier roll. Only continents need the suppression zone. The test enforces the invariant over the full plan anyway, so a future tier that breaks it fails loudly."
+  },
+  "configChanges": [
+    "scripts/generation/archipelago.ts - ARCHIPELAGO_CONFIG.idVersion: 1 -> 2. ID prefix becomes `a2_`; ID_PATTERN becomes /^a2_([np]\\d+)_([np]\\d+)$/u. Old `a1_` islands stay on disk as inert terrain and their IDs stay in generatedIslandIds forever, which is the cheapest correct migration - the planner simply no longer knows about them.",
+    "scripts/generation/archipelago.ts - DELETE `conservativeTemplateRadius: 19`. Replace with the per-template resolution described below; nothing may read a single global radius again.",
+    "scripts/generation/archipelago.ts - DELETE `minY: 145` and `maxY: 163`. Replace with `ALTITUDE_BANDS` (5 entries), `TIER_BAND_WEIGHTS`, `absoluteMinY: 60`, `absoluteMaxTopY: 314`.",
+    "scripts/generation/archipelago.ts - REPLACE `minSpacing: 48` with `minEdgeGap: 12` (minimum gap between two clearance cylinders, not between two centres). The old flat 48 is meaningless once radii range from 14 to 113.",
+    "scripts/generation/archipelago.ts - REPLACE `minObserverDistance: 48` with `minObserverClearanceBase: 24`; the effective value becomes `Math.max(48, island.radius + minObserverClearanceBase)` -> islet 48, standard 48, crag 48, landmark 57, duo_mesa 52, continent 137. archipelago-runtime.ts nextArchipelagoGenerationJob must use the per-island value instead of the constant.",
+    "scripts/generation/archipelago.ts - `maxGeneratedIslands: 384 -> 224`. Average solid blocks per island rises from ~285 to ~666 (0.35*105 + 0.45*285 + 0.16*1500 + 0.04*6100), a 2.3x increase; halving the cap holds the total placed-block ceiling roughly constant.",
+    "scripts/generation/archipelago.ts - ADD `maxGeneratedContinents: 2`. Continents are counted and capped separately from maxGeneratedIslands; a world that has raised 2 continents will not raise a third even if the player reaches a fourth site.",
+    "scripts/generation/archipelago.ts - ADD `continentRingCellRadius: 24`, `continentSiteCount: 6`, `continentJitterCells: 2`, `continentSuppressionCells: 2`, `continentGrid: 5`, `continentComponentSize: { x: 30, y: 40, z: 30 }`, `continentOmittedCorners: true`.",
+    "scripts/generation/archipelago.ts - ADD `TIER_ROLL_BUCKETS = [{tier:'islet',max:349},{tier:'standard',max:799},{tier:'crag',max:959},{tier:'landmark',max:999}]` and `tierFor(seed, ver, cellX, cellZ)` using hash key 'tier' % 1000.",
+    "scripts/generation/archipelago.ts - ArchipelagoIsland gains: `tier: ArchipelagoTier`, `size: {x,y,z}`, `heightRadius: number`, `variant?: 'ember' | 'pyre' | 'mesa'`, `parts?: readonly {structureId,origin,rotation,row}[]`. `radius` stays but is now resolved from the chosen template, not from a global constant.",
+    "scripts/generation/archipelago.ts - ARCHIPELAGO_TEMPLATES stops being Record<family, template> and becomes Record<templateKey, template> where templateKey is `${tier}_${family}` plus the continent component keys and the burn variants. templateFor() takes (tier, family, variant). TEMPLATE_PROBES becomes per-tier (the current probe list is hardcoded to the 15x10x13 body: {7,0,6} core and four surface probes at y=5).",
+    "scripts/generation/archipelago-runtime.ts - ARCHIPELAGO_CONTENT_VERSION: 1 -> 2.",
+    "scripts/generation/archipelago-runtime.ts line ~97 - `anchors.safeDock.y` is hardcoded to 6, which only made sense for the 10-tall standard template. It must become `template.dockY`, defined per tier: islet 4, standard 6, crag 10, landmark 15, duo_mesa/continent 21 (the surface datum). Getting this wrong drops the recovery teleport inside solid rock on every crag and landmark.",
+    "scripts/generation/archipelago-runtime.ts - archipelagoOrigin() must use the per-island resolved size, not ARCHIPELAGO_TEMPLATES[family].size, and must return the multi-part `parts` array for continent sites.",
+    "scripts/generation/archipelago-runtime.ts - archipelagoPersistenceBudgetBytes() slices to maxGeneratedIslands; it must also account for the fact that a continent contributes ONE id but 21 parts, so the budget projection is unchanged in size but the comment is now wrong.",
+    "scripts/persistence/schema.ts - GenerationJob gains `parts?: readonly GenerationPart[]` and `partCursor?: number` (both optional; undefined = today's single-structure behaviour). ADD `export interface GenerationPart { structureId: string; origin: BlockVector; rotation: 'None'|'Rotate90'|'Rotate180'|'Rotate270'; row: number; integrityBlock: { offset: BlockVector; typeId: string }; }`. ADD `advancePartCursor(state, jobId, cursor): WorldState` next to markStructurePlaced in state.ts.",
+    "scripts/generation/service.ts line ~217 - single place() becomes the per-part loop with rotation options and a persisted partCursor. ADD `const CONTINENT_PART_GAP_TICKS = 5`.",
+    "scripts/generation/service.ts - loadIslandChunks() must open one ticking area PER GRID ROW for multi-part jobs; the current single whole-island ticking area will fail hasCapacity() at 100 chunks.",
+    "scripts/generation/service.ts - firstStructureObstruction() and firstStructureOccupant() become per-part and are skipped for parts already covered by partCursor.",
+    "scripts/generation/service.ts registeredIsland() - the deterministic-plan equality check must additionally compare parts.length and each part's structureId/origin/rotation, and must NOT compare partCursor (it legitimately advances mid-job).",
+    "scripts/config/constants.ts line 305 - VOID_RESCUE_Y = 64 CONFLICTS with the new deep band (minY 60). A player standing on a deep-band island at Y 60-63 trips void rescue. Must be lowered to 20 (or the deep band raised to 68). This is a hard blocker, not a nicety.",
+    "scripts/config/constants.ts lines 307-308 - BASIC_SHIP_RANGE 150 / BASIC_SHIP_WARNING_RANGE 130. If range is measured in 3D, a 230-block altitude spread means a single vertical transit can consume the entire budget. Either keep the range check strictly horizontal, or raise BASIC_SHIP_RANGE, or gate the deep and crown bands behind a later ship tier. The architect must choose explicitly - do not let this be discovered in playtest.",
+    "tests/archipelago.test.ts - the assertions `island.y >= ARCHIPELAGO_CONFIG.minY` and `<= maxY` (lines ~33-35) reference constants that no longer exist and must be rewritten against the band table. The plan length assertion (900..1200) drops by ~48 due to continent suppression and should become 850..1200.",
+    "tools/structures/nbt.mjs - NO CHANGE REQUIRED. structureBuffer writes `states: compound({})`; Bedrock applies defaults, which gives source water, source lava, and fire age 0 - exactly what every feature in this spec needs. The two consequences of having no block states are handled at design level instead: leaves must stay within 4 blocks of a log (assertLeafSupport) and no orientable block (stairs, logs with axis, doors) may be used.",
+    "tools/structures/shape.mjs - NO CHANGE REQUIRED. Carved cells carry a real air palette index (>= 0), so the existing assertSolidBody keeps passing unmodified. All new assertions live in the new tools/structures/assert.mjs so neither engineer touches shape.mjs.",
+    "tools/generate-structures.mjs - ARCHITECT ONLY. 20 new alphabetically sorted imports plus 20 ISLAND_MODULES entries, in one integration commit, after both engineers have landed their disjoint files."
+  ],
+  "blockBudgets": {
+    "measurement": "assert.mjs exports countIndices(indices) -> { void, air, solid, liquid, total }. `solid` counts every index that is neither -1, nor airIndex, nor a liquid index. `liquid` counts water + lava + fire. A per-module budget test in tests/structure-budgets.test.ts imports each module's inspect() and asserts the row below. These are HARD ceilings, not targets - the placement hitch is the top risk and this table is how it stays bounded.",
+    "perTier": [
+      {
+        "tier": "islet",
+        "module": "islet_*",
+        "boxCells": 792,
+        "maxSolid": 220,
+        "maxAir": 40,
+        "maxLiquid": 0,
+        "expectedSolid": 105,
+        "occupancyCeiling": "n/a"
+      },
+      {
+        "tier": "standard",
+        "module": "ambient_*",
+        "boxCells": 1950,
+        "maxSolid": 420,
+        "maxAir": 90,
+        "maxLiquid": 12,
+        "expectedSolid": 285,
+        "occupancyCeiling": "n/a",
+        "note": "existing modules must continue to pass unchanged; measured today at ~285 solid, 0 air, 0 liquid"
+      },
+      {
+        "tier": "crag",
+        "module": "crag_*",
+        "boxCells": 8694,
+        "maxSolid": 1900,
+        "maxAir": 400,
+        "maxLiquid": 60,
+        "expectedSolid": 1500,
+        "occupancyCeiling": "solid + air + liquid <= 0.28 * boxCells = 2434"
+      },
+      {
+        "tier": "landmark",
+        "module": "landmark_*",
+        "boxCells": 40950,
+        "maxSolid": 8500,
+        "maxAir": 1600,
+        "maxLiquid": 260,
+        "expectedSolid": 6100,
+        "occupancyCeiling": "solid + air + liquid <= 0.28 * boxCells = 11466"
+      },
+      {
+        "tier": "continent-interior",
+        "module": "comp_plain / comp_lake / comp_ridge / comp_chasm / comp_bridge / duo_mesa",
+        "boxCells": 36000,
+        "maxSolid": 11000,
+        "maxAir": 2600,
+        "maxLiquid": 420,
+        "expectedSolid": 9000,
+        "occupancyCeiling": "solid + air + liquid <= 0.40 * boxCells = 14400 (higher than solo tiers because a continent component is a slab, not a floating ellipsoid)"
+      },
+      {
+        "tier": "continent-coast",
+        "module": "comp_coast",
+        "boxCells": 36000,
+        "maxSolid": 8000,
+        "maxAir": 1800,
+        "maxLiquid": 300,
+        "expectedSolid": 6500,
+        "occupancyCeiling": "solid + air + liquid <= 0.30 * boxCells = 10800"
+      }
+    ],
+    "aggregate": {
+      "continentTotal": "sum over the 21 canonical slots of one continent <= 200000 solid blocks. Enforced by a test that builds the canonical layout for a fixed seed and sums countIndices across the resolved modules. Expected ~180000.",
+      "continentPerPart": "no single part may exceed 11000 solid blocks - that is the per-place() hitch bound and it is roughly the same as one landmark, so the engine never sees a placement larger than the largest single-structure tier.",
+      "continentWallClock": "21 parts x CONTINENT_PART_GAP_TICKS 5 = 105 ticks ~= 5.25 s to raise a continent, plus 5 row ticking-area setups.",
+      "worldCeiling": "maxGeneratedIslands 224 x average 666 solid = ~149000 blocks of ambient terrain, plus at most maxGeneratedContinents 2 x 180000 = 360000. Both numbers are placement totals over the life of a world, not per-frame."
+    },
+    "voidFloor": "For every solo-tier module, void cells must be >= 70% of boxCells. This is the direct expression of RULE 1 in the air/void contract: if a generator starts emitting rectangular air it will trip this before it ships. Continent components are exempt (they are slabs) and instead carry the occupancy ceilings above.",
+    "liquidCap": "maxRimFallsPerIsland = 3 total, of which maxVoidFallsPerIsland = 1 and lava void falls = 0. Enforced in the module, asserted by assertFallColumn's `columns` count."
+  },
+  "burningGate": "{\"whyItIsSafe\":\"Stated explicitly rather than assumed: every island in this world is surrounded on all six sides by void. Bedrock fire spreads only to flammable blocks within a bounded neighbourhood (dx/dz in -1..1, dy in -1..4) of an existing fire block, and there is no block of any kind between two islands - the nearest neighbouring island is at least minEdgeGap 12 blocks of pure air away, and in practice 60+ blocks. Fire therefore has no possible path off the structure it starts on. This is a property of the planner's clearance invariant, so if that invariant is ever relaxed, both gates must be re-reviewed.\",\"eligiblePopulation\":\"family === 'volcanic' AND (tier === 'crag' OR tier === 'landmark'). From a ~1010-island plan: volcanic is one of four clusters (~253 islands), of which 16% are crags (~40) and 4% are landmarks (~10) -> ~50 eligible islands per world.\",\"gateOrder\":\"Evaluate eternal FIRST. Reactive is only considered when eternal did not fire. The two variants can never coincide.\",\"variants\":[{\"id\":\"ember_eternal\",\"name\":\"Eternal ember island\",\"predicate\":\"hash([worldSeed, layoutVersion, cellX, cellZ, 'burn_eternal']) % 8 === 0\",\"expectedPerWorld\":\"~6 planned (50 eligible / 8), of which ~1-2 are actually generated within a session's exploration radius\",\"structures\":[\"crag_volcanic_ember\",\"landmark_volcanic_ember\"],\"mechanism\":\"minecraft:fire placed directly on minecraft:netherrack. Vanilla netherrack fire never extinguishes and never consumes its substrate, so the island burns forever and looks identical to every visitor who ever arrives.\",\"blockUpdateCost\":\"ZERO ongoing. A fire block on netherrack has no scheduled tick that changes state and no neighbour it can spread to (see safety ring below). Once placed it is visually animated but mechanically inert.\",\"safetyRing\":\"HARD CONSTRAINT, generator-enforced. No fire cell may have any flammable cell (oak_log, oak_leaves, or any other flammable palette entry) within |dx| <= 4, |dz| <= 4, -2 <= dy <= 5. This is strictly larger than Bedrock's spread neighbourhood (|dx|,|dz| <= 1, dy in -1..4) so it holds with margin. Enforced by assertFireSafety({name,size,indices,fireIndex,flammableIndices}), which throws at generation time.\",\"layout\":\"The ember field occupies one lobe of the island (an emberField of 18-30 cells at the surface layer, netherrack under fire). The oaks the owner asked for live on the OPPOSITE lobe, separated by a basalt/blackstone saddle at least 9 blocks wide. Reading from the air: a burning half and a green half, permanently.\",\"budget\":\"fire + netherrack counts against maxLiquid (fire is counted as liquid by countIndices). crag: <= 30 fire cells. landmark: <= 60 fire cells.\",\"integrityProbes\":\"MUST target blackstone/basalt/netherrack core cells ONLY. Never fire (its block state ticks and the probe would be flaky), never oak.\"},{\"id\":\"pyre_reactive\",\"name\":\"Reactive pyre island\",\"predicate\":\"!eternalGate && hash([worldSeed, layoutVersion, cellX, cellZ, 'burn_reactive']) % 16 === 0\",\"expectedPerWorld\":\"~3 planned (44 remaining eligible / 16), of which ~1 is actually generated in a typical session\",\"structures\":[\"landmark_volcanic_pyre\"],\"note\":\"Landmark tier only. A crag is too small to make a legible before/after and too small to guarantee the fuel bound comfortably.\",\"mechanism\":\"The island ships UNBURNT: a healthy oak grove plus 2 lava source blocks in sealed cups. It is placed when a player approaches (the existing observer-driven generation loop already guarantees a player is nearby). Lava adjacent to a flammable block across a 1-block air gap starts fire, fire consumes the grove, and the island burns down to a charred husk over roughly 2-5 minutes of player presence.\",\"terminationProof\":\"Four generator-enforced conditions, all checked by assertPyreTermination:\\n  (1) FINITE FUEL. Total flammable cells <= fuelBudget = 260. Counted directly from the index array.\\n  (2) CONTAINED FUEL. Every flammable cell lies inside the declared `zone` box, and the zone is surrounded on all six sides by a non-flammable shell at least 2 blocks thick (stone/basalt/blackstone). No flammable block touches the island's outer surface, so nothing can be re-lit from outside.\\n  (3) SEALED IGNITION. Exactly 2 lava source cells. Each has linerIndex on -X, +X, -Z, +Z and -Y, and airIndex on +Y. Lava that cannot flow cannot spread, cannot create new lava, and cannot travel to the fuel zone - it only ignites across the fixed 1-block air gap it was aimed at.\\n  (4) NO REIGNITION SOURCE. The pyre uses NO netherrack and NO soul soil anywhere. Bedrock fire requires either a flammable neighbour or an eternal substrate to persist. Once the last flammable block is consumed, neither exists, so every fire block extinguishes on its next tick and none can respawn. The two sealed lava cups remain: static, sealed, zero further updates.\\nEnd state: bare stone/basalt terrain, 2 lava cups, no fire, no block updates. Permanent and idempotent.\",\"runtimeRule\":\"CRITICAL. landmark_volcanic_pyre's integrityBlocks MUST all target core stone/basalt cells that the fire cannot touch - never oak_log, never oak_leaves, never lava, never fire. If a probe targets a flammable block, the post-burn integrity verification in service.ts waitForIslandIntegrity() will fail, the job will be treated as retryable, and the service will re-place the structure - resurrecting the grove and re-running the burn forever. The service's existing ambient guard ('Ambient island changed after its placement checkpoint; preserving the current blocks') is the second line of defence, but the probe choice is the first and it must be right.\",\"budget\":\"fuelBudget 260 flammable cells, 2 lava cells, 0 fire cells at generation time. Counts against the landmark maxLiquid 260 only for the 2 lava cells; the 260 oak cells count as solid.\"}],\"continentExclusion\":\"Burn gates are FORBIDDEN on continents. A continent has no bounded fuel inventory, the fuel zone containment proof does not survive the seam contract (a fire could walk across a seam into the next component's grove), and a 200000-block landmass burning down is not a bounded block-update budget. The predicate is never evaluated for continent sites.\",\"testability\":\"tests/burn-gate.test.ts: (a) over a fixed seed's full plan, assert 3 <= eternalCount <= 12 and 0 <= reactiveCount <= 8 and eternalCount + reactiveCount < plan.length * 0.02; (b) assert no island carries both variants; (c) assert no continent site carries either; (d) module-level, assert assertFireSafety and assertPyreTermination actually throw when fed a deliberately bad index array (negative tests, so the guard cannot silently become a no-op).\"}",
+  "featureSpecs": [
+    {
+      "id": "sealedLakeBasin",
+      "module": "tools/structures/features/lake.mjs",
+      "signature": "lakeBasin({ centerX, centerZ, radiusX, radiusZ, surfaceY, depth, liquidIndex, linerIndex, airIndex }) -> { stamps, liquidCells, linerCells }",
+      "emitOrder": [
+        "1. LINER SHELL: every cell at ellipse radius+1 (inclusive ring) for y in [surfaceY - depth - 1, surfaceY], plus the full ellipse floor at y = surfaceY - depth - 1, set to linerIndex. The liner is written FIRST so the liquid stamp can only ever overwrite interior cells.",
+        "2. LIQUID FILL: every cell strictly inside the ellipse for y in [surfaceY - depth, surfaceY], set to liquidIndex.",
+        "3. HEADROOM: every cell strictly inside the ellipse at y = surfaceY + 1, set to airIndex. ONE layer only."
+      ],
+      "invariant": "assertSealedBasin: for every liquid cell, each of its -X/+X/-Z/+Z/-Y neighbours must be liquid or liner (never -1, never air, never a gravity block). The +Y neighbour must be liquid, air, or a declared spout. Throws otherwise. This is what stops liquids re-flowing and draining the island on placement.",
+      "linerRestrictions": "Liner may not be sand, red_sand, gravel or any concrete_powder - they fall. Verdant/tundra use minecraft:stone, desert uses minecraft:sandstone, volcanic and lava basins use minecraft:magma_block over minecraft:blackstone.",
+      "sizesByTier": {
+        "standard": "radiusX 1, radiusZ 1, depth 2 (optional, <= 12 liquid cells)",
+        "crag": "radiusX 3, radiusZ 3, depth 3",
+        "landmark": "radiusX 5, radiusZ 4, depth 4",
+        "comp_lake": "radiusX 8, radiusZ 7, depth 4, carved DOWN from the surface datum y 20 into the 8-layer core slab (y 12..19), leaving 4 layers of slab below the floor - sealed by construction"
+      },
+      "liquidStates": "structureBuffer writes empty state compounds, so minecraft:water and minecraft:lava default to liquid_depth 0 = SOURCE blocks. That is exactly what a sealed basin needs and no state support is required."
+    },
+    {
+      "id": "rimWaterfall",
+      "module": "tools/structures/features/fall.mjs",
+      "signature": "rimFall({ spoutX, spoutZ, surfaceY, spillType, liquidIndex, linerIndex, airIndex, structureMinY }) -> { stamps, column }",
+      "notch": "A single 1x1 gap cut through the rim at (spoutX, spoutZ), one layer tall at surfaceY. The lake's outermost liquid cell is placed directly inboard of the notch. The notch's two lateral neighbours at surfaceY are solid liner, so the notch is exactly 1 block wide and outflow travels at most 2 blocks before reaching the drop.",
+      "column": "airIndex at (spoutX, spoutZ) and at the one cell laterally outward of the spout, for every y from surfaceY down to the column terminus. Enforced by assertFallColumn.",
+      "spillTypes": [
+        {
+          "type": "bounded",
+          "default": true,
+          "description": "An underside solid spur carries a 3x3x2 sealed catch cup of linerIndex, 8 blocks below the rim, with liquidIndex inside and airIndex above. The fall is exactly 8 blocks long, visually reads as a waterfall pouring off the edge, and terminates in a settled pool that never updates again.",
+          "allowedOn": [
+            "crag",
+            "landmark",
+            "comp_coast"
+          ],
+          "perIslandCap": 3
+        },
+        {
+          "type": "void",
+          "default": false,
+          "description": "No cup. The column exits the structure's bottom face and the liquid falls into the void. The engine builds a static falling column down to the world floor and then stops; it costs a one-time settle and ~250-350 static liquid blocks that only exist while the island is in render distance. This is the hero shot and it is deliberately rationed.",
+          "allowedOn": [
+            "landmark",
+            "comp_coast"
+          ],
+          "perIslandCap": 1
+        }
+      ],
+      "lavaRule": "Lava rim falls are ALWAYS bounded and never void. Overworld lava spreads on a 30-tick cycle, so a 300-block void lava fall costs orders of magnitude more settle work than water. Lava falls use a 6-block drop into a magma_block-lined cup. maxLavaFallsPerIsland = 1, volcanic family only.",
+      "assertion": "assertFallColumn({name,size,indices,airIndex,columns}) verifies every declared column cell equals airIndex, that the spout's lateral neighbours at spout height are solid, and that columns.length respects the per-island caps."
+    },
+    {
+      "id": "mountainPeak",
+      "module": "tools/structures/features/relief.mjs",
+      "signature": "mountainPeak({ centerX, centerZ, baseY, height, baseRadius, coreIndex, capIndex, capDepth })",
+      "shape": "Solid, no interior void. Radius at layer y is r(y) = baseRadius - Math.floor((y - baseY) * baseRadius / height), so the last layer is a 1-block tip. Fill = every cell with (dx*dx)/(r*r) + (dz*dz)/(r*r) <= 1. Integer only.",
+      "cap": "The top capDepth layers use capIndex - snow_block for tundra, stone for verdant, smooth_sandstone for desert, basalt for volcanic.",
+      "sizesByTier": {
+        "crag": "baseY 10, height 6..8, baseRadius 5, capDepth 2 (occupies y 10..17, the 8 free layers above the reduced crag topY of 9)",
+        "landmark": "baseY 15, height 12..15, baseRadius 9, capDepth 3 (occupies y 15..29)",
+        "comp_ridge": "baseY 21, height 14..18, baseRadius 11, capDepth 4 (occupies y 21..39 above the continent surface datum)"
+      },
+      "whyCragTopYIsReduced": "canonicalIslandBody would give a 23x18x21 crag a topY of 13, leaving only 4 layers of headroom - not enough to read as peaked. The crag body is therefore built directly with taperedEllipsoidBody at topY 9, freeing 8 layers. This is the single most important shape decision for making crags feel different from standards."
+    },
+    {
+      "id": "spire",
+      "module": "tools/structures/features/relief.mjs",
+      "signature": "spire({ x, z, baseY, height, radius, index, flareIndex })",
+      "shape": "A solid vertical shaft of the given radius (1 or 2) with a one-layer flare of radius+1 at baseY. Always solid - a hollow spire is a fall hazard and a carve-predicate headache.",
+      "counts": {
+        "crag": "1-2 spires, height 6..14",
+        "landmark": "2-3 spires, height 10..22",
+        "comp_ridge / duo_mesa": "2-4 spires, height 8..16"
+      },
+      "placement": "Offsets are center-relative and drawn from a fixed per-module table, never from a runtime hash - modules are static files and must produce byte-identical output."
+    },
+    {
+      "id": "caveTube",
+      "module": "tools/structures/features/carve.mjs",
+      "signature": "caveTube({ path, radius, airIndex, body, roofDepth })",
+      "shape": "For each node in `path` (an array of [x,y,z] integer waypoints, connected by integer Bresenham steps), set every cell within Chebyshev distance `radius` to airIndex - BUT ONLY where body.contains(x,y,z) is true. Cells outside the body are left untouched. This is RULE 3 of the air/void contract and it is what makes caves safe next to seams and neighbours.",
+      "roofRule": "Every carved cell must satisfy y <= body.topY - roofDepth, with roofDepth >= 2. A tube may never break the walkable surface implicitly.",
+      "mouth": "Where an opening IS wanted, use caveMouth({x,y,z,radius,airIndex,body}) explicitly. It is the only carve that is permitted to reach body.topY, and it must be declared in the module's `carved` predicate like everything else.",
+      "sizesByTier": {
+        "crag": "one tube, radius 1, 2-3 waypoints",
+        "landmark": "one network, radius 1-2, 3-5 waypoints, plus exactly one caveMouth",
+        "comp_chasm": "see chasm"
+      },
+      "assertion": "assertCarveIsIntentional({name,size,body,indices,airIndex,carved}) - every in-body airIndex cell must be reported by carved(x,y,z); every in-body -1 cell still throws via the existing assertSolidBody."
+    },
+    {
+      "id": "chasm",
+      "module": "tools/structures/features/carve.mjs",
+      "signature": "chasm({ minX, maxX, centerZ, width, topY, bottomY, airIndex, body })",
+      "shape": "A straight canyon running along X: for x in [minX,maxX], z in [centerZ - floor(width/2), centerZ + floor(width/2)], y in [bottomY, topY], set airIndex where body.contains is true.",
+      "continentUse": "comp_chasm cuts FULLY THROUGH the continent slab (topY = 20, bottomY = 4), leaving a 1-block rim of surfaceIndex at the lip. Looking down a continental chasm you see the void beneath the continent - which is correct and dramatic, and costs nothing.",
+      "mutualExclusion": "A component or island containing a chasm may NOT contain a sealed lake. The two features are mutually exclusive per module, because a chasm that clips a basin liner drains it. Enforced by a module-level assertion in defineContinentComponent.",
+      "abutments": "comp_chasm and comp_bridge both carry bridgeAbutments on -X and +X so a chasm can continue across the seam into the next component."
+    },
+    {
+      "id": "landBridge",
+      "module": "tools/structures/features/bridge.mjs",
+      "signature": "landBridge({ fromX, fromZ, toX, toZ, y, width, archDepth, index, railIndex })",
+      "shape": "Integer Bresenham path from (fromX,fromZ) to (toX,toZ). At each step lay a `width`-wide deck (3 or 5) at layer y, plus one supporting layer at y-1 whose sag is floor(archDepth * step * (span - step) * 4 / (span * span)) - a pure-integer parabola, no floating point, no trig.",
+      "rails": "Optional 1-block rail at the two outer columns using railIndex. Rails are recommended on continents (players will walk them) and omitted on solo landmarks (they read better bare from the air).",
+      "seamRule": "A bridge that crosses a component seam MUST terminate exactly at the border shell using bridgeAbutment({ edge, y: CONTINENT_BRIDGE_Y, width, index }). The abutment window is the compile-time constant z in [13,16], y in [25,26], so any two abutment-bearing components meet block-for-block. Nothing else may write into the border shell.",
+      "perIsland": {
+        "landmark": "one bridge, width 3, spanning the landmark's own chasm",
+        "comp_bridge": "one bridge, width 5, with abutments on -X and +X"
+      }
+    },
+    {
+      "id": "emberField",
+      "module": "tools/structures/features/burn.mjs",
+      "signature": "emberField({ cells, surfaceY, netherrackIndex, fireIndex })",
+      "shape": "Each [x,z] in `cells` gets netherrackIndex at surfaceY and fireIndex at surfaceY+1. Cells are a fixed per-module table.",
+      "see": "burningGate.variants[0] for the safety ring, the block-update argument, and the integrity-probe rule."
+    },
+    {
+      "id": "pyreFuel",
+      "module": "tools/structures/features/burn.mjs",
+      "signature": "pyreFuel({ zone, lavaCups, fuelBudget, logIndex, leafIndex, lavaIndex, linerIndex, airIndex })",
+      "see": "burningGate.variants[1] for the four-condition termination proof and the critical integrity-probe rule."
+    }
+  ],
+  "notesForEngineers": "OWNERSHIP SPLIT (disjoint files, safe to run in parallel)\n- Engineer A: tier_shared.mjs, islet_*.mjs (4), crag_*.mjs (4), crag_volcanic_ember.mjs, landmark_*.mjs (4), landmark_volcanic_ember.mjs, landmark_volcanic_pyre.mjs, features/relief.mjs, features/burn.mjs.\n- Engineer B: assert.mjs, continent_shared.mjs, comp_*.mjs (6), duo_mesa.mjs, features/lake.mjs, features/fall.mjs, features/carve.mjs, features/bridge.mjs.\n- Architect only: tools/generate-structures.mjs, scripts/generation/archipelago.ts, archipelago-runtime.ts, service.ts, scripts/persistence/schema.ts, scripts/generation/state.ts, scripts/config/constants.ts, all tests.\nA depends on B's assert.mjs and features/lake.mjs + features/fall.mjs + features/carve.mjs. Their signatures in featureSpecs are the contract; A codes against them immediately and B lands them first. Neither engineer touches shape.mjs, nbt.mjs, ambient_shared.mjs or the four existing ambient_*.mjs files - all four remain byte-identical, which is the reason this change carries near-zero regression risk for live worlds.\n\nTWO GOOD-NEWS FINDINGS FROM READING THE SOURCE\n1. shape.mjs needs NO changes. Carved cells carry a real air palette index (>= 0), so assertSolidBody at shape.mjs:351 keeps passing unmodified. Every new assertion lives in the new assert.mjs.\n2. nbt.mjs needs NO changes. structureBuffer writes `states: compound({})` and Bedrock applies defaults, which gives source water, source lava, and fire age 0 - precisely what every feature here needs.\n\nTWO BAD-NEWS CONSEQUENCES OF HAVING NO BLOCK STATES\n1. oak_leaves default to persistent_bit=false and WILL decay. Every leaf cell must be within 4 blocks (taxicab) of an oak_log cell. assertLeafSupport enforces it. This bites hardest on landmark canopies.\n2. No orientable blocks. No stairs, no axis-bearing logs, no doors, no directional slabs. Design accordingly.\n\nTHE THREE ITEMS THE OWNER ASKED TO BE NAMED EXPLICITLY\n1. VOID_RESCUE_Y = 64 (scripts/config/constants.ts:305) is a HARD CONFLICT with the new deep band, which starts at Y 60. A player standing on a deep-band island at Y 60-63 trips void rescue and gets teleported off it. Either lower VOID_RESCUE_Y to 20 or raise the deep band floor to 68. This must be decided before anything ships; it is not a polish item.\n2. BASIC_SHIP_RANGE = 150 / BASIC_SHIP_WARNING_RANGE = 130 (constants.ts:307-308). The altitude spread grows from 18 blocks to 230. If range is a 3D distance from the home dock, a single deep-to-crown transit consumes the entire budget and the starter craft becomes unusable outside the mid band. Three viable resolutions: keep the range check strictly horizontal (cheapest, recommended); raise BASIC_SHIP_RANGE to ~260; or gate the deep and crown bands behind a later ship tier so the starter craft only ever meets low/mid/high. Choose explicitly.\n3. archipelago-runtime.ts:97 hardcodes anchors.safeDock.y = 6, valid only for the 10-tall standard template. It must become a per-tier dockY (islet 4, standard 6, crag 10, landmark 15, duo_mesa/continent 21). If this is missed, safe-dock recovery teleports the player into solid rock on every crag and landmark - the failure is silent and looks like a suffocation bug.\nRelated: initial player arrival. The starter island sits inside protectedRadius 460 at its pinned origin. The nearest generated island is now at a band-rolled altitude that can differ from the starter's by 130+ blocks, so \"the first island you see when you look out from spawn\" may no longer be at eye level. If the onboarding relies on that sightline, pin the first ring of cells (cellRadius 5-6) to the mid band.\n\nSCOPING DECISION WORTH CONFIRMING\nContinents are family-neutral: one shared temperate palette (stone / dirt / grass_block / gravel / water / oak_log / oak_leaves) rather than four family variants. This is what keeps the component kit at 7 modules instead of 28. Rationale: a player sees at most 1-2 of the 6 continents per world, and \"the Green Continents\" reads as deliberate worldbuilding rather than as a missing feature. If the architect disagrees, the cost is 21 additional structure modules and roughly 4x the component authoring effort - it should be a conscious trade, not a default.\n\nMIGRATION POSTURE\nidVersion 1 -> 2 changes the ID prefix from a1_ to a2_, so the planner stops knowing about every currently-placed ambient island. Those islands stay on disk as inert terrain and their IDs stay in generatedIslandIds forever. This is the cheapest correct migration and it is safe precisely because the four existing ambient_*.mjs modules are frozen: their structures still exist in the pack, so any job that somehow references an a1_ id still resolves. Note that the generatedAmbientCount filter in archipelago-runtime.ts:142 uses isArchipelagoIslandId, which reparses against the CURRENT layout version - after the bump it will return false for every a1_ id, so the 224 budget will count only new islands. That is the desired behaviour but it is accidental rather than designed; add a comment so nobody \"fixes\" it.\n\nTOP RISK, RESTATED\nPlacement hitch. The three controls are (a) the per-tier solid-block ceilings in blockBudgets, enforced by a test, (b) the 70% void floor for solo tiers, which is what stops a generator quietly emitting rectangular air, and (c) CONTINENT_PART_GAP_TICKS = 5, which caps any single place() call at ~11000 blocks - roughly one landmark - no matter how large the composed island is. All three are numeric and testable without launching Minecraft. The in-engine gate still applies: nothing here is verified until a human flies to a continent in a real world."
+}

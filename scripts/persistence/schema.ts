@@ -19,6 +19,28 @@ export interface DockLocation {
 
 export type GenerationStage = "queued" | "structure_placed";
 
+export type GenerationRotation =
+  | "None"
+  | "Rotate90"
+  | "Rotate180"
+  | "Rotate270";
+
+/**
+ * One `structureManager.place` call inside a composed island. Composed islands
+ * exist because Bedrock refuses to place a structure larger than 64x384x64, so
+ * anything wider than that is tiled from square components.
+ */
+export interface GenerationPart {
+  structureId: string;
+  origin: BlockVector;
+  rotation: GenerationRotation;
+  /** Grid row; every part in a row shares one generation ticking area. */
+  row: number;
+  size: BlockVector;
+  /** Probe offset relative to THIS part's origin. */
+  integrityBlock: { offset: BlockVector; typeId: string };
+}
+
 export interface GenerationJob {
   id: string;
   contentVersion: number;
@@ -31,6 +53,23 @@ export interface GenerationJob {
   };
   stage: GenerationStage;
   attempts: number;
+  /**
+   * Present only for composed islands. `undefined` means exactly the historic
+   * single-structure behaviour, and `structureId`/`origin` always describe
+   * part 0 so every existing reader keeps working.
+   */
+  parts?: readonly GenerationPart[];
+  /**
+   * Restart cursor for composed placement.
+   *
+   * `undefined` means the occupied-volume survey has not run yet. Once the
+   * survey passes it is persisted as `0`, which is also the commitment point:
+   * from then on the job owns its volume and never re-surveys, so a crash in
+   * the middle of a `place()` can only ever cost one idempotent re-place
+   * instead of aborting a half-built island. Parts `[0, partCursor)` are
+   * placed and verified. Never decreases.
+   */
+  partCursor?: number;
 }
 
 interface WorldStateV1 {
@@ -515,6 +554,48 @@ function islandLayoutRecords(
   return result;
 }
 
+function generationRotation(value: unknown): GenerationRotation {
+  return value === "Rotate90" ||
+    value === "Rotate180" ||
+    value === "Rotate270"
+    ? value
+    : "None";
+}
+
+function generationParts(value: unknown): GenerationPart[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const parts: GenerationPart[] = [];
+
+  for (const entry of value) {
+    if (!isRecord(entry) || typeof entry.structureId !== "string") {
+      // A malformed part would silently punch a hole in a composed island, so
+      // the whole `parts` list is discarded and the job falls back to its
+      // single-structure form rather than building something incomplete.
+      return undefined;
+    }
+
+    const probe = isRecord(entry.integrityBlock) ? entry.integrityBlock : {};
+
+    parts.push({
+      structureId: entry.structureId,
+      origin: blockVector(entry.origin, ZERO_VECTOR),
+      rotation: generationRotation(entry.rotation),
+      row: Math.max(0, Math.trunc(finiteNumber(entry.row, 0))),
+      size: blockVector(entry.size, UNIT_VECTOR),
+      integrityBlock: {
+        offset: blockVector(probe.offset, ZERO_VECTOR),
+        typeId:
+          typeof probe.typeId === "string" ? probe.typeId : "minecraft:stone",
+      },
+    });
+  }
+
+  return parts.length > 0 ? parts : undefined;
+}
+
 function generationJob(value: unknown): GenerationJob | undefined {
   if (!isRecord(value)) {
     return undefined;
@@ -533,6 +614,13 @@ function generationJob(value: unknown): GenerationJob | undefined {
     return undefined;
   }
 
+  const parts = generationParts(value.parts);
+  const storedCursor = value.partCursor;
+  const partCursor =
+    parts !== undefined && typeof storedCursor === "number"
+      ? Math.min(parts.length, Math.max(0, Math.trunc(storedCursor)))
+      : undefined;
+
   return {
     id: value.id,
     contentVersion: Math.max(
@@ -548,6 +636,8 @@ function generationJob(value: unknown): GenerationJob | undefined {
     },
     stage,
     attempts: Math.max(0, Math.trunc(finiteNumber(value.attempts, 0))),
+    parts,
+    partCursor,
   };
 }
 

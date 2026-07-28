@@ -1,22 +1,35 @@
 import { REQUIRED_ISLANDS } from "../config/constants";
 import { IslandDefinition } from "../config/islands";
-import { GenerationJob, WorldState } from "../persistence/schema";
+import {
+  GenerationJob,
+  GenerationPart,
+  WorldState,
+} from "../persistence/schema";
 import {
   ARCHIPELAGO_CONFIG,
   ARCHIPELAGO_TEMPLATES,
   ArchipelagoIsland,
+  ArchipelagoPart,
+  archipelagoIntegrityBlocks,
+  archipelagoIslandOrigin,
   archipelagoIslandsWithinRadius,
+  archipelagoMinObserverDistance,
+  archipelagoTemplateKey,
   parseArchipelagoIslandId,
   planArchipelago,
 } from "./archipelago";
 import { queueGeneration } from "./state";
 
-export const ARCHIPELAGO_CONTENT_VERSION = 1;
+/**
+ * Bumped alongside `ARCHIPELAGO_CONFIG.idVersion`: the ambient tier system,
+ * altitude bands, and composed continents are all new content.
+ */
+export const ARCHIPELAGO_CONTENT_VERSION = 2;
 export const STABLE_ARCHIPELAGO_DIMENSION = "minecraft:overworld";
 /**
- * Ambient IDs use the `a1_` prefix, so their coordinates must always be
- * rederived with the matching planner version. Authored-island layout
- * migrations must not silently move an already persisted ambient job.
+ * Ambient IDs carry the planner version in their prefix, so their coordinates
+ * must always be rederived with the matching planner version. Authored-island
+ * layout migrations must not silently move an already persisted ambient job.
  */
 export const ARCHIPELAGO_LAYOUT_VERSION = ARCHIPELAGO_CONFIG.idVersion;
 
@@ -26,18 +39,24 @@ export interface ArchipelagoObserver {
   z: number;
 }
 
-function archipelagoOrigin(island: ArchipelagoIsland): {
-  x: number;
-  y: number;
-  z: number;
-} {
-  const size = ARCHIPELAGO_TEMPLATES[island.family].size;
+function generationParts(
+  island: ArchipelagoIsland,
+): readonly GenerationPart[] | undefined {
+  if (island.parts === undefined) {
+    return undefined;
+  }
 
-  return {
-    x: island.x - Math.floor(size.x / 2),
-    y: island.y,
-    z: island.z - Math.floor(size.z / 2),
-  };
+  return island.parts.map((part: ArchipelagoPart) => ({
+    structureId: part.structureId,
+    origin: { ...part.origin },
+    rotation: part.rotation,
+    row: part.row,
+    size: { ...part.size },
+    integrityBlock: {
+      offset: { ...part.integrityBlock.offset },
+      typeId: part.integrityBlock.typeId,
+    },
+  }));
 }
 
 export function archipelagoGenerationJobForId(
@@ -58,9 +77,13 @@ export function archipelagoGenerationJobForId(
   return {
     id: island.id,
     contentVersion: ARCHIPELAGO_CONTENT_VERSION,
-    structureId: ARCHIPELAGO_TEMPLATES[island.family].structureId,
+    // `structureId` describes part 0 and `origin` is always the whole island's
+    // footprint corner, so `structureBounds(job.origin, island.size)` and the
+    // island's integrity offsets stay meaningful for composed islands too.
+    structureId: island.structureId,
     dimensionId,
-    origin: archipelagoOrigin(island),
+    origin: archipelagoIslandOrigin(island),
+    parts: generationParts(island),
   };
 }
 
@@ -79,24 +102,30 @@ export function archipelagoIslandDefinition(
     return undefined;
   }
 
-  const template = ARCHIPELAGO_TEMPLATES[island.family];
+  const template =
+    ARCHIPELAGO_TEMPLATES[
+      archipelagoTemplateKey(island.tier, island.family, island.variant)
+    ];
 
   return {
     id: island.id,
     family: island.family,
     tier: 0,
-    structureId: template.structureId,
+    structureId: island.structureId,
     dimensionId,
     contentVersion: ARCHIPELAGO_CONTENT_VERSION,
-    size: template.size,
+    size: island.size,
     placement: "seeded",
     gameplayActivation: "structure_only",
-    integrityBlocks: template.integrityBlocks,
+    integrityBlocks: archipelagoIntegrityBlocks(island),
     anchors: {
       safeDock: {
-        x: Math.floor(template.size.x / 2) + 0.5,
-        y: 6,
-        z: Math.floor(template.size.z / 2) + 0.5,
+        x: Math.floor(island.size.x / 2) + 0.5,
+        // Per-tier surface datum. A flat 6 was only ever correct for the
+        // 10-tall standard template; on a crag or landmark it would drop the
+        // recovery teleport inside solid rock.
+        y: template.dockY,
+        z: Math.floor(island.size.z / 2) + 0.5,
       },
     },
   };
@@ -112,6 +141,16 @@ export function isArchipelagoIslandId(
       ARCHIPELAGO_LAYOUT_VERSION,
       id,
     ) !== undefined
+  );
+}
+
+export function isArchipelagoContinentId(
+  state: Pick<WorldState, "worldSeed">,
+  id: string,
+): boolean {
+  return (
+    parseArchipelagoIslandId(state.worldSeed, ARCHIPELAGO_LAYOUT_VERSION, id)
+      ?.tier === "continent"
   );
 }
 
@@ -139,11 +178,36 @@ export function nextArchipelagoGenerationJob(
   }
 
   const generated = new Set(state.generatedIslandIds);
-  const generatedAmbientCount = state.generatedIslandIds.filter((id) =>
-    isArchipelagoIslandId(state, id),
-  ).length;
+  let generatedAmbientCount = 0;
+  let generatedContinentCount = 0;
 
-  if (generatedAmbientCount >= ARCHIPELAGO_CONFIG.maxGeneratedIslands) {
+  // NOTE: `isArchipelagoIslandId` reparses against the CURRENT layout version,
+  // so ids from an earlier planner version deliberately do not count against
+  // either budget. Those islands remain on disk as inert terrain.
+  for (const id of state.generatedIslandIds) {
+    const island = parseArchipelagoIslandId(
+      state.worldSeed,
+      ARCHIPELAGO_LAYOUT_VERSION,
+      id,
+    );
+
+    if (island === undefined) {
+      continue;
+    }
+
+    if (island.tier === "continent") {
+      generatedContinentCount += 1;
+    } else {
+      generatedAmbientCount += 1;
+    }
+  }
+
+  const ambientBudgetSpent =
+    generatedAmbientCount >= ARCHIPELAGO_CONFIG.maxGeneratedIslands;
+  const continentBudgetSpent =
+    generatedContinentCount >= ARCHIPELAGO_CONFIG.maxGeneratedContinents;
+
+  if (ambientBudgetSpent && continentBudgetSpent) {
     return undefined;
   }
 
@@ -167,11 +231,18 @@ export function nextArchipelagoGenerationJob(
         continue;
       }
 
+      if (island.tier === "continent" ? continentBudgetSpent : ambientBudgetSpent) {
+        continue;
+      }
+
+      // Clearance scales with the island: 48 for islets through standards, 57
+      // for a landmark, 137 for a continent.
+      const clearance = archipelagoMinObserverDistance(island);
+
       if (
         dimensionObservers.some(
           (candidateObserver) =>
-            distanceSquared(island, candidateObserver) <
-            ARCHIPELAGO_CONFIG.minObserverDistance ** 2,
+            distanceSquared(island, candidateObserver) < clearance * clearance,
         )
       ) {
         continue;
@@ -210,10 +281,20 @@ export function queueNextArchipelagoIsland(
   return job === undefined ? state : queueGeneration(state, job);
 }
 
+/**
+ * Worst-case persisted size once the ambient budget is spent. A continent adds
+ * exactly one id like any other island — its 21 components live in the active
+ * job while it is being raised and are gone once it completes — so the
+ * projection stays a plain id/version count.
+ */
 export function archipelagoPersistenceBudgetBytes(state: WorldState): number {
   const ids = planArchipelago(state.worldSeed, ARCHIPELAGO_LAYOUT_VERSION)
     .map((island) => island.id)
-    .slice(0, ARCHIPELAGO_CONFIG.maxGeneratedIslands);
+    .slice(
+      0,
+      ARCHIPELAGO_CONFIG.maxGeneratedIslands +
+        ARCHIPELAGO_CONFIG.maxGeneratedContinents,
+    );
   const islandVersions = { ...state.islandVersions };
 
   for (const id of ids) {
