@@ -4,7 +4,7 @@
     "name": "Sky Knights Behavior Pack",
     "description": "Development behavior pack for Sky Knights: Bedrock.",
     "uuid": "4e8ae092-a400-48fc-82d7-f1c42decefd6",
-    "version": [0, 3, 6],
+    "version": [0, 3, 7],
     "min_engine_version": [1, 26, 30]
   },
   "modules": [
@@ -12,14 +12,14 @@
       "description": "Sky Knights data",
       "type": "data",
       "uuid": "7c797acf-c057-4e0f-8e00-9b3169356e01",
-      "version": [0, 3, 6]
+      "version": [0, 3, 7]
     },
     {
       "description": "Sky Knights server scripts",
       "language": "javascript",
       "type": "script",
       "uuid": "fded5734-2096-481f-a908-bd261af0ea4f",
-      "version": [0, 3, 6],
+      "version": [0, 3, 7],
       "entry": "scripts/main.js"
     }
   ],
@@ -34,7 +34,7 @@
     },
     {
       "uuid": "83d16786-1603-4b13-b4d1-4c555fb37865",
-      "version": [0, 3, 6]
+      "version": [0, 3, 7]
     }
   ]
 }

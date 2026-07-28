@@ -4,6 +4,47 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
+## [0.3.7] — 2026-07-28
+
+### Fixed
+
+- **D-1**: the Dockmaster no longer falls forever when its dock deck is
+  destroyed. It has gravity and a damage sensor that refuses every source
+  including the void, so a broken deck dropped it into the void while the
+  200-tick sweep teleported it back, indefinitely, every ten seconds. The dock
+  sweep is now deck-aware and cannot produce that combination for any input.
+
+### Added
+
+- Destroying the dock deck beneath the Dockmaster now has consequences, gated
+  so it cannot trap a new player:
+  - before the player's first ship, the deck plank is rebuilt, because the
+    Dockmaster is the only route to that ship;
+  - after the first ship, the destruction is treated as deliberate: Elian
+    rises from the wreckage and turns hostile, flying, damaging, and targeting
+    players within 48 blocks.
+- The transformation swaps Bedrock component groups on the existing entity
+  rather than spawning a new one, so it needs no new model, texture, or
+  resource-pack change. A steward Dockmaster is also re-stewarded on sight, so
+  an entity spawned before the component groups existed heals itself.
+- Dockmaster mood persists in its own world dynamic property rather than the
+  world state document, so this slice adds no schema version.
+
+### Changed
+
+- Bumped the add-on, stable packs, world template, and GameTest dependency
+  profile to `0.3.7`.
+
+### Validation
+
+- `npm run verify` passed with 238 tests across 41 files.
+- `npm audit --audit-level=high` reported zero vulnerabilities.
+- The dock-deck decision table is exhaustively unit-tested, including a
+  regression asserting that no combination of inputs ever asks to station a
+  Dockmaster whose deck is gone.
+- The in-game transformation, flight, and combat behaviour remain a Minecraft
+  hands-on acceptance check.
+
 ## [0.3.6] — 2026-07-27
 
 ### Fixed

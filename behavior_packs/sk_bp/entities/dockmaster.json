@@ -8,9 +8,6 @@
       "spawn_category": "creature"
     },
     "components": {
-      "minecraft:type_family": {
-        "family": ["skyknights_dockmaster", "npc"]
-      },
       "minecraft:collision_box": {
         "width": 0.7,
         "height": 1.9
@@ -18,13 +15,6 @@
       "minecraft:health": {
         "value": 100,
         "max": 100
-      },
-      "minecraft:physics": {
-        "has_gravity": true,
-        "has_collision": true
-      },
-      "minecraft:movement": {
-        "value": 0
       },
       "minecraft:knockback_resistance": {
         "value": 1
@@ -34,34 +24,119 @@
         "is_pushable_by_piston": false
       },
       "minecraft:persistent": {},
-      "minecraft:nameable": {},
-      "minecraft:damage_sensor": {
-        "triggers": [
-          {
-            "deals_damage": "no"
-          }
-        ]
+      "minecraft:nameable": {}
+    },
+    "component_groups": {
+      "skyknights:steward": {
+        "minecraft:type_family": {
+          "family": ["skyknights_dockmaster", "npc"]
+        },
+        "minecraft:physics": {
+          "has_gravity": true,
+          "has_collision": true
+        },
+        "minecraft:movement": {
+          "value": 0
+        },
+        "minecraft:damage_sensor": {
+          "triggers": [
+            {
+              "deals_damage": "no"
+            }
+          ]
+        },
+        "minecraft:interact": {
+          "interactions": [
+            {
+              "interact_text": "action.interact.skyknights.shipyard",
+              "on_interact": {
+                "event": "skyknights:open_shipyard",
+                "target": "self"
+              },
+              "swing": false
+            }
+          ]
+        },
+        "minecraft:behavior.look_at_player": {
+          "priority": 1,
+          "look_distance": 8,
+          "probability": 1
+        }
       },
-      "minecraft:interact": {
-        "interactions": [
-          {
-            "interact_text": "action.interact.skyknights.shipyard",
-            "on_interact": {
-              "event": "skyknights:open_shipyard",
-              "target": "self"
-            },
-            "swing": false
-          }
-        ]
-      },
-      "minecraft:behavior.look_at_player": {
-        "priority": 1,
-        "look_distance": 8,
-        "probability": 1
+      "skyknights:wrathful": {
+        "minecraft:type_family": {
+          "family": ["skyknights_dockmaster", "monster"]
+        },
+        "minecraft:physics": {
+          "has_gravity": false,
+          "has_collision": true
+        },
+        "minecraft:movement": {
+          "value": 0.32
+        },
+        "minecraft:movement.fly": {},
+        "minecraft:navigation.fly": {
+          "can_path_over_water": true,
+          "can_pass_doors": false,
+          "can_open_doors": false
+        },
+        "minecraft:can_fly": {},
+        "minecraft:attack": {
+          "damage": 6
+        },
+        "minecraft:damage_sensor": {
+          "triggers": [
+            {
+              "deals_damage": "yes"
+            }
+          ]
+        },
+        "minecraft:behavior.nearest_attackable_target": {
+          "priority": 1,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 48,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "player"
+              },
+              "max_dist": 48
+            }
+          ]
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
       }
     },
     "events": {
-      "skyknights:open_shipyard": {}
+      "minecraft:entity_spawned": {
+        "add": {
+          "component_groups": ["skyknights:steward"]
+        }
+      },
+      "skyknights:open_shipyard": {},
+      "skyknights:become_wrathful": {
+        "remove": {
+          "component_groups": ["skyknights:steward"]
+        },
+        "add": {
+          "component_groups": ["skyknights:wrathful"]
+        }
+      },
+      "skyknights:become_steward": {
+        "remove": {
+          "component_groups": ["skyknights:wrathful"]
+        },
+        "add": {
+          "component_groups": ["skyknights:steward"]
+        }
+      }
     }
   }
 }

@@ -28,8 +28,16 @@ import {
   MaterialConsumption,
   countMaterials,
   planMaterialConsumption,
+  DOCK_DECK_BLOCK,
+  resolveDockDeck,
   shouldEnsureDockmaster,
 } from "./dockyard-materials";
+import {
+  dockmasterMood,
+  firstShipBuilt,
+  provokeDockmaster,
+  restoreSteward,
+} from "./dockmaster-wrath";
 import { dockOwnedShip, isAtDock, resolveOwnedShip } from "./ship-docking";
 import { modulesForSlot, shipModuleName } from "./ship-modules";
 import { isCompleteSkycutterLoadout } from "./ship-rules";
@@ -86,9 +94,46 @@ export function ensureDockmaster(
   const islandRecorded = repository
     .load()
     .generatedIslandIds.includes(STARTER_ISLAND.id);
+  const mood = dockmasterMood();
+  const outcome = resolveDockDeck({
+    islandRecorded,
+    dockSupportTypeId: dockSupport?.typeId,
+    firstShipBuilt: firstShipBuilt(),
+    mood,
+  });
 
-  if (!shouldEnsureDockmaster(islandRecorded, dockSupport?.typeId)) {
+  if (outcome === "wait") {
     return false;
+  }
+
+  // Once turned, the steward is gone for good. Returning early is also what
+  // stops the pre-fix loop: nothing teleports or respawns a Dockmaster whose
+  // deck no longer exists.
+  if (outcome === "leave_wrathful") {
+    return true;
+  }
+
+  const anyDockmaster = dimension.getEntities({
+    type: IDENTIFIERS.dockmaster,
+  })[0];
+
+  if (outcome === "provoke") {
+    if (anyDockmaster === undefined) {
+      // Nothing to turn yet; the next sweep will find it.
+      return false;
+    }
+
+    provokeDockmaster(anyDockmaster, logger);
+    return true;
+  }
+
+  if (outcome === "restore_deck") {
+    // The player has not reached their first ship, so the Dockmaster is still
+    // their only route to one. Rebuild the plank rather than strand them.
+    dockSupport?.setType(DOCK_DECK_BLOCK);
+    logger.warn("Rebuilt the starter dock deck beneath the Dockmaster.", {
+      block: DOCK_DECK_BLOCK,
+    });
   }
 
   const nearby = dimension.getEntities({
@@ -101,13 +146,11 @@ export function ensureDockmaster(
     return true;
   }
 
-  const displaced = dimension.getEntities({
-    type: IDENTIFIERS.dockmaster,
-  })[0];
+  const displaced = anyDockmaster;
 
   if (displaced !== undefined) {
     displaced.teleport(DOCKYARD.dockmaster, { dimension });
-    displaced.nameTag = "Dockmaster Elian";
+    restoreSteward(displaced);
     displaced.addTag("skyknights.dockmaster");
     logger.warn("Displaced Dockmaster returned to the starter dock.", {
       entityId: displaced.id,

@@ -248,7 +248,8 @@ a world created from the `0.3.6` template.
 
 ### D-1 — the Dockmaster falls forever when its dock deck is destroyed
 
-Found 2026-07-27 during the `0.3.6` session. Not yet fixed.
+Found 2026-07-27 during the `0.3.6` session. **Fixed in `0.3.7`**; the in-game
+behaviour is not yet confirmed in a client.
 
 The Dockmaster stands at world `(12.5, 161, 0.5)`, which is starter-island
 local `(24, 12, 10)`, directly on the oak-plank dock deck. Reading the current
