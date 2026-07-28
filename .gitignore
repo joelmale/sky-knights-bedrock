@@ -35,6 +35,9 @@ pnpm-debug.log*
 /.sky-knights-server.properties.backup
 /server.properties.sky-knights-*.tmp
 
+# Agent worktrees (transient checkouts created by workflow runs)
+.claude/worktrees/
+
 # Editor, operating-system, and scratch files
 .idea/
 .vs/
