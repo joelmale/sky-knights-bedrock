@@ -11,6 +11,7 @@ import {
   ARCHIPELAGO_CONTENT_VERSION,
   ARCHIPELAGO_LAYOUT_VERSION,
   ARCHIPELAGO_V3_CONTENT_VERSION,
+  ARCHIPELAGO_V4_CONTENT_VERSION,
   STABLE_ARCHIPELAGO_DIMENSION,
   archipelagoGenerationJobForId,
   archipelagoIslandDefinition,
@@ -19,11 +20,16 @@ import {
   queueNextArchipelagoIsland,
 } from "../scripts/generation/archipelago-runtime";
 import {
-  ARCHIPELAGO_V3_CONFIG,
   ArchipelagoV3Island,
   parseArchipelagoV3IslandId,
   planArchipelagoV3,
 } from "../scripts/generation/archipelago-v3";
+import {
+  ARCHIPELAGO_V4_CONFIG,
+  ArchipelagoV4Island,
+  parseArchipelagoV4IslandId,
+  planArchipelagoV4,
+} from "../scripts/generation/archipelago-v4";
 import { WorldState, createWorldState } from "../scripts/persistence/schema";
 
 function readyState(): WorldState {
@@ -44,10 +50,11 @@ function readyState(): WorldState {
 function islandForJob(
   state: WorldState,
   id: string | undefined,
-): ArchipelagoIsland | ArchipelagoV3Island | undefined {
+): ArchipelagoIsland | ArchipelagoV3Island | ArchipelagoV4Island | undefined {
   return id === undefined
     ? undefined
-    : (parseArchipelagoV3IslandId(state.worldSeed, id) ??
+    : (parseArchipelagoV4IslandId(state.worldSeed, id) ??
+        parseArchipelagoV3IslandId(state.worldSeed, id) ??
         parseArchipelagoIslandId(
           state.worldSeed,
           ARCHIPELAGO_LAYOUT_VERSION,
@@ -175,6 +182,43 @@ describe("archipelago runtime planning", () => {
     }
   });
 
+  it("uses migration-safe a4 ids for new clustered solo jobs", () => {
+    const state = readyState();
+    const plan = planArchipelagoV4(state.worldSeed);
+
+    for (const tier of ["islet", "standard", "crag", "landmark"] as const) {
+      const island = plan.find((candidate) => candidate.tier === tier)!;
+      const job = archipelagoGenerationJobForId(state, island.id);
+      const definition = archipelagoIslandDefinition(state, island.id);
+      const expectedPartCount =
+        tier === "crag" ? 4 : tier === "landmark" ? 16 : undefined;
+
+      expect(island.id.startsWith("a4_")).toBe(true);
+      expect(job).toMatchObject({
+        id: island.id,
+        contentVersion: ARCHIPELAGO_V4_CONTENT_VERSION,
+        structureId: island.template.parts[0].structureId,
+        dimensionId: STABLE_ARCHIPELAGO_DIMENSION,
+        origin: {
+          x: island.x - Math.floor(island.size.x / 2),
+          y: island.y,
+          z: island.z - Math.floor(island.size.z / 2),
+        },
+      });
+      expect(job?.parts?.length).toBe(expectedPartCount);
+      expect(definition).toMatchObject({
+        id: island.id,
+        family: island.family,
+        contentVersion: ARCHIPELAGO_V4_CONTENT_VERSION,
+        structureId: island.template.parts[0].structureId,
+        gameplayActivation: "structure_only",
+      });
+      expect(definition?.integrityBlocks).toHaveLength(
+        island.template.parts.length,
+      );
+    }
+  });
+
   it("creates a complete resumable continent job and definition", () => {
     const state = readyState();
     const island = planArchipelago(
@@ -228,7 +272,7 @@ describe("archipelago runtime planning", () => {
     });
   });
 
-  it("prioritizes a reachable reserved continent over nearby solo backlog", () => {
+  it("keeps frozen a2 continents recoverable without queueing new ones", () => {
     const state = readyState();
     const continent = planArchipelago(
       state.worldSeed,
@@ -242,7 +286,8 @@ describe("archipelago runtime planning", () => {
       },
     ]);
 
-    expect(islandForJob(state, job?.id)?.tier).toBe("continent");
+    expect(archipelagoGenerationJobForId(state, continent.id)).toBeDefined();
+    expect(islandForJob(state, job?.id)?.tier).not.toBe("continent");
   });
 
   it("can finish a valid in-flight a1 job without admitting it to the new plan", () => {
@@ -288,7 +333,7 @@ describe("archipelago runtime planning", () => {
     ).toBeUndefined();
   });
 
-  it("isolates dimensions and enforces solo and continent caps independently", () => {
+  it("isolates dimensions and enforces the active a4 cap", () => {
     const state = readyState();
     const wrongDimension = {
       dimensionId: "skyknights:sky_realm",
@@ -300,7 +345,7 @@ describe("archipelago runtime planning", () => {
       nextArchipelagoGenerationJob(state, [wrongDimension]),
     ).toBeUndefined();
 
-    const solos = planArchipelagoV3(state.worldSeed);
+    const solos = planArchipelagoV4(state.worldSeed);
     const continents = planArchipelago(
       state.worldSeed,
       ARCHIPELAGO_LAYOUT_VERSION,
@@ -309,28 +354,24 @@ describe("archipelago runtime planning", () => {
       ...state,
       generatedIslandIds: [
         ...state.generatedIslandIds,
-        ...solos
-          .slice(0, ARCHIPELAGO_V3_CONFIG.maxGeneratedIslands)
-          .map((island) => island.id),
+        ...solos.map((island) => island.id),
       ],
     };
-    const continentJob = nextArchipelagoGenerationJob(soloCapped, [
-      {
-        dimensionId: STABLE_ARCHIPELAGO_DIMENSION,
-        x: continents[0].x + 200,
-        z: continents[0].z,
-      },
-    ]);
+    expect(
+      nextArchipelagoGenerationJob(soloCapped, [
+        {
+          dimensionId: STABLE_ARCHIPELAGO_DIMENSION,
+          x: continents[0].x + 200,
+          z: continents[0].z,
+        },
+      ]),
+    ).toBeUndefined();
 
-    expect(islandForJob(state, continentJob?.id)?.tier).toBe("continent");
-
-    const continentCapped: WorldState = {
+    const archivedContinents: WorldState = {
       ...state,
       generatedIslandIds: [
         ...state.generatedIslandIds,
-        ...continents
-          .slice(0, ARCHIPELAGO_CONFIG.maxGeneratedContinents)
-          .map((island) => island.id),
+        ...continents.map((island) => island.id),
       ],
     };
     const solo = solos.find(
@@ -339,9 +380,9 @@ describe("archipelago runtime planning", () => {
           ...continents.map((continent) =>
             Math.hypot(candidate.x - continent.x, candidate.z - continent.z),
           ),
-        ) > ARCHIPELAGO_V3_CONFIG.maxQueryRadius,
+        ) > ARCHIPELAGO_V4_CONFIG.maxQueryRadius,
     )!;
-    const soloJob = nextArchipelagoGenerationJob(continentCapped, [
+    const soloJob = nextArchipelagoGenerationJob(archivedContinents, [
       {
         dimensionId: STABLE_ARCHIPELAGO_DIMENSION,
         x: solo.x,
@@ -350,26 +391,6 @@ describe("archipelago runtime planning", () => {
     ]);
 
     expect(islandForJob(state, soloJob?.id)?.tier).not.toBe("continent");
-
-    const fullyCapped: WorldState = {
-      ...soloCapped,
-      generatedIslandIds: [
-        ...soloCapped.generatedIslandIds,
-        ...continents
-          .slice(0, ARCHIPELAGO_CONFIG.maxGeneratedContinents)
-          .map((island) => island.id),
-      ],
-    };
-
-    expect(
-      nextArchipelagoGenerationJob(fullyCapped, [
-        {
-          dimensionId: STABLE_ARCHIPELAGO_DIMENSION,
-          x: continents[2].x,
-          z: continents[2].z,
-        },
-      ]),
-    ).toBeUndefined();
   });
 
   it("never queues an island inside its per-template observer clearance", () => {
@@ -397,7 +418,7 @@ describe("archipelago runtime planning", () => {
     ).toBeGreaterThanOrEqual(queuedIsland?.observerClearance ?? 0);
   });
 
-  it("keeps worst-case a1/a2 history outside new caps and bounds persistence", () => {
+  it("keeps a1/a2/a3 history outside new caps and bounds persistence", () => {
     const base = readyState();
     const archivedA1 = Array.from(
       { length: 384 },
@@ -410,6 +431,9 @@ describe("archipelago runtime planning", () => {
       .filter((island) => island.tier !== "continent")
       .slice(0, ARCHIPELAGO_CONFIG.maxGeneratedIslands)
       .map((island) => island.id);
+    const archivedA3 = planArchipelagoV3(base.worldSeed)
+      .slice(-384)
+      .map((island) => island.id);
     const islandVersions = { ...base.islandVersions };
 
     for (const id of archivedA1) {
@@ -418,6 +442,9 @@ describe("archipelago runtime planning", () => {
     for (const id of archivedA2) {
       islandVersions[id] = ARCHIPELAGO_CONTENT_VERSION;
     }
+    for (const id of archivedA3) {
+      islandVersions[id] = ARCHIPELAGO_V3_CONTENT_VERSION;
+    }
 
     const state: WorldState = {
       ...base,
@@ -425,6 +452,7 @@ describe("archipelago runtime planning", () => {
         ...base.generatedIslandIds,
         ...archivedA1,
         ...archivedA2,
+        ...archivedA3,
       ],
       islandVersions,
     };
@@ -436,7 +464,7 @@ describe("archipelago runtime planning", () => {
       },
     ]);
 
-    expect(job?.id.startsWith("a3_")).toBe(true);
+    expect(job?.id.startsWith("a4_")).toBe(true);
     expect(archipelagoPersistenceBudgetBytes(state)).toBeLessThan(30_000);
   });
 });

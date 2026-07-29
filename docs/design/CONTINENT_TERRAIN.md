@@ -1,9 +1,12 @@
 # Continent Terrain — design spec
 
-> Status: **specified, not implemented.** No code for this exists.
+> Status: **600-block terrain and streaming implemented; Minecraft acceptance
+> pending.** Decoration, additional families, caves, and 1,200–1,800-block
+> promotion remain gated.
 >
-> Supersedes the multipart `.mcstructure` approach for continents only.
-> Islets, Standards, Crags and Landmarks stay authored structures.
+> Supersedes new multipart `.mcstructure` placement for continents only.
+> Existing and interrupted `a2` continents remain supported. Islets, Standards,
+> Crags and Landmarks stay authored structures.
 
 ## Why this exists
 
@@ -11,15 +14,15 @@ Continents are currently assembled from 30x40x30 `.mcstructure` parts: 21 today
 at a 150-block span. The owner wants 600-1,800 blocks. Scaling the current
 approach does not reach that:
 
-| Span | Parts @30 | Parts @64 | Preflight volume |
-| ---- | --------: | --------: | ---------------: |
-| 150 (today) | 21 | — | 900 K cells |
-| 600 | ~396 | ~100 | 14.4 M cells |
-| 1,200 | ~1,600 | ~361 | 57.6 M cells |
-| 1,800 | ~3,600 | ~841 | 129.6 M cells |
+| Span        | Parts @30 | Parts @64 | Preflight volume |
+| ----------- | --------: | --------: | ---------------: |
+| 150 (today) |        21 |         — |      900 K cells |
+| 600         |      ~396 |      ~100 |     14.4 M cells |
+| 1,200       |    ~1,600 |      ~361 |     57.6 M cells |
+| 1,800       |    ~3,600 |      ~841 |    129.6 M cells |
 
 Widening parts to Bedrock's 64-block maximum cuts placement count ~4.5x, but
-the obstruction preflight is per *volume*, not per part, so it does not shrink.
+the obstruction preflight is per _volume_, not per part, so it does not shrink.
 The measured cost today is already 180,000 `getBlock` calls in a single tick for
 one 21-part continent. 129.6 M is roughly two minutes of pure scanning.
 
@@ -40,22 +43,22 @@ Mass is computed; character is authored. Neither is asked to do the other's job.
 
 ### Why this is better than more parts
 
-**Idempotence removes the F1 defect class.** A part is discrete, cursor-tracked
-and unrepeatable, so losing one strands it permanently — the defect fixed in
-`0.3.11`, which would have recurred across 100-841 placements per continent. A
-formula-generated chunk is recomputable by definition: "was this written?" is
-answered by looking, and the repair is running the formula again. Same input,
-same output. There is no cursor and nothing to strand.
+**Idempotence contains the multipart cursor defect class.** A structure part is
+discrete and can be stranded after placement but before its cursor advances.
+A formula chunk is recomputable from the same input. The runtime keeps only a
+fixed completion bitset and one exact in-flight chunk index; after interruption
+it replays that chunk with an air-only filter, then advances the bit. There is
+no growing part list and no ambiguous jump to a different chunk.
 
 It also collapses three constraints at once:
 
-| Constraint | Parts | Formula |
-| ---------- | ----- | ------- |
-| Authored content at 1,800 blocks | ~841 structures | none |
-| Preflight | 129.6 M `getBlock` | per chunk, already iterating |
-| Streaming | needs a new job model | inherent to chunk generation |
-| Persistence | part cursor per continent | ID only; shape is derivable |
-| 600 -> 1,800 | architecture change | radius parameter |
+| Constraint                       | Parts                     | Formula                      |
+| -------------------------------- | ------------------------- | ---------------------------- |
+| Authored content at 1,800 blocks | ~841 structures           | none                         |
+| Preflight                        | 129.6 M `getBlock`        | per chunk, already iterating |
+| Streaming                        | needs a new job model     | inherent to chunk generation |
+| Persistence                      | part cursor per continent | ID only; shape is derivable  |
+| 600 -> 1,800                     | architecture change       | radius parameter             |
 
 ## Shape
 
@@ -99,31 +102,45 @@ Per chunk, on approach:
    - subsurface band
    - surface layer
 4. Carve lakes, then fill them.
-5. Place decoration structures whose deterministic site falls in this chunk,
-   anchored to `surfaceY`.
+5. A later pass may place decoration structures whose deterministic site falls
+   in this chunk, anchored to `surfaceY`.
 
-`Dimension.fillBlocks(volume, block, options)` is the primitive. The typings
-document no volume cap, only `UnloadedChunksError`, and
-`ignoreChunkBoundErrors` lets a fill cover only what is loaded — which is
-exactly the streaming behaviour wanted. A 16x40x16 column band is 10,240
-blocks, so a chunk costs single-digit `fillBlocks` calls per band.
+`Dimension.fillBlocks(volume, block, options)` is the primitive. BDS
+`1.26.34.3` established the actual contract:
 
-**Unverified:** actual `fillBlocks` throughput in-engine. The legacy `/fill`
-command capped at 32,768 blocks and `fillBlocks` may inherit an undocumented
-limit. This must be measured on the weakest target device before committing to
-1,800 blocks. It is the single largest risk in this design.
+- 32,768 blocks succeeds and an explicit 32,769-block volume throws;
+- a 16×40×16 volume averaged 6 ms across six samples on the test host;
+- four 8,192-block fills and one 32,768-block fill had effectively equal
+  measured cost; and
+- both values of `ignoreChunkBoundErrors` threw across an unloaded span.
+
+Runtime therefore loads one whole chunk through a ticking area, rejects a
+chunk or volume above 32,768 blocks, and issues at most four fill calls per
+tick. It never relies on partial loaded-chunk behavior. Weakest-client
+measurement is still required before increasing the span beyond 600 blocks.
 
 ## Persistence
 
-One continent costs the same as an islet: **20 bytes** — one entry in
-`generatedIslandIds`, one in `islandVersions`. The shape is derivable from the
-world seed and the continent index, so no per-chunk record is required.
+Completed continent identity still costs one `generatedIslandIds` entry and
+one `islandVersions` entry. Streaming progress is stored separately under the
+permanent `skyknights:continent_progress_v1` key so world schema 5 and its
+solo-island budget do not change.
 
-If chunk-level bookkeeping later proves necessary, it must not be a growing
-per-chunk set: that would reintroduce the persistence pressure the measured
-20-bytes-per-island figure currently avoids. Prefer recomputation.
+Progress is fixed, not a growing per-chunk set. A 600-block site has 1,444
+conservative chunk slots and an exact 181-byte bitset; only started sites are
+stored, and the shared legacy/formula lifetime cap remains two. One exact
+in-flight `{continentId, chunkIndex}` is persisted before fills begin.
+Malformed schema, seed, field version, IDs, base64, length, or unused bits
+fails closed.
 
-Continent count therefore does not compete with the solo-island cap.
+Writes include air only. A new occupied chunk is recorded as skipped rather
+than overwritten; an interrupted in-flight chunk may resume the same formula
+task, still without replacing any non-air block.
+
+An entity-occupied chunk receives a runtime-only 200-tick cooldown while the
+scheduler considers alternate incomplete chunks. Infrastructure or fill
+failures back off the whole formula service for 200 ticks, allowing the solo
+island scheduler to run before the exact formula task is retried.
 
 ## Territory
 
@@ -172,18 +189,18 @@ which cover more of what actually matters.
 
 ## Sequencing
 
-1. Measure `fillBlocks` throughput in-engine. Gate the whole design on it.
-2. Implement the field and its host-side tests, no Minecraft required.
-3. Chunk generation for one family at 600 blocks.
-4. Decoration pass reusing the run-1 library.
-5. Raise to 1,200-1,800 once measured, which should be a parameter change.
-
-Steps 1-2 are independent of the ring/cluster planner work and can proceed in
-parallel.
+1. **Complete:** measure `fillBlocks` cap, loaded-chunk behavior, and baseline
+   throughput in BDS.
+2. **Complete:** implement the deterministic field and host-side contracts.
+3. **Complete in source:** stream one Verdant material family at 600 blocks
+   with fixed progress and migration-safe IDs.
+4. **Pending:** Minecraft appearance, approach pacing, interruption,
+   player-build, multiplayer, and weakest-device acceptance.
+5. **Pending:** decoration pass reusing the authored library.
+6. **Pending:** raise to 1,200–1,800 only after step 4 evidence.
 
 ## Open questions
 
-- Does `fillBlocks` have an undocumented volume cap?
 - Do continents need biome families, or is one continental palette enough?
 - Should the authored progression islands eventually sit on continent terrain
   rather than being separate structures?

@@ -17,15 +17,17 @@ import {
   ARCHIPELAGO_CONFIG,
   parseArchipelagoIslandId,
 } from "../generation/archipelago";
+import { parseArchipelagoV3IslandId } from "../generation/archipelago-v3";
 import {
-  ARCHIPELAGO_V3_CONFIG,
-  parseArchipelagoV3IslandId,
-} from "../generation/archipelago-v3";
+  ARCHIPELAGO_V4_CONFIG,
+  parseArchipelagoV4IslandId,
+} from "../generation/archipelago-v4";
 import {
   ARCHIPELAGO_LAYOUT_VERSION,
   isArchipelagoIslandId,
   nextArchipelagoGenerationJob,
 } from "../generation/archipelago-runtime";
+import { parseContinentStreamingId } from "../generation/continent-streaming";
 import {
   isArchipelagoGenerationPaused,
   pauseArchipelagoGeneration,
@@ -509,10 +511,24 @@ function sendDebugReport(
   const ambientIslandIds = state.generatedIslandIds.filter((id) =>
     isArchipelagoIslandId(state, id),
   );
+  const v4AmbientIslands = [];
   const v3AmbientIslands = [];
   const v2AmbientIslands = [];
+  let formulaContinentCount = 0;
 
   for (const id of ambientIslandIds) {
+    if (parseContinentStreamingId(id) !== undefined) {
+      formulaContinentCount += 1;
+      continue;
+    }
+
+    const v4Island = parseArchipelagoV4IslandId(state.worldSeed, id);
+
+    if (v4Island !== undefined) {
+      v4AmbientIslands.push(v4Island);
+      continue;
+    }
+
     const v3Island = parseArchipelagoV3IslandId(state.worldSeed, id);
 
     if (v3Island !== undefined) {
@@ -530,13 +546,15 @@ function sendDebugReport(
       v2AmbientIslands.push(v2Island);
     }
   }
-  const soloAmbientCount = v3AmbientIslands.length;
+  const soloAmbientCount = v4AmbientIslands.length;
+  const archivedA3Count = v3AmbientIslands.length;
   const archivedA2Count = v2AmbientIslands.filter(
     (island) => island.tier !== "continent",
   ).length;
-  const continentCount = v2AmbientIslands.filter(
+  const archivedA2ContinentCount = v2AmbientIslands.filter(
     (island) => island.tier === "continent",
   ).length;
+  const continentCount = formulaContinentCount + archivedA2ContinentCount;
   const archivedA1Count = state.generatedIslandIds.filter((id) =>
     id.startsWith("a1_"),
   ).length;
@@ -564,7 +582,7 @@ function sendDebugReport(
     }`,
   );
   player.sendMessage(
-    `archipelago=${soloAmbientCount}/${ARCHIPELAGO_V3_CONFIG.maxGeneratedIslands} continents=${continentCount}/${ARCHIPELAGO_CONFIG.maxGeneratedContinents} archivedA2=${archivedA2Count} archivedA1=${archivedA1Count} paused=${isArchipelagoGenerationPaused()} next=${
+    `archipelago=${soloAmbientCount}/${ARCHIPELAGO_V4_CONFIG.maxGeneratedIslands} continents=${continentCount}/${ARCHIPELAGO_CONFIG.maxGeneratedContinents} formulaC1=${formulaContinentCount} archivedA2Continents=${archivedA2ContinentCount} archivedA3=${archivedA3Count} archivedA2=${archivedA2Count} archivedA1=${archivedA1Count} paused=${isArchipelagoGenerationPaused()} next=${
       nextAmbient === undefined
         ? "none"
         : `${nextAmbient.id}@${nextAmbient.origin.x},${nextAmbient.origin.y},${nextAmbient.origin.z}`

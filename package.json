@@ -21,6 +21,7 @@
     "test:bds:unit": "node tools/bds/test-nbt.mjs",
     "test:bds:smoke": "npm run test:bds:unit && node tools/bds/run-smoke.mjs",
     "test:bds:void-source": "npm run test:bds:unit && node tools/bds/run-void-source.mjs",
+    "test:bds:fillblocks-benchmark": "npm run test:bds:unit && node tools/bds/run-fillblocks-benchmark.mjs",
     "check": "npm run lint && npm run build && npm test",
     "local-deploy": "node tools/project.mjs local-deploy",
     "local-deploy:experimental": "node tools/build-profile.mjs --profile experimental --deploy",

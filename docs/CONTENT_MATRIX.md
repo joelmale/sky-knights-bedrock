@@ -88,9 +88,10 @@ share enemy health or loot families.
 | Watchtower                 | geometry built; encounter and chest content inactive                                                                                                    | glacier_vault                      | partial |
 | Biome shrine               | geometry built; relic and ambient content inactive                                                                                                      | ashfall_crater                     | partial |
 | Boss arena                 | geometry built; Giant and completion objective inactive                                                                                                 | aether_sanctum                     | partial |
-| Large ambient solo islands | 9.15–11.09× usable-area Islet, Standard, Crag, and Landmark family templates without progression loot or entities                                       | `a3` Fibonacci-annulus archipelago | built   |
-| Legacy ambient variants    | run-2 small tiers and rare volcanic burn variants retained for existing terrain and interrupted jobs; large burn-content parity is not selected by `a3` | frozen `a1`/`a2` compatibility     | partial |
-| Continent kit              | six seam-safe component roles plus dual-purpose `duo_mesa`; 21 parts per continent                                                                      | six sparse planner sites           | built   |
+| Large ambient solo islands | 9.15–11.09× usable-area Islet, Standard, Crag, and Landmark family templates without progression loot or entities                                       | `a4` four-deck cluster-center plan  | built   |
+| Legacy ambient variants    | run-2 small tiers, burn variants, and run-3 solo terrain retained for existing worlds and interrupted jobs                                               | frozen `a1`/`a2`/`a3` compatibility | partial |
+| Formula continent terrain  | deterministic 600-block stone/dirt/grass field with coastline, relief, and sealed lakes; no decoration, resources, encounters, docks, or caves           | `c1` at frozen run-2 centers        | built   |
+| Legacy continent kit       | six seam-safe component roles plus dual-purpose `duo_mesa`; 21 parts per continent retained for generated terrain and interrupted `a2` jobs             | frozen `a2` recovery                | built   |
 
 ## Skycraft construction and technology
 

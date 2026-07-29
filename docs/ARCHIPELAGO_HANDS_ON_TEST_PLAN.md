@@ -1,6 +1,6 @@
 # Procedural Archipelago Hands-On Test Plan
 
-> Build under test: `0.3.10`
+> Build under test: unreleased archipelago recovery atop `0.3.10`
 >
 > Automated status is not Minecraft acceptance. Record the exact commit,
 > Minecraft version, world type, device, input method, and Content Log result.
@@ -86,12 +86,15 @@ still runs short of.
 Pass when:
 
 - the ambient count increases without a developer generation command;
-- only one `a3_...` solo job or preserved `a2_...` continent job is active at
-  a time;
+- only one `a4_...` solo structure job or one `c1_...` formula chunk is
+  advancing at a time; a valid interrupted `a2_...`/`a3_...` job may still
+  recover;
 - new islands remain outside the authored central realm;
 - no island stamps directly around a player or occupied craft;
 - entering a queued target before placement preserves the entity and skips that
   candidate without blocking later islands;
+- an entity-occupied formula chunk yields to alternate formula chunks, while a
+  ticking-area/load/fill failure yields to solo scheduling for 200 ticks;
 - placement does not visibly freeze controls for more than a brief frame;
 - islands do not intersect one another.
 
@@ -100,16 +103,15 @@ FPS before and during placement.
 
 ## Session C — family, tier, altitude, scale, and pattern variety
 
-Visit the broad family arcs across the deep, low, mid, high, and crown altitude
-bands. Run 3 uses eight seed-rotated Voronoi hubs rather than fixed quadrants,
-so use palette changes and `/skyknights:debug` instead of expecting one family
-at one compass direction.
+Visit clusters across all four vertical decks. Run 4 assigns one family to
+each cluster center, so use palette changes and `/skyknights:debug` to verify
+that nearby cluster members stay coherent while neighboring centers remain
+separated by open sky.
 
 Sample at least 40 solo islands between 600 and 3,200 blocks from the origin,
-covering several arcs of the golden-angle/Fibonacci-annulus field. Visit at
-least two Islets and Standards, one Crag, and one Landmark. Then travel to one
-of the six preserved run-2 continent sites on the outer ring and let its
-complete 21-part job finish.
+covering at least ten populated clusters and all decks. Visit at least two
+Islets and Standards, one Crag, and one Landmark. Then approach a fresh one of
+the six reserved continent centers and let several `c1` chunks stream.
 
 Expected run-3 scale:
 
@@ -122,38 +124,40 @@ Expected run-3 scale:
 
 Pass when:
 
-- all four families form recognizable multi-island arcs rather than
-  alternating randomly at every site;
+- each populated cluster reads as roughly three to four related islands of one
+  family, while families may change between centers;
 - all four palettes are readily distinguishable at normal flight distance;
 - island origins visibly span multiple altitude bands rather than one shelf;
-- the golden-angle field reads as irregular clustered rings with useful flight
-  corridors rather than rigid spokes or an obvious square grid;
+- same-deck centers read as distinct archipelagos with useful open-sky flight
+  corridors rather than narrow island belts, rigid spokes, or a square grid;
 - each sampled island offers a clear landing area, and at least one Standard,
   Crag, and Landmark has enough navigable flat space for a small player base;
 - Islets, Standards, Crags, and Landmarks have distinct silhouettes and do not
   expose open multipart seams;
-- one continent reads as a rounded, continuous landmass with no open component
-  seams, contains a central massif, at least two lakes, a chasm, and a bridge,
-  and does not visibly place all 21 parts in one frozen frame;
+- one formula continent presents a continuous warped coastline, buildable
+  plateau/relief, sealed lakes, stone core, dirt subsurface, and grass surface
+  without a visible all-at-once freeze;
 - no ambient island contains a Dockmaster, progression chest, custom entity,
   Aether Core, or Relic Shard.
 
 These are visual biome families, not true Bedrock biome assignments. Weather,
 sky color, and the biome readout are not expected to change in this slice.
-Run-2 burn structures remain packaged for existing terrain and interrupted
-jobs, but run-3 large solo selection does not currently create new burn
+Run-2 burn and multipart-continent structures remain packaged for existing
+terrain and interrupted jobs, but run-4 solo selection does not create new burn
 variants. Do not wait for one or record their absence as a failure.
+Formula-continent decorations, docks, resources, chasms, bridges, and caves
+are not implemented in this slice and are not acceptance expectations.
 
 ## Session D — reload and duplicate safety
 
-1. While exploring new space, watch debug until an `a3_...` solo job is active.
+1. While exploring new space, watch debug until an `a4_...` solo job is active.
 2. Close the world during or immediately after visible placement.
 3. Reopen the same world.
 4. Return to that island and run debug.
 5. Repeat the close/reopen after at least 25 ambient islands exist.
 6. Close once during a four-part Crag or sixteen-part Landmark placement and
-   reopen. At a continent site, close once during its 21-part placement and
-   reopen.
+   reopen. At a formula-continent site, close while a terrain chunk is
+   partially filling and reopen.
 
 Pass when:
 
@@ -161,6 +165,8 @@ Pass when:
 - the island is not duplicated, shifted, or partially overlaid;
 - each multipart island resumes after its persisted part cursor and finishes
   without erasing or rejecting components already placed;
+- the formula service resumes only its persisted `c1` chunk, preserves every
+  non-air edit, and clears the active chunk after completion;
 - the ambient count never decreases or double-increments for one ID;
 - no ticking area named `skyknights_generation_*` remains stuck;
 - dynamic property bytes remain below the configured world-document limit.
@@ -224,11 +230,12 @@ Record:
 - memory or disconnect symptoms;
 - multiplayer observations if a second player explores another family arc.
 
-Pass when generation remains responsive, restart-safe, and below the 224-`a3`
-solo and two-`a2`-continent lifetime caps. Reaching either cap is not required
-for the first hands-on pass. Record whether nearby terrain feels about two to
-three times as available as the earlier run-2 field without looking crowded or
-causing persistent placement backlog.
+Pass when generation remains responsive and restart-safe across the bounded
+1,870-site `a4` envelope and shared two-continent `a2`/`c1` cap. Reaching
+either bound is not required for the first hands-on pass. Record whether
+clusters remain clearly separated, formula chunks appear ahead of travel
+without holes or long stalls, and the four-call tick batching avoids
+persistent placement backlog.
 
 ## Acceptance record
 
@@ -245,7 +252,8 @@ causing persistent placement backlog.
 
 The slice is ready for broader play only when Sessions A–F pass on a fresh void
 world and the Content Log is clean. Session G supplies the measurements needed
-to adjust density, per-tier radii, and the two lifetime caps.
+to adjust cluster density, per-tier radii, formula batching, and the two
+lifetime caps.
 
 Sessions A and A2 are the gate for everything after them: a wrong world type
 invalidates the terrain observations, and a starter route that cannot reach the

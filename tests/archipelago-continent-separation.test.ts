@@ -8,6 +8,7 @@ import {
 } from "../scripts/generation/archipelago-runtime";
 import { planArchipelago } from "../scripts/generation/archipelago";
 import { planArchipelagoV3 } from "../scripts/generation/archipelago-v3";
+import { planArchipelagoV4 } from "../scripts/generation/archipelago-v4";
 import { REQUIRED_ISLANDS } from "../scripts/config/constants";
 import { WorldState, createWorldState } from "../scripts/persistence/schema";
 
@@ -60,7 +61,20 @@ describe("a3 islands never collide with a2 continents", () => {
     expect(conflicts).toBeGreaterThan(0);
   });
 
-  it("never queues a solo island that overlaps a continent", () => {
+  it("keeps the active a4 plan conflict-free before runtime filtering", () => {
+    for (const seed of SEEDS) {
+      const state = readyState(seed);
+
+      for (const island of planArchipelagoV4(state.worldSeed)) {
+        expect(
+          archipelagoContinentConflict(state.worldSeed, island),
+          `seed ${seed} planned ${island.id} over a continent`,
+        ).toBeUndefined();
+      }
+    }
+  });
+
+  it("never queues an active solo island that overlaps a continent", () => {
     for (const seed of SEEDS) {
       const state = readyState(seed);
 
@@ -75,11 +89,11 @@ describe("a3 islands never collide with a2 continents", () => {
           },
         ]);
 
-        if (job === undefined || !job.id.startsWith("a3_")) {
+        if (job === undefined || !job.id.startsWith("a4_")) {
           continue;
         }
 
-        const island = planArchipelagoV3(state.worldSeed).find(
+        const island = planArchipelagoV4(state.worldSeed).find(
           (candidate) => candidate.id === job.id,
         );
 

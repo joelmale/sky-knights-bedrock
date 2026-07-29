@@ -6,21 +6,26 @@
  * exactly 20 bytes per island, so a 1,500-island world spends 29,903 of the
  * 30,000-byte budget and leaves 97 bytes of headroom — about five islands.
  *
- * `a3` ids are `a3_<base36 index>` over a dense index space, and every a3
- * island shares one content version. "Which islands exist" is therefore a
- * bitset, not a list of strings: 2,563 sites is 321 raw bytes, 428 base64,
- * fixed regardless of how many are generated. That is 61x smaller than 1,500
- * strings and it does not grow with island count.
+ * Indexed ambient ids (`a3` and migration-safe `a4`) use
+ * `<planner>_<base36 index>` over dense index spaces, and every planner run
+ * shares one content version. "Which islands exist" is therefore a bitset,
+ * not a list of strings. Each planner gets its own property so existing a3
+ * worlds remain byte-stable while a4 history cannot reinterpret their ids.
  *
  * Compaction applies only at the serialisation boundary. `WorldState` keeps its
  * `string[]` shape in memory, so no consumer changes.
  */
 
-const A3_ID = /^a3_([0-9a-z]+)$/u;
+const INDEXED_ID_PATTERNS = {
+  a3: /^a3_([0-9a-z]+)$/u,
+  a4: /^a4_([0-9a-z]+)$/u,
+} as const;
 const BASE64_ALPHABET =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-interface CompactA3 {
+type IndexedPlanner = keyof typeof INDEXED_ID_PATTERNS;
+
+interface CompactIndexedPlanner {
   /** Shared content version for every island in the bitset. */
   v: number;
   /** Base64 bitset, least-significant bit first within each byte. */
@@ -73,8 +78,11 @@ export function decodeBase64(text: string): Uint8Array {
   return bytes.subarray(0, byteIndex);
 }
 
-function a3Index(id: string): number | undefined {
-  const match = A3_ID.exec(id);
+function indexedIslandIndex(
+  planner: IndexedPlanner,
+  id: string,
+): number | undefined {
+  const match = INDEXED_ID_PATTERNS[planner].exec(id);
 
   if (match === null) {
     return undefined;
@@ -85,13 +93,16 @@ function a3Index(id: string): number | undefined {
 }
 
 /**
- * Replaces the a3 entries of a world document with a bitset.
+ * Replaces one indexed planner's entries with a bitset.
  *
  * Compaction is skipped whenever the a3 islands do not share a single content
  * version, because the bitset cannot express per-island versions. Returning the
  * document unchanged is always correct, just larger.
  */
-export function compactWorldDocument(document: unknown): unknown {
+function compactIndexedPlanner(
+  document: unknown,
+  planner: IndexedPlanner,
+): unknown {
   if (document === null || typeof document !== "object") {
     return document;
   }
@@ -118,7 +129,7 @@ export function compactWorldDocument(document: unknown): unknown {
       return document;
     }
 
-    const index = a3Index(entry);
+    const index = indexedIslandIndex(planner, entry);
 
     if (index === undefined) {
       retained.push(entry);
@@ -155,12 +166,12 @@ export function compactWorldDocument(document: unknown): unknown {
   const remainingVersions: Record<string, number> = {};
 
   for (const key of Object.keys(versionMap)) {
-    if (a3Index(key) === undefined) {
+    if (indexedIslandIndex(planner, key) === undefined) {
       remainingVersions[key] = versionMap[key];
     }
   }
 
-  const compact: CompactA3 = {
+  const compact: CompactIndexedPlanner = {
     v: sharedVersion,
     b: encodeBase64(bytes),
   };
@@ -169,24 +180,30 @@ export function compactWorldDocument(document: unknown): unknown {
     ...source,
     generatedIslandIds: retained,
     islandVersions: remainingVersions,
-    a3: compact,
+    [planner]: compact,
   };
 }
 
-/** Restores the string form a compacted document was written from. */
-export function expandWorldDocument(document: unknown): unknown {
+export function compactWorldDocument(document: unknown): unknown {
+  return compactIndexedPlanner(compactIndexedPlanner(document, "a3"), "a4");
+}
+
+function expandIndexedPlanner(
+  document: unknown,
+  planner: IndexedPlanner,
+): unknown {
   if (document === null || typeof document !== "object") {
     return document;
   }
 
   const source = document as Record<string, unknown>;
-  const compact = source.a3;
+  const compact = source[planner];
 
   if (compact === null || typeof compact !== "object") {
     return document;
   }
 
-  const { v, b } = compact as Partial<CompactA3>;
+  const { v, b } = compact as Partial<CompactIndexedPlanner>;
 
   if (typeof v !== "number" || typeof b !== "string") {
     return document;
@@ -206,7 +223,7 @@ export function expandWorldDocument(document: unknown): unknown {
       continue;
     }
 
-    const id = `a3_${index.toString(36)}`;
+    const id = `${planner}_${index.toString(36)}`;
     ids.push(id);
     versions[id] = v;
   }
@@ -216,6 +233,11 @@ export function expandWorldDocument(document: unknown): unknown {
     generatedIslandIds: ids,
     islandVersions: versions,
   };
-  delete (expanded as Record<string, unknown>).a3;
+  delete (expanded as Record<string, unknown>)[planner];
   return expanded;
+}
+
+/** Restores the string form compacted a3 and a4 documents were written from. */
+export function expandWorldDocument(document: unknown): unknown {
+  return expandIndexedPlanner(expandIndexedPlanner(document, "a3"), "a4");
 }

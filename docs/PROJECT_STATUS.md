@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-07-28
+> Last updated: 2026-07-29
 >
 > Current playtest version: `0.3.10`
 >
@@ -15,9 +15,10 @@
 > dock-destruction response, a summon-only Aether Outrigger art/handling
 > prototype, the `0.3.8` varied procedural archipelago, a separate summon-only
 > four-seat Steampunk Blimp art/animation/handling prototype, and the `0.3.9`
-> large-prototype scale/camera accessibility correction, plus the `0.3.10`
-> Fibonacci-annulus and useful-area ambient-island correction are integrated.
-> Repository evidence is green; Minecraft altitude, continent, fire, entity
+> large-prototype scale/camera accessibility correction, the `0.3.10`
+> useful-area structures, and the unreleased `a4` cluster-center/600-block
+> formula-continent recovery are integrated. Repository evidence is green;
+> Minecraft altitude, continent, fire, entity
 > rendering, seating, camera, flight, reload, multiplayer, migration,
 > performance, and device gates remain.
 >
@@ -109,28 +110,32 @@ not require them.
 - Authored `.mcstructure` placement through a resumable generation queue.
 - Four-family deterministic registry with three permanently pinned islands and
   five seeded island placements.
-- Active `a3` planner with 2,563 Fibonacci-cohort/golden-angle candidates from
-  radius 600–3,200, eight family hubs, four size tiers, five altitude bands,
-  complete-footprint 460-block authored-realm exclusion, and a 224-solo
-  persistence/performance cap.
-- Reference 512-block windows contain approximately 2.0–2.6× the frozen `a2`
-  candidate density. Runtime queries 768 blocks so the inner cohort can prepare
-  from the central realm.
-- Run-3 solo tiers provide 9.15–11.09× their prior usable top area. Islets and
-  Standards are single structures; Crags use four bounded parts and Landmarks
-  sixteen. Every unique placement remains below 50,000 bounding cells and
-  11,000 solid blocks.
-- Six sparse continent sites, each composed from 21 seam-safe parts; at most
-  two generate in one world.
-- Lazy nearby solo placement uses compact `a3_<base36>` IDs, per-island
+- Active `a4` planner with 374 Fibonacci-cohort cluster centers across four
+  vertical decks, at least 560 blocks between same-deck centers, one family
+  per center, and roughly three to four islands per populated cluster.
+- The bounded run-4 plan accepts roughly 1,100–1,500 islands from 1,870 compact
+  site indexes. Runtime queries 768 blocks and serializes `a3` and `a4`
+  histories to independent fixed bitsets.
+- The reused run-3 solo tiers provide 9.15–11.09× their run-2 usable top area.
+  Islets and Standards are single structures; Crags use four bounded parts and
+  Landmarks sixteen. Every unique placement remains below 50,000 bounding
+  cells and 11,000 solid blocks.
+- Six formula-continent sites reuse the frozen run-2 centers. New terrain uses
+  migration-safe `c1_<site>` IDs, a deterministic 600-block integer field,
+  exact chunk strata/lake plans, and a shared two-continent cap.
+- Formula progress is a fixed 181-byte bitset per started site plus one exact
+  in-flight chunk in `skyknights:continent_progress_v1`. Runtime loads one full
+  chunk, fills air only, defers around entities, preserves occupied chunks, and
+  issues at most four fill calls per tick.
+- Lazy nearby solo placement uses compact `a4_<base36>` IDs, per-island
   observer clearance, occupied-volume protection, and one persisted job at a
   time. Multipart jobs checkpoint every part and load only one row at once.
-- Existing `a1` and `a2` terrain remains untouched and outside the `a3` solo
-  cap. Valid in-flight legacy jobs still finish against their original
-  templates. The six `a2` continent sites remain active and reserve their
-  complete footprint against run-3 solos.
+- Existing `a1`, `a2`, and `a3` terrain remains untouched. Valid in-flight
+  legacy jobs still finish against their original templates. Generated `a2`
+  continents suppress formula replacement, and all six formula footprints are
+  reserved across the run-4 decks.
 - Run-2 rare volcanic ember and bounded reactive-pyre structures remain
-  packaged for compatibility. New run-3 large solo selection does not yet have
+  packaged for compatibility. New run-4 large solo selection does not yet have
   burn-content parity and this is tracked as partial rather than implied.
 - Persisted world profile, layout seed, layout version, origins, reserved
   bounds, and sticky player-modified protection.
@@ -218,7 +223,7 @@ not implementation evidence.
 
 ## Verification snapshot
 
-The current `0.3.10` combined working tree has passed:
+The unreleased archipelago-recovery working tree atop `0.3.10` has passed:
 
 ```text
 npm run verify
@@ -230,20 +235,25 @@ Results:
 - non-mutating verification of all 63 generated structures: passed;
 - formatting/lint: passed;
 - TypeScript/stable bundle: passed;
-- host tests: 287 passed across 48 files;
+- host tests: 389 passed across 59 files;
 - BDS NBT fixture tests: passed;
 - production `.mcaddon`: built;
 - experimental profile: built;
 - GameTest profile: built;
 - npm vulnerabilities: 0;
 
-The production `sky_knights.mcaddon` is 207,063 bytes with SHA-256
-`0de7282608be6659381d0fd8a704447a6854d35a11336d5406bd9a3181038f5e`.
-Both nested packs report `0.3.10`, and archive inspection confirms the prior
-prototype assets plus all 28 run-3 ambient structures.
+The production `sky_knights.mcaddon` is 223,210 bytes with SHA-256
+`fc8f78a06e156300f7209bd7985ef51727f8d7410871ed9cdc4a7999414f0deb`.
+Both nested packs remain versioned `0.3.10`; this is an unreleased source
+checkpoint, not a new playtest version.
 
-The latest external-server and void-template evidence remains the earlier
-`0.3.6` gate; those commands were not rerun for `0.3.10`:
+The latest external-server evidence adds the 2026-07-29 BDS fill benchmark;
+the void-template evidence remains the earlier `0.3.6` gate:
+
+- opt-in BDS `1.26.34.3` fill benchmark: passed — 32,768 blocks filled and the
+  asserted 32,769-block probe threw, 16×40×16 averaged 6 ms on the BDS host,
+  both unloaded-span modes threw, and four-fill versus one-fill ratio was
+  1.073;
 
 - opt-in BDS `1.26.34.3` smoke: passed — both packs loaded without
   content errors and the named skiff-seat test passed. This smoke does not
@@ -307,9 +317,11 @@ trustworthy backed-up old-world fixture.
   proxy entities. Arbitrary unbounded rigid blocks, block-perfect moving
   collision, and free walking on a moving deck remain outside the stable
   promise.
-- A bounded procedural-template archipelago is implemented. Infinite streaming,
-  algorithmic voxel bodies, true biome assignment, native feature-rule
-  decoration, resources, and encounters remain outside this slice.
+- A bounded clustered procedural-template archipelago and the first
+  600-block formula-continent terrain family are implemented. Infinite
+  expansion, authored continent decoration, 1,200–1,800-block promotion, true
+  biome assignment, native feature-rule decoration, continent resources, and
+  encounters remain outside this slice.
 - Five seeded structures now have deterministic placement, discovery, and
   guaranteed gray-box caches. Their final custom creature/boss and reveal
   presentation remain incomplete.
@@ -322,18 +334,19 @@ trustworthy backed-up old-world fixture.
   are not destructively cleared or silently converted.
 - Current art is functional gray-box/vanilla-derived presentation, not final
   release art.
-- The BDS harness is a local one-test smoke, not dedicated-server longevity,
-  Realms, Marketplace packaging, or redistribution acceptance.
+- The BDS harness provides the named pack-load smoke plus an opt-in
+  `fillBlocks` benchmark. It is not dedicated-server longevity, Realms,
+  Marketplace packaging, weakest-client, or redistribution acceptance.
 
 ## Next recommended work
 
-1. Build and import the `0.3.10` `sky_knights_void_world.mctemplate`, confirm
+1. Build and import the current `sky_knights_void_world.mctemplate`, confirm
    `/skyknights:debug` reports `v0.3.10` and `below=void`, and execute
-   procedural archipelago Sessions B-G with explicit density, Fibonacci-ring
-   naturalness, family arcs, useful landing/build area, Crag/Landmark seams,
-   continent interruption, and weakest-device measurements. Earlier `0.3.6`
-   Sessions A, A2, and B remain historical evidence but do not validate the
-   run-3 planner.
+   procedural archipelago Sessions B-G with explicit cluster separation,
+   family coherence, useful landing/build area, Crag/Landmark seams,
+   600-block formula-continent approach, interruption, player-build
+   preservation, and weakest-device measurements. Earlier `0.3.6` Sessions A,
+   A2, and B remain historical evidence but do not validate run 4.
 2. Execute and record the Phase 3 stabilization plan on a fresh world and a
    backed-up schema-4 world copy.
 3. Run the Skycraft BDS pack-load/reconstruction/restart matrix and add one

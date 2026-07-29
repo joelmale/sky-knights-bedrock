@@ -1,7 +1,7 @@
 # Procedural Archipelago Architecture
 
-> Status: Fibonacci/large-island run 3 integrated in `0.3.10` source;
-> Minecraft acceptance pending.
+> Status: clustered run 4 and 600-block formula continents integrated in
+> unreleased source; Minecraft acceptance pending.
 
 ## Decision
 
@@ -9,17 +9,51 @@ Sky Knights uses a hybrid Bedrock architecture:
 
 1. a void world is the intended sky-only substrate;
 2. reusable `.mcstructure` files provide island bodies and visual families;
-3. a deterministic Script API planner chooses island locations and families;
-4. one restart-safe generation job places and verifies one nearby island at a
+3. a deterministic Script API planner chooses cluster centers, members, and
+   families;
+4. one restart-safe structure job places and verifies one nearby authored
+   island at a time; and
+5. a separate fixed-progress service streams one formula-continent chunk at a
    time.
 
 This preserves the useful part of Bedrock feature generation—small authored
 templates repeated into a large field—while adding the progression, migration,
 and recovery guarantees the project needs.
 
-## Active run-3 implementation
+## Active run-4 implementation
 
-New ambient solo generation uses `scripts/generation/archipelago-v3.ts`.
+New ambient solo generation uses
+`scripts/generation/archipelago-v4.ts`. Ten Fibonacci cohorts contain 374
+cluster centers:
+
+```text
+2, 3, 5, 8, 13, 21, 34, 55, 89, 144
+```
+
+Centers are area-uniform across four vertical decks instead of being forced
+onto narrow annuli. Same-deck centers retain at least 560 blocks of separation.
+Each non-reserved center has one deterministic family, one guaranteed anchor,
+four possible satellites, and a maximum 260-block reach. Seeded vigor yields
+roughly three to four members in a populated cluster, so the visible unit is an
+archipelago separated by open sky rather than an island belt.
+
+The authored run-3 structure library and tier sizes are reused without changing
+their bytes. New canonical IDs are `a4_<base36 site>`. Existing `a1`, `a2`, and
+`a3` terrain stays fixed; valid interrupted jobs rederive against the matching
+frozen planner. Generated `a3` footprints obstruct new `a4` terrain, and `a3`
+and `a4` serialize to separate compact bitsets.
+
+The six frozen run-2 continent centers reserve a 600-block formula footprint,
+the 260-block cluster reach, and the normal 12-block edge gap across every
+vertical deck. New continents use `c1_<siteIndex>` IDs and stream deterministic
+stone, dirt, grass, coastline, relief, and lakes one fully loaded chunk at a
+time. A generated `a2` continent suppresses `c1` at that site; interrupted
+`a2` jobs remain recoverable; legacy and formula continents share the
+two-continent cap.
+
+## Preserved run-3 implementation
+
+The frozen run-3 planner lives in `scripts/generation/archipelago-v3.ts`.
 It exposes 2,563 deterministic candidate sites from radius 600 through 3,200.
 The sites are divided into Fibonacci-sized annular cohorts:
 
@@ -33,7 +67,7 @@ avoid `Math.random()`, wall-clock state, and platform trigonometry. Eight
 family-only Voronoi hubs assign two broad regions each to Verdant, Desert,
 Tundra, and Volcanic without changing physical sites.
 
-The active tier contract is:
+The authored tier contract reused by run 4 is:
 
 | Tier     | Logical size | Preferred roll | Usable top | Scale vs run 2 | Placement               |
 | -------- | ------------ | -------------: | ---------: | -------------: | ----------------------- |
@@ -56,17 +90,16 @@ authored realm. Exact footprint-plus-altitude checks keep accepted candidates
 separate and can deterministically downgrade a conflicting site. Complete
 island edges remain outside the authored 460-block protected radius.
 
-The permanent limit remains 224 run-3 solo outcomes. Increasing nearby choice
-does not increase permanent state without bound: a 448-solo migrated-world
-projection exceeds the current 30 KB dynamic-property contract. A later cap
-increase requires compact/sharded persistence and in-engine performance
-evidence.
+Run 3's historical runtime limit was 224 solo outcomes. Run 4 has 1,870 dense
+site indexes and plans roughly 1,100–1,500 accepted islands depending on seed.
+Its permanent cap covers that complete bounded plan. Serialization converts
+`a4` history to a fixed dense bitset, independently from the frozen `a3`
+bitset, instead of storing every ID twice in the world document.
 
 Run-3 IDs use `a3_<base36 index>`. Existing `a1` and `a2` terrain remains
-untouched and outside this cap. Valid interrupted jobs still rederive against
-their original plan. The six run-2 continent sites stay active under their
-separate two-continent cap, and their full footprints are reserved against new
-run-3 candidates.
+untouched. Valid interrupted jobs still rederive against their original plan.
+The six run-2 continent sites are frozen recovery inputs rather than sources of
+new multipart work.
 
 The 28 new source structures use four family palettes and seven reusable roles:
 
@@ -129,9 +162,11 @@ The frozen run-2 planner in `scripts/generation/archipelago.ts` provides:
 
 The `a1` identifier prefix remains permanently paired with the original flat
 planner. Existing `a1` terrain and generated IDs stay intact but become inert:
-later planners neither relocate nor restamp them. Run 2 uses `a2`; its solo
-terrain is now also inert while its continent sites remain active. Run 3 uses
-`a3`, so no released coordinate/identifier contract is reinterpreted.
+later planners neither relocate nor restamp them. Run 2 uses `a2`; its terrain
+is inert except for valid interrupted-job recovery and formula-site
+suppression. Run 3 uses frozen `a3`, run 4 uses active `a4`, and formula
+continents use `c1`, so no released coordinate/identifier contract is
+reinterpreted.
 
 Altitude is deterministic integer math. Each solo tier chooses from a weighted
 subset of deep, low, mid, high, and crown bands, then applies a small
@@ -150,22 +185,31 @@ After the starter island, Ember Outpost, and Frostspire are ready, a sweep runs
 every 40 ticks:
 
 1. collect players in the configured archipelago dimension;
-2. find the nearest ungenerated run-3 solo within 768 horizontal blocks or
-   run-2 continent within its frozen 512-block window;
-3. reject candidates inside that island's per-tier observer clearance;
-4. persist one generation job;
-5. load a single-part target, or preflight every remaining multipart target
+2. first resume an exact in-flight formula chunk, or select the nearest
+   incomplete `c1` chunk when a player is within the 600-block footprint plus
+   a 256-block approach margin;
+3. load exactly that chunk, defer for entities, preserve and record an occupied
+   new chunk, or persist its in-flight index and fill only air in batches of
+   four calls per tick;
+4. give entity-occupied chunks a 200-tick per-chunk cooldown, and give
+   ticking-area/load/fill failures a 200-tick service-wide backoff;
+5. during a service-wide backoff or when no formula chunk is selected, find
+   the nearest ungenerated `a4` solo within 768 horizontal blocks;
+6. reject solo candidates inside their per-tier observer clearance or
+   intersecting generated `a3` terrain;
+7. persist one structure generation job;
+8. load a single-part target, or preflight every remaining multipart target
    one row at a time;
-6. refuse to stamp any multipart island if a later remaining part is already
-   occupied, so no partial Crag, Landmark, or continent is created;
-7. recheck each loaded target for players, craft, blocks, or other entities
-   immediately before placement and preserve/skip that candidate if one is
-   present;
-8. place the resolved single structure, or resume the multipart island at its
-   persisted part cursor with five ticks between parts;
-9. verify the solo probes, or each newly handled part while its row remains
-   loaded without retry-gating earlier checkpointed player edits;
-10. checkpoint and mark the island generated.
+9. refuse to stamp any multipart island if a later remaining part is already
+   occupied, so no partial Crag or Landmark is created;
+10. recheck each loaded target for players, craft, blocks, or other entities
+    immediately before placement and preserve/skip that candidate if one is
+    present;
+11. place the resolved single structure, or resume the multipart island at its
+    persisted part cursor with five ticks between parts;
+12. verify the solo probes, or each newly handled part while its row remains
+    loaded without retry-gating earlier checkpointed player edits;
+13. checkpoint and mark the island generated.
 
 Only one global generation job runs at a time. A crash after placement but
 before the checkpoint accepts an intact structure without restamping it. Every
@@ -174,6 +218,13 @@ restart recognizes a valid placement made just before a missed cursor save and
 never treats a partial island as finished. A player or vanilla block found in
 any ungenerated target volume causes that location to be recorded as skipped,
 preserving the existing blocks.
+
+Formula progress is independent from the structure job. Its fixed bitset
+records empty, filled, and conservatively skipped chunks. A crash can authorize
+only the one persisted in-flight chunk for replay, and replay still targets air
+only. Formula work takes priority while a player approaches a started
+continent, but it pauses whenever a required or ambient structure job is
+already active.
 
 The stable target is currently `minecraft:overworld` so the add-on remains
 installable without custom-dimension migration. A normal Overworld will still

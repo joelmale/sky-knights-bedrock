@@ -38,6 +38,11 @@ development evidence only. The hardened harness then passed from clean commit
 no content errors, restored server properties, and no surviving process, lock,
 backup, or temporary properties file.
 
+The separate `npm run test:bds:fillblocks-benchmark` harness passed on BDS
+`1.26.34.3` on 2026-07-29. It measured the volume ceiling, a realistic
+16×40×16 fill, loaded/unloaded behavior, and paired batch-versus-bulk cost.
+This is host/server evidence, not weakest-client frame-time evidence.
+
 Do not silently fall back to a different server or preview API version. A
 successful smoke run proves the selected server-side pack load and named
 GameTest only; stable client acceptance and other experimental profiles remain
@@ -90,11 +95,19 @@ The runner owns only these fixed children of the sentinel-marked BDS root:
 - `.sky-knights-bds-smoke.lock` plus the recoverable
   `.sky-knights-server.properties.backup`.
 
+The fill benchmark owns a disjoint fixed world and staged-pack set named
+`sky_knights_bds_fillblocks_*`, its
+`sky_knights_bds_fillblocks_artifacts` directory, ports `19156`/`19157`, and
+its own lock/backup. It also acquires the shared smoke lock so both runners
+cannot mutate the same BDS root concurrently.
+
 It rejects filesystem roots, the repository root, the user-profile root, unsafe
 top-level BDS links, unmarked installations, unexpected BDS versions, and an
 existing run lock. Every run temporarily edits `server.properties`, uses
-authenticated online mode, an empty allowlist, LAN visibility disabled, and
-ports `19152`/`19153`; the original properties are restored afterward.
+authenticated online mode, an enabled allowlist whose entries are inherited
+from the dedicated test installation, LAN visibility disabled, and its
+documented isolated ports (`19152`/`19153` for smoke or `19156`/`19157` for the
+fill benchmark); the original properties are restored afterward.
 Those settings do not guarantee loopback-only binding: BDS still listens on
 network interfaces. Keep the dedicated test instance behind the host firewall
 and do not expose its UDP ports.
@@ -146,6 +159,29 @@ installation, so the console capture is the retained content-error evidence.
 Record a concise outcome in `docs/VALIDATION_LOG.md`. A green process exit
 alone is insufficient: the result must include explicit GameTest completion and
 no relevant pack-load or script errors.
+
+## fillBlocks benchmark usage
+
+Run:
+
+```powershell
+npm run test:bds:fillblocks-benchmark
+```
+
+The runner executes four GameTests outside the default suite and fails if a
+passing test omits its required metric marker. The retained `result.json`
+contains the exact server version and:
+
+- success/throw outcomes for 4,096 through 98,304-block volumes, including an
+  asserted exact 32,769-block boundary probe;
+- six 10,240-block duration samples and calculated throughput;
+- both `ignoreChunkBoundErrors` modes across an unloaded span; and
+- paired reverse-order four-fill versus one-fill trials over 32,768 blocks.
+
+The accepted `1.26.34.3` result is an exact 32,768-block ceiling (32,768 filled;
+32,769 threw), a 6 ms average for the realistic volume on that BDS host, throws
+for both unloaded-span modes, and a 1.073 batch-to-bulk duration ratio. Do not
+generalize that throughput to a client or weaker device.
 
 ## Troubleshooting
 

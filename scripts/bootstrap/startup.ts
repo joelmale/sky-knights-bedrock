@@ -16,6 +16,7 @@ import {
   queueNextArchipelagoIsland,
 } from "../generation/archipelago-runtime";
 import { isArchipelagoGenerationPaused } from "../generation/archipelago-control";
+import { resumeContinentStreaming } from "../generation/continent-service";
 import { registerIslandModificationTracking } from "../generation/modification-tracking";
 import {
   ensureDockmaster,
@@ -342,14 +343,27 @@ function runArchipelagoGenerationSweep(): void {
       return;
     }
 
+    const observers = world.getAllPlayers().map((player) => ({
+      dimensionId: player.dimension.id,
+      x: player.location.x,
+      z: player.location.z,
+    }));
+
+    if (
+      resumeContinentStreaming(
+        worldRepository,
+        observers,
+        logger.child("continents"),
+        STABLE_ARCHIPELAGO_DIMENSION,
+      )
+    ) {
+      return;
+    }
+
     const state = worldRepository.load();
     const next = queueNextArchipelagoIsland(
       state,
-      world.getAllPlayers().map((player) => ({
-        dimensionId: player.dimension.id,
-        x: player.location.x,
-        z: player.location.z,
-      })),
+      observers,
       STABLE_ARCHIPELAGO_DIMENSION,
     );
 

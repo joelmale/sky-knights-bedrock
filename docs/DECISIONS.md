@@ -483,3 +483,71 @@ Worst-case migrated state exceeds the tested 30 KB document budget before a
 448-island cap, so any cap increase requires an explicit compact/sharded
 persistence migration plus fresh-world, restart, multiplayer, and weakest
 device evidence.
+
+## ADR-021 — Cluster-center `a4` planner replaces annular solo belts
+
+Status: accepted for the unreleased archipelago recovery slice; Minecraft
+acceptance remains pending.
+
+Run 3's `a3` planner is frozen. Its Fibonacci-sized annuli increased candidate
+density but placed individual islands directly on narrow bands, so neighboring
+cohorts could read as continuous belts rather than separate archipelagos.
+Changing the `a3` formula would reinterpret already shipped IDs and could move
+generated or player-modified terrain.
+
+Run 4 therefore uses new `a4_<base36 site>` IDs and makes cluster centers, not
+individual islands, the radial unit. Ten Fibonacci cohorts contain exactly 374
+centers. They are area-uniformly distributed across four vertical decks, with
+a deterministic minimum 560-block same-deck center gap. Each non-reserved
+center owns one family, one anchor, four possible satellites, and a
+260-block maximum reach. Seeded vigor and fixed presence gates yield roughly
+three to four members per populated cluster; exact 3D checks retain deterministic
+tier fallback and prevent overlap.
+
+The six continent centers reserve their full 600-block formula footprint plus
+cluster reach and the 12-block edge gap. Generated `a3` terrain is also an
+obstruction for new `a4` selection. Runtime can still rederive and finish a
+valid interrupted `a3` job, but only `a4` is selected for new solo terrain.
+`a3` and `a4` use separate compact bitsets at the serialization boundary, so
+neither namespace can reinterpret the other.
+
+## ADR-022 — Formula continents stream under a fixed, crash-safe `c1` contract
+
+Status: accepted at a 600-block span for the unreleased recovery slice;
+Minecraft appearance, pacing, migration, multiplayer, and weakest-device
+acceptance remain pending.
+
+The 150×40×150 multipart continent library is frozen for `a2` recovery. New
+continents use the deterministic integer field in
+`scripts/generation/continent-field.ts` and exact one-chunk volume plans in
+`continent-chunk-plan.ts`. The six centers remain the frozen run-2 centers, but
+formula terrain uses new canonical `c1_<siteIndex>` IDs. A generated legacy
+`a2` continent suppresses `c1` at that site, valid interrupted `a2` jobs remain
+recoverable, and legacy plus formula continents share the existing lifetime
+cap of two.
+
+BDS `1.26.34.3` measured a hard 32,768-block `fillBlocks` ceiling: 32,768
+filled and an explicit 32,769-block volume threw. It also showed that
+`ignoreChunkBoundErrors` still throws across an unloaded span. Runtime
+therefore loads and verifies exactly one chunk, rejects any chunk plan or
+individual volume above the measured ceiling, and never requests partial
+loaded-chunk behavior. It limits execution to four calls per tick, matching
+the measured batch comparison rather than issuing a whole relief plan in one
+tick.
+
+Every write filters for `minecraft:air`; entities defer the task for 200 ticks,
+and a previously occupied new volume is recorded as skipped. The scheduler may
+choose another incomplete chunk during that entity cooldown. A ticking-area,
+load, or fill failure instead backs off all formula work for 200 ticks so the
+solo scheduler can advance before formula retry. Progress lives in the
+new permanent `skyknights:continent_progress_v1` property rather than world
+schema 5. Each possible 600-block site has a fixed 181-byte chunk bitset, but
+only started sites are stored. An exact `{continentId, chunkIndex}` checkpoint
+is saved before the first fill. After a crash, only that chunk may bypass the
+new-volume obstruction check, and it still fills air only. Corrupt schema,
+seed, field version, ID, bitset length, base64, or unused bits fails closed.
+
+This slice implements terrain, strata, coastline, and lakes for one Verdant
+material family. Authored decorations, docks, resources, encounters, larger
+1,200–1,800 spans, and formula caves remain later gates rather than implied
+content.

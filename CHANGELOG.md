@@ -4,6 +4,56 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
+## [Unreleased] — 2026-07-29
+
+### Added
+
+- Added the migration-safe `a4` ambient planner. Its 374 Fibonacci-cohort
+  cluster centers are distributed across four vertical decks with at least
+  560 blocks between same-deck centers; deterministic cluster vigor produces
+  roughly three to four same-family islands around each populated center.
+- Added a deterministic fixed-point continent height field, exact per-chunk
+  strata/lake volume planner, and a stable `c1_<site>` streaming namespace for
+  the first 600-block formula-continent family.
+- Added fixed-size continent chunk bitsets in the separate
+  `skyknights:continent_progress_v1` dynamic property. One exact in-flight
+  chunk is persisted before writes begin, so a partial fill can resume without
+  authorizing unrelated occupied terrain.
+- Added an opt-in BDS/GameTest `fillBlocks` benchmark runner with retained JSON,
+  log, and result artifacts.
+
+### Changed
+
+- New solo terrain uses `a4` IDs and cluster-center planning. Frozen `a3`
+  terrain and valid interrupted jobs remain rederivable and are treated as
+  occupied history, not relocated or restamped.
+- New continents use formula terrain at the six frozen run-2 centers. A site
+  with generated `a2` continent history is suppressed, valid interrupted `a2`
+  multipart jobs remain recoverable, and the shared lifetime cap remains two
+  continents.
+- Formula chunks require a fully loaded one-chunk ticking area, preserve every
+  non-air block, defer around entities, and issue at most four bounded
+  `fillBlocks` calls per tick. Per-chunk entity cooldowns allow alternate
+  terrain work, while a runtime failure backs off the whole formula service for
+  200 ticks so solo generation is not starved. Occupied new chunks are
+  recorded as skipped instead of being overwritten.
+
+### Validation
+
+- BDS `1.26.34.3` measured the exact 32,768-block `fillBlocks` ceiling:
+  32,768 filled and the explicit 32,769-block case threw. A 16×40×16 volume
+  averaged 6 ms across six samples.
+  Both values of `ignoreChunkBoundErrors` threw across an unloaded span, so
+  runtime generation never relies on partial loaded-chunk behavior.
+- Host contracts cover field determinism, coastline/lakes/strata, exact chunk
+  tiling, fixed bitsets, corrupt-state fail-closed behavior, crash resume,
+  legacy suppression, shared caps, air-only execution, four-call tick
+  batching, cluster separation, migration compatibility, and persistence
+  compaction.
+- Formula-continent appearance, approach pacing, player-build preservation,
+  interruption recovery, multiplayer, and weakest-client performance remain
+  Minecraft hands-on gates.
+
 ## [0.3.10] — 2026-07-28
 
 ### Added

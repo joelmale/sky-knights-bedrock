@@ -14,23 +14,28 @@ import {
   ArchipelagoIsland,
   archipelagoClusters,
   archipelagoContinentAnchors,
-  archipelagoIslandsWithinRadius,
   deriveArchipelagoIsland,
   parseArchipelagoIslandId,
   planArchipelago,
 } from "./archipelago";
 import {
-  ARCHIPELAGO_V3_CONFIG,
   ArchipelagoV3Island,
-  archipelagoV3IslandsWithinRadius,
   parseArchipelagoV3IslandId,
-  planArchipelagoV3,
 } from "./archipelago-v3";
+import {
+  ARCHIPELAGO_V4_CONFIG,
+  ArchipelagoV4Island,
+  archipelagoV4IslandsWithinRadius,
+  parseArchipelagoV4IslandId,
+  planArchipelagoV4,
+} from "./archipelago-v4";
+import { parseContinentStreamingId } from "./continent-streaming";
 import { queueGeneration } from "./state";
 
 /** Frozen run-2 content version retained for a2 jobs and tests. */
 export const ARCHIPELAGO_CONTENT_VERSION = 2;
 export const ARCHIPELAGO_V3_CONTENT_VERSION = 3;
+export const ARCHIPELAGO_V4_CONTENT_VERSION = 4;
 export const STABLE_ARCHIPELAGO_DIMENSION = "minecraft:overworld";
 /**
  * Frozen a2 layout version. New placement uses the independent a3 planner;
@@ -39,7 +44,7 @@ export const STABLE_ARCHIPELAGO_DIMENSION = "minecraft:overworld";
  */
 export const ARCHIPELAGO_LAYOUT_VERSION = ARCHIPELAGO_V2_CONFIG.idVersion;
 export const ARCHIPELAGO_ACTIVE_LAYOUT_VERSION =
-  ARCHIPELAGO_V3_CONFIG.idVersion;
+  ARCHIPELAGO_V4_CONFIG.idVersion;
 
 export interface ArchipelagoObserver {
   dimensionId: string;
@@ -177,7 +182,11 @@ function generationParts(
   }));
 }
 
-function v3Origin(island: ArchipelagoV3Island): GenerationJob["origin"] {
+type IndexedArchipelagoIsland = ArchipelagoV3Island | ArchipelagoV4Island;
+
+function indexedOrigin(
+  island: IndexedArchipelagoIsland,
+): GenerationJob["origin"] {
   return {
     x: island.x - Math.floor(island.size.x / 2),
     y: island.y,
@@ -185,14 +194,14 @@ function v3Origin(island: ArchipelagoV3Island): GenerationJob["origin"] {
   };
 }
 
-function v3GenerationParts(
-  island: ArchipelagoV3Island,
+function indexedGenerationParts(
+  island: IndexedArchipelagoIsland,
 ): readonly GenerationPart[] | undefined {
   if (island.template.parts.length <= 1) {
     return undefined;
   }
 
-  const origin = v3Origin(island);
+  const origin = indexedOrigin(island);
   return island.template.parts.map((part) => ({
     structureId: part.structureId,
     origin: {
@@ -206,25 +215,47 @@ function v3GenerationParts(
   }));
 }
 
+function indexedGenerationJob(
+  island: IndexedArchipelagoIsland,
+  contentVersion: number,
+  dimensionId: string,
+): Omit<GenerationJob, "stage" | "attempts"> {
+  const parts = indexedGenerationParts(island);
+  const firstPart = parts?.[0];
+
+  return {
+    id: island.id,
+    contentVersion,
+    structureId: firstPart?.structureId ?? island.template.structureId,
+    dimensionId,
+    origin: firstPart?.origin ?? indexedOrigin(island),
+    ...(parts === undefined ? {} : { parts }),
+  };
+}
+
 export function archipelagoGenerationJobForId(
   state: Pick<WorldState, "worldSeed">,
   id: string,
   dimensionId: string = STABLE_ARCHIPELAGO_DIMENSION,
 ): Omit<GenerationJob, "stage" | "attempts"> | undefined {
+  const v4Island = parseArchipelagoV4IslandId(state.worldSeed, id);
+
+  if (v4Island !== undefined) {
+    return indexedGenerationJob(
+      v4Island,
+      ARCHIPELAGO_V4_CONTENT_VERSION,
+      dimensionId,
+    );
+  }
+
   const v3Island = parseArchipelagoV3IslandId(state.worldSeed, id);
 
   if (v3Island !== undefined) {
-    const parts = v3GenerationParts(v3Island);
-    const firstPart = parts?.[0];
-
-    return {
-      id: v3Island.id,
-      contentVersion: ARCHIPELAGO_V3_CONTENT_VERSION,
-      structureId: firstPart?.structureId ?? v3Island.template.structureId,
+    return indexedGenerationJob(
+      v3Island,
+      ARCHIPELAGO_V3_CONTENT_VERSION,
       dimensionId,
-      origin: firstPart?.origin ?? v3Origin(v3Island),
-      ...(parts === undefined ? {} : { parts }),
-    };
+    );
   }
 
   const island = parseArchipelagoIslandId(
@@ -268,52 +299,75 @@ export function archipelagoGenerationJobForId(
   };
 }
 
+function indexedIslandDefinition(
+  state: Pick<WorldState, "worldSeed">,
+  island: IndexedArchipelagoIsland,
+  contentVersion: number,
+  dimensionId: string,
+): IslandDefinition | undefined {
+  const job = archipelagoGenerationJobForId(state, island.id, dimensionId);
+
+  if (job === undefined) {
+    return undefined;
+  }
+
+  const logicalOrigin = indexedOrigin(island);
+  const integrityBlocks =
+    job.parts?.map((part) => ({
+      offset: {
+        x: part.origin.x + part.integrityBlock.offset.x - job.origin.x,
+        y: part.origin.y + part.integrityBlock.offset.y - job.origin.y,
+        z: part.origin.z + part.integrityBlock.offset.z - job.origin.z,
+      },
+      typeId: part.integrityBlock.typeId,
+    })) ?? island.template.integrityBlocks;
+
+  return {
+    id: island.id,
+    family: island.family,
+    tier: 0,
+    structureId: job.structureId,
+    dimensionId,
+    contentVersion,
+    size: island.size,
+    placement: "seeded",
+    gameplayActivation: "structure_only",
+    integrityBlocks,
+    anchors: {
+      safeDock: {
+        x: logicalOrigin.x + island.template.safeDock.x - job.origin.x + 0.5,
+        y: island.template.safeDock.y,
+        z: logicalOrigin.z + island.template.safeDock.z - job.origin.z + 0.5,
+      },
+    },
+  };
+}
+
 export function archipelagoIslandDefinition(
   state: Pick<WorldState, "worldSeed">,
   id: string,
   dimensionId: string = STABLE_ARCHIPELAGO_DIMENSION,
 ): IslandDefinition | undefined {
+  const v4Island = parseArchipelagoV4IslandId(state.worldSeed, id);
+
+  if (v4Island !== undefined) {
+    return indexedIslandDefinition(
+      state,
+      v4Island,
+      ARCHIPELAGO_V4_CONTENT_VERSION,
+      dimensionId,
+    );
+  }
+
   const v3Island = parseArchipelagoV3IslandId(state.worldSeed, id);
 
   if (v3Island !== undefined) {
-    const job = archipelagoGenerationJobForId(state, id, dimensionId);
-
-    if (job === undefined) {
-      return undefined;
-    }
-
-    const logicalOrigin = v3Origin(v3Island);
-    const integrityBlocks =
-      job.parts?.map((part) => ({
-        offset: {
-          x: part.origin.x + part.integrityBlock.offset.x - job.origin.x,
-          y: part.origin.y + part.integrityBlock.offset.y - job.origin.y,
-          z: part.origin.z + part.integrityBlock.offset.z - job.origin.z,
-        },
-        typeId: part.integrityBlock.typeId,
-      })) ?? v3Island.template.integrityBlocks;
-
-    return {
-      id: v3Island.id,
-      family: v3Island.family,
-      tier: 0,
-      structureId: job.structureId,
+    return indexedIslandDefinition(
+      state,
+      v3Island,
+      ARCHIPELAGO_V3_CONTENT_VERSION,
       dimensionId,
-      contentVersion: ARCHIPELAGO_V3_CONTENT_VERSION,
-      size: v3Island.size,
-      placement: "seeded",
-      gameplayActivation: "structure_only",
-      integrityBlocks,
-      anchors: {
-        safeDock: {
-          x:
-            logicalOrigin.x + v3Island.template.safeDock.x - job.origin.x + 0.5,
-          y: v3Island.template.safeDock.y,
-          z:
-            logicalOrigin.z + v3Island.template.safeDock.z - job.origin.z + 0.5,
-        },
-      },
-    };
+    );
   }
 
   const island = parseArchipelagoIslandId(
@@ -398,6 +452,8 @@ export function isArchipelagoIslandId(
   id: string,
 ): boolean {
   return (
+    parseContinentStreamingId(id) !== undefined ||
+    parseArchipelagoV4IslandId(state.worldSeed, id) !== undefined ||
     parseArchipelagoV3IslandId(state.worldSeed, id) !== undefined ||
     parseArchipelagoIslandId(
       state.worldSeed,
@@ -408,12 +464,29 @@ export function isArchipelagoIslandId(
 }
 
 function distanceSquared(
-  island: Pick<ArchipelagoIsland | ArchipelagoV3Island, "x" | "z">,
+  island: Pick<
+    ArchipelagoIsland | ArchipelagoV3Island | ArchipelagoV4Island,
+    "x" | "z"
+  >,
   observer: ArchipelagoObserver,
 ): number {
   const dx = island.x - observer.x;
   const dz = island.z - observer.z;
   return dx * dx + dz * dz;
+}
+
+function generatedV4Islands(state: WorldState): readonly ArchipelagoV4Island[] {
+  const islands: ArchipelagoV4Island[] = [];
+
+  for (const id of state.generatedIslandIds) {
+    const island = parseArchipelagoV4IslandId(state.worldSeed, id);
+
+    if (island !== undefined) {
+      islands.push(island);
+    }
+  }
+
+  return islands;
 }
 
 function generatedV3Islands(state: WorldState): readonly ArchipelagoV3Island[] {
@@ -430,27 +503,8 @@ function generatedV3Islands(state: WorldState): readonly ArchipelagoV3Island[] {
   return islands;
 }
 
-function generatedV2Continents(
-  state: WorldState,
-): readonly ArchipelagoIsland[] {
-  const islands: ArchipelagoIsland[] = [];
-
-  for (const id of state.generatedIslandIds) {
-    const island = parseArchipelagoIslandId(
-      state.worldSeed,
-      ARCHIPELAGO_LAYOUT_VERSION,
-      id,
-    );
-
-    if (island?.tier === "continent") {
-      islands.push(island);
-    }
-  }
-
-  return islands;
-}
-
-type AmbientCandidate = ArchipelagoIsland | ArchipelagoV3Island;
+type AmbientCandidate =
+  ArchipelagoIsland | ArchipelagoV3Island | ArchipelagoV4Island;
 
 function ambientIslandsIntersect(
   left: Pick<
@@ -464,13 +518,13 @@ function ambientIslandsIntersect(
 ): boolean {
   const dx = left.x - right.x;
   const dz = left.z - right.z;
-  // Carry the same edge gap the a3 planner's own overlap test uses. Without it
+  // Carry the same edge gap the indexed planners' own overlap tests use. Without it
   // this was the only clearance check in the system with zero margin, so two
   // islands could finish exactly touching. It is also the sole guard keeping a3
   // islands off the six a2 continent sites, which the planner knows nothing
   // about, and vertical stacking makes the height term load-bearing.
   const horizontalClearance =
-    left.radius + right.radius + ARCHIPELAGO_V3_CONFIG.minEdgeGap;
+    left.radius + right.radius + ARCHIPELAGO_V4_CONFIG.minEdgeGap;
 
   if (dx * dx + dz * dz >= horizontalClearance * horizontalClearance) {
     return false;
@@ -480,18 +534,17 @@ function ambientIslandsIntersect(
   const rightCenterY = right.y + Math.floor(right.size.y / 2);
   return (
     Math.abs(leftCenterY - rightCenterY) <
-    left.heightRadius + right.heightRadius + ARCHIPELAGO_V3_CONFIG.minEdgeGap
+    left.heightRadius + right.heightRadius + ARCHIPELAGO_V4_CONFIG.minEdgeGap
   );
 }
 
 /**
- * The a2 continent an a3 island would collide with, if any.
+ * The a2 continent an indexed ambient island would collide with, if any.
  *
- * The a3 planner has no knowledge of the six continent sites, so this is the
- * only thing keeping new solo islands off them. Measured across 40 seeds there
- * are 4-11 genuine intersections per seed, every one of which must be refused
- * here. Exported so the invariant is testable rather than implicit in a filter
- * expression.
+ * The frozen a3 planner has no knowledge of the six continent sites, so this
+ * remains its runtime safety net. The a4 planner also reserves continent
+ * territory itself; retaining this predicate gives runtime defense in depth and
+ * one shared test surface for both generations.
  */
 export function archipelagoContinentConflict(
   worldSeed: number,
@@ -542,14 +595,11 @@ export function nextArchipelagoGenerationJob(
   }
 
   const generated = new Set(state.generatedIslandIds);
-  const generatedSoloCount = generatedV3Islands(state).length;
-  const generatedContinentCount = generatedV2Continents(state).length;
+  const generatedSoloCount = generatedV4Islands(state).length;
   const soloCapReached =
-    generatedSoloCount >= ARCHIPELAGO_V3_CONFIG.maxGeneratedIslands;
-  const continentCapReached =
-    generatedContinentCount >= ARCHIPELAGO_V2_CONFIG.maxGeneratedContinents;
+    generatedSoloCount >= ARCHIPELAGO_V4_CONFIG.maxGeneratedIslands;
 
-  if (soloCapReached && continentCapReached) {
+  if (soloCapReached) {
     return undefined;
   }
 
@@ -561,37 +611,27 @@ export function nextArchipelagoGenerationJob(
     (observer) => observer.dimensionId === dimensionId,
   );
   const reservedContinents = plannedV2Continents(state.worldSeed);
+  const archivedV3Islands = generatedV3Islands(state);
 
   for (const observer of dimensionObservers) {
     const nearby: AmbientCandidate[] = [];
 
-    if (!soloCapReached) {
-      nearby.push(
-        ...archipelagoV3IslandsWithinRadius(
-          state.worldSeed,
-          observer.x,
-          observer.z,
-          ARCHIPELAGO_V3_CONFIG.maxQueryRadius,
-        ).filter(
-          (island) =>
-            !reservedContinents.some((continent) =>
-              ambientIslandsIntersect(island, continent),
-            ),
-        ),
-      );
-    }
-
-    if (!continentCapReached) {
-      nearby.push(
-        ...archipelagoIslandsWithinRadius(
-          state.worldSeed,
-          ARCHIPELAGO_LAYOUT_VERSION,
-          observer.x,
-          observer.z,
-          ARCHIPELAGO_V2_CONFIG.maxQueryRadius,
-        ).filter((island) => island.tier === "continent"),
-      );
-    }
+    nearby.push(
+      ...archipelagoV4IslandsWithinRadius(
+        state.worldSeed,
+        observer.x,
+        observer.z,
+        ARCHIPELAGO_V4_CONFIG.maxQueryRadius,
+      ).filter(
+        (island) =>
+          !reservedContinents.some((continent) =>
+            ambientIslandsIntersect(island, continent),
+          ) &&
+          !archivedV3Islands.some((archived) =>
+            ambientIslandsIntersect(island, archived),
+          ),
+      ),
+    );
 
     for (const island of nearby) {
       if (generated.has(island.id)) {
@@ -619,8 +659,6 @@ export function nextArchipelagoGenerationJob(
 
   const next = [...candidates.values()].sort(
     (left, right) =>
-      (left.island.tier === "continent" ? 0 : 1) -
-        (right.island.tier === "continent" ? 0 : 1) ||
       left.distance - right.distance ||
       (left.island.id < right.island.id
         ? -1
@@ -647,17 +685,17 @@ export function archipelagoPersistenceBudgetBytes(state: WorldState): number {
   const islandVersions = { ...state.islandVersions };
   const generatedIslandIds = new Set(state.generatedIslandIds);
   // Worst case, not the cheapest case. The plan is ordered by site index and
-  // ids are `a3_<base36 index>`, so slicing the first N took the lowest
+  // ids are `a4_<base36 index>`, so slicing the first N took the lowest
   // indices and therefore the shortest ids. Islands are actually generated by
   // player proximity and can come from anywhere in the index space, so that
   // under-reported the real cost by about 12% and made the budget guard
   // report a world safe when it was not. Take the longest ids instead.
-  const soloIds = planArchipelagoV3(state.worldSeed)
+  const soloIds = planArchipelagoV4(state.worldSeed)
     .map((island) => island.id)
     .sort(
       (left, right) => right.length - left.length || (left < right ? -1 : 1),
     )
-    .slice(0, ARCHIPELAGO_V3_CONFIG.maxGeneratedIslands);
+    .slice(0, ARCHIPELAGO_V4_CONFIG.maxGeneratedIslands);
   const continentIds = planArchipelago(
     state.worldSeed,
     ARCHIPELAGO_LAYOUT_VERSION,
@@ -667,7 +705,7 @@ export function archipelagoPersistenceBudgetBytes(state: WorldState): number {
     .map((island) => island.id);
 
   for (const id of soloIds) {
-    islandVersions[id] = ARCHIPELAGO_V3_CONTENT_VERSION;
+    islandVersions[id] = ARCHIPELAGO_V4_CONTENT_VERSION;
     generatedIslandIds.add(id);
   }
   for (const id of continentIds) {
