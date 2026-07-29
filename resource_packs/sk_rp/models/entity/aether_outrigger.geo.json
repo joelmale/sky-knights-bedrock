@@ -1,0 +1,100 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.skyknights.aether_outrigger",
+        "texture_width": 256,
+        "texture_height": 256,
+        "visible_bounds_width": 14,
+        "visible_bounds_height": 12,
+        "visible_bounds_offset": [0, 5, 0]
+      },
+      "bones": [
+        {
+          "name": "bow",
+          "pivot": [0, -8, -16],
+          "parent": "hull",
+          "cubes": [
+            { "origin": [-4, 12, -58], "size": [8, 4, 18], "uv": [0, 102] },
+            { "origin": [-4, 8, -52], "size": [8, 4, 12], "uv": [24, 114] },
+            { "origin": [-12, 4, -40], "size": [8, 12, 6], "uv": [92, 114] },
+            { "origin": [4, 4, -40], "size": [8, 12, 6], "uv": [106, 114] },
+            { "origin": [-4, 4, -46], "size": [8, 4, 6], "uv": [120, 122] },
+            { "origin": [-4, 0, -42], "size": [8, 4, 2], "uv": [74, 111] },
+            { "origin": [-10, 0, -40], "size": [20, 4, 6], "uv": [102, 96] }
+          ]
+        },
+        {
+          "name": "engine_block",
+          "pivot": [0, 8, 34],
+          "parent": "hull",
+          "cubes": [
+            { "origin": [-8, 6, 34], "size": [16, 16, 10], "uv": [92, 101] },
+            { "origin": [-8, 6, 44], "size": [6, 6, 8], "uv": [118, 101] },
+            { "origin": [2, 6, 44], "size": [6, 6, 8], "uv": [120, 108] },
+            { "origin": [-8, 16, 44], "size": [6, 6, 8], "uv": [120, 115] },
+            { "origin": [2, 16, 44], "size": [6, 6, 8], "uv": [24, 122] }
+          ]
+        },
+        {
+          "name": "lift_pod_left",
+          "pivot": [-22, 10, 16],
+          "parent": "hull",
+          "cubes": [
+            { "origin": [-26, 8, 6], "size": [10, 4, 4], "uv": [38, 123] },
+            { "origin": [-26, 8, 26], "size": [10, 4, 4], "uv": [52, 123] },
+            { "origin": [-38, 4, 0], "size": [12, 12, 38], "uv": [52, 76] },
+            { "origin": [-40, 2, -2], "size": [16, 16, 8], "uv": [26, 102] },
+            { "origin": [-40, 2, 38], "size": [16, 16, 8], "uv": [102, 84] }
+          ]
+        },
+        {
+          "name": "lift_pod_right",
+          "pivot": [22, 10, 16],
+          "parent": "hull",
+          "cubes": [
+            { "origin": [16, 8, 6], "size": [10, 4, 4], "uv": [66, 123] },
+            { "origin": [16, 8, 26], "size": [10, 4, 4], "uv": [92, 123] },
+            { "origin": [26, 4, 0], "size": [12, 12, 38], "uv": [0, 76] },
+            { "origin": [24, 2, -2], "size": [16, 16, 8], "uv": [50, 111] },
+            { "origin": [24, 2, 38], "size": [16, 16, 8], "uv": [0, 113] }
+          ]
+        },
+        {
+          "name": "sail",
+          "pivot": [0, 66, 16],
+          "parent": "mast",
+          "cubes": [
+            { "origin": [-22, 56, 14], "size": [44, 20, 4], "uv": [92, 0] },
+            { "origin": [-22, 76, 14], "size": [44, 12, 4], "uv": [92, 20] },
+            { "origin": [-22, 44, 14], "size": [44, 12, 4], "uv": [92, 28] }
+          ]
+        },
+        {
+          "name": "mast",
+          "pivot": [0, 8, 16],
+          "parent": "hull",
+          "cubes": [
+            { "origin": [-2, 8, 14], "size": [4, 82, 4], "uv": [84, 101] },
+            { "origin": [-24, 86, 12], "size": [48, 4, 4], "uv": [92, 12] },
+            { "origin": [-24, 44, 12], "size": [48, 4, 4], "uv": [92, 16] }
+          ]
+        },
+        {
+          "name": "hull",
+          "pivot": [0, 0, 0],
+          "parent": "root",
+          "cubes": [
+            { "origin": [-12, 0, -34], "size": [24, 4, 68], "uv": [0, 0] },
+            { "origin": [12, 4, -34], "size": [4, 12, 68], "uv": [0, 36] },
+            { "origin": [-16, 4, -34], "size": [4, 12, 68], "uv": [72, 36] },
+            { "origin": [-12, 4, 30], "size": [24, 12, 4], "uv": [102, 76] },
+            { "origin": [-8, 4, -8], "size": [16, 4, 16], "uv": [52, 101] }
+          ]
+        },
+        { "name": "root", "pivot": [0, 0, 0] }
+      ]
+    }
+  ]
+}

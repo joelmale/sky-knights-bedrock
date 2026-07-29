@@ -1,0 +1,24 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "skyknights:steampunk_blimp",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/skyknights/steampunk_blimp"
+      },
+      "geometry": {
+        "default": "geometry.skyknights.steampunk_blimp"
+      },
+      "animations": {
+        "propellers": "animation.skyknights.steampunk_blimp.propellers"
+      },
+      "scripts": {
+        "animate": ["propellers"]
+      },
+      "render_controllers": ["controller.render.default"]
+    }
+  }
+}

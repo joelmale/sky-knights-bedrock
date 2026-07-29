@@ -1,151 +1,71 @@
 {
-  "format_version": "1.12.0",
-  "minecraft:geometry": [
-    {
-      "description": {
-        "identifier": "geometry.skyknights.skycutter",
-        "texture_width": 128,
-        "texture_height": 64,
-        "visible_bounds_width": 8,
-        "visible_bounds_height": 5,
-        "visible_bounds_offset": [0, 1.5, 0]
-      },
-      "bones": [
-        {
-          "name": "root",
-          "pivot": [0, 0, 0],
-          "cubes": [
-            {
-              "origin": [-32, 4, -16],
-              "size": [64, 4, 32],
-              "uv": [0, 0]
-            },
-            {
-              "origin": [-28, 0, -12],
-              "size": [56, 4, 24],
-              "uv": [0, 20]
-            },
-            {
-              "origin": [-32, 8, -16],
-              "size": [4, 8, 32],
-              "uv": [0, 40]
-            },
-            {
-              "origin": [28, 8, -16],
-              "size": [4, 8, 32],
-              "uv": [40, 40]
-            },
-            {
-              "origin": [-26, 8, 10],
-              "size": [12, 12, 10],
-              "uv": [72, 0]
-            },
-            {
-              "origin": [14, 8, 10],
-              "size": [12, 12, 10],
-              "uv": [72, 24]
-            },
-            {
-              "origin": [-3, 8, -4],
-              "size": [6, 30, 6],
-              "uv": [104, 0]
-            },
-            {
-              "origin": [3, 20, -3],
-              "size": [2, 16, 26],
-              "uv": [112, 0]
-            },
-            {
-              "origin": [-30, -5, -10],
-              "size": [10, 6, 12],
-              "uv": [0, 48]
-            },
-            {
-              "origin": [20, -5, -10],
-              "size": [10, 6, 12],
-              "uv": [48, 48]
-            }
-          ]
-        },
-        {
-          "name": "armor_plates",
-          "parent": "root",
-          "pivot": [0, 0, 0],
-          "cubes": [
-            {
-              "origin": [-34, 0, -18],
-              "size": [4, 10, 36],
-              "uv": [0, 0]
-            },
-            {
-              "origin": [30, 0, -18],
-              "size": [4, 10, 36],
-              "uv": [36, 0]
-            }
-          ]
-        },
-        {
-          "name": "expanded_cargo",
-          "parent": "root",
-          "pivot": [0, 0, 0],
-          "cubes": [
-            {
-              "origin": [-24, 8, 7],
-              "size": [16, 13, 12],
-              "uv": [72, 0]
-            },
-            {
-              "origin": [8, 8, 7],
-              "size": [16, 13, 12],
-              "uv": [72, 24]
-            }
-          ]
-        },
-        {
-          "name": "aether_cannon",
-          "parent": "root",
-          "pivot": [0, 0, 0],
-          "cubes": [
-            {
-              "origin": [-16, 13, -23],
-              "size": [8, 7, 22],
-              "uv": [0, 40]
-            },
-            {
-              "origin": [8, 13, -23],
-              "size": [8, 7, 22],
-              "uv": [32, 40]
-            }
-          ]
-        },
-        {
-          "name": "shield_projector",
-          "parent": "root",
-          "pivot": [0, 0, 0],
-          "cubes": [
-            {
-              "origin": [-28, 9, -12],
-              "size": [4, 22, 4],
-              "uv": [96, 0]
-            },
-            {
-              "origin": [24, 9, -12],
-              "size": [4, 22, 4],
-              "uv": [104, 0]
-            },
-            {
-              "origin": [-28, 9, 8],
-              "size": [4, 22, 4],
-              "uv": [112, 0]
-            },
-            {
-              "origin": [24, 9, 8],
-              "size": [4, 22, 4],
-              "uv": [120, 0]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.skyknights.skycutter",
+				"texture_width": 128,
+				"texture_height": 64,
+				"visible_bounds_width": 8,
+				"visible_bounds_height": 6,
+				"visible_bounds_offset": [0, 2, 0]
+			},
+			"bones": [
+				{
+					"name": "root",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-32, 4, -16], "size": [64, 4, 32], "uv": [0, 0]},
+						{"origin": [-28, 0, -12], "size": [56, 4, 24], "uv": [0, 20]},
+						{"origin": [-32, 8, -16], "size": [4, 8, 32], "uv": [0, 40]},
+						{"origin": [28, 8, -16], "size": [4, 8, 32], "uv": [40, 40]},
+						{"origin": [-26, 8, 10], "size": [12, 12, 10], "uv": [72, 0]},
+						{"origin": [14, 8, 10], "size": [12, 12, 10], "uv": [72, 24]},
+						{"origin": [-3, 8, -4], "size": [6, 50, 6], "uv": [104, 0]},
+						{"origin": [3, 42, -3], "size": [2, 16, 26], "uv": [112, 0]},
+						{"origin": [-30, -5, -10], "size": [10, 6, 12], "uv": [0, 48]},
+						{"origin": [20, -5, -10], "size": [10, 6, 12], "uv": [48, 48]}
+					]
+				},
+				{
+					"name": "armor_plates",
+					"parent": "root",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-34, 0, -18], "size": [4, 10, 36], "uv": [0, 0]},
+						{"origin": [30, 0, -18], "size": [4, 10, 36], "uv": [36, 0]}
+					]
+				},
+				{
+					"name": "expanded_cargo",
+					"parent": "root",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-24, 8, 7], "size": [16, 13, 12], "uv": [72, 0]},
+						{"origin": [8, 8, 7], "size": [16, 13, 12], "uv": [72, 24]}
+					]
+				},
+				{
+					"name": "aether_cannon",
+					"parent": "root",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-16, 13, -23], "size": [8, 7, 22], "uv": [0, 40]},
+						{"origin": [8, 13, -23], "size": [8, 7, 22], "uv": [32, 40]}
+					]
+				},
+				{
+					"name": "shield_projector",
+					"parent": "root",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-28, 9, -12], "size": [4, 22, 4], "uv": [96, 0]},
+						{"origin": [24, 9, -12], "size": [4, 22, 4], "uv": [104, 0]},
+						{"origin": [-28, 9, 8], "size": [4, 22, 4], "uv": [112, 0]},
+						{"origin": [24, 9, 8], "size": [4, 22, 4], "uv": [120, 0]}
+					]
+				}
+			]
+		}
+	]
 }

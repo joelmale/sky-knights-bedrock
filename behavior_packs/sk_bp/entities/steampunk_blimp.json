@@ -1,0 +1,97 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "skyknights:steampunk_blimp",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "spawn_category": "creature"
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": ["skyknights_ship", "skyknights_steampunk_blimp", "inanimate"]
+      },
+      "minecraft:collision_box": {
+        "width": 5.6,
+        "height": 3
+      },
+      "minecraft:health": {
+        "value": 150,
+        "max": 150
+      },
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": true
+      },
+      "minecraft:can_fly": {},
+      "minecraft:movement": {
+        "value": 0.12
+      },
+      "minecraft:flying_speed": {
+        "value": 0.12
+      },
+      "minecraft:movement.fly": {
+        "max_turn": 7,
+        "start_speed": 0.05,
+        "speed_when_turning": 0.08
+      },
+      "minecraft:navigation.fly": {
+        "can_path_from_air": true,
+        "can_path_over_water": true,
+        "avoid_damage_blocks": true
+      },
+      "minecraft:input_air_controlled": {
+        "strafe_speed_modifier": 0.55,
+        "backwards_movement_modifier": 0.3
+      },
+      "minecraft:is_tamed": {},
+      "minecraft:rideable": {
+        "seat_count": 4,
+        "controlling_seat": 0,
+        "crouching_skip_interact": true,
+        "rider_can_interact": true,
+        "family_types": ["player"],
+        "interact_text": "action.interact.mount",
+        "seats": [
+          {
+            "position": [0, 1.05, -0.65],
+            "third_person_camera_radius": 16,
+            "camera_relax_distance_smoothing": 3
+          },
+          {
+            "position": [-0.45, 1.05, -1.05],
+            "third_person_camera_radius": 16,
+            "camera_relax_distance_smoothing": 3
+          },
+          {
+            "position": [0.45, 1.05, -1.05],
+            "third_person_camera_radius": 16,
+            "camera_relax_distance_smoothing": 3
+          },
+          {
+            "position": [0, 1.05, -1.45],
+            "third_person_camera_radius": 16,
+            "camera_relax_distance_smoothing": 3
+          }
+        ]
+      },
+      "minecraft:behavior.player_ride_tamed": {
+        "priority": 0
+      },
+      "minecraft:nameable": {},
+      "minecraft:persistent": {},
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "fall",
+            "deals_damage": "no"
+          }
+        ]
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      }
+    }
+  }
+}
