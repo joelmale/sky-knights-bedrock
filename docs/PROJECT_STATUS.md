@@ -67,6 +67,11 @@ Verdant Isle resources
 Developer commands are diagnostics and recovery aids; normal progression does
 not require them.
 
+The cheat-gated `/skyknights:test_setup` command prepares the documented
+starter-dock inspection hub, four mobile craft, all five Skycraft berths and
+eight reference plans, a stocked bench, and an isolated Raider lane without
+claiming the staged legacy craft as the player's canonical ship.
+
 ## Current content inventory
 
 | Content type       | Implemented                                                                                               |
@@ -223,7 +228,7 @@ not implementation evidence.
 
 ## Verification snapshot
 
-The unreleased archipelago-recovery working tree atop `0.3.10` has passed:
+The integrated developer inspection-hub working tree atop `0.3.10` has passed:
 
 ```text
 npm run verify
@@ -235,15 +240,15 @@ Results:
 - non-mutating verification of all 63 generated structures: passed;
 - formatting/lint: passed;
 - TypeScript/stable bundle: passed;
-- host tests: 389 passed across 59 files;
+- host tests: 406 passed across 62 files;
 - BDS NBT fixture tests: passed;
 - production `.mcaddon`: built;
 - experimental profile: built;
 - GameTest profile: built;
 - npm vulnerabilities: 0;
 
-The production `sky_knights.mcaddon` is 223,210 bytes with SHA-256
-`fc8f78a06e156300f7209bd7985ef51727f8d7410871ed9cdc4a7999414f0deb`.
+The production `sky_knights.mcaddon` is 224,216 bytes with SHA-256
+`ecf3cf364a68f61e34bed377f9352a42639b332101fd39c1bfc2eaac1c322104`.
 Both nested packs remain versioned `0.3.10`; this is an unreleased source
 checkpoint, not a new playtest version.
 

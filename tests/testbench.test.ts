@@ -11,6 +11,10 @@ import {
   planTestBench,
   unmarkTestBenchStall,
 } from "../scripts/gameplay/testbench-layout";
+import {
+  REFERENCE_BLUEPRINTS,
+  referenceMaterials,
+} from "../scripts/skycraft/catalog";
 
 // @ts-expect-error Vite injects import.meta.glob; there is no @types/node here.
 const ITEM_SOURCES: Record<string, string> = import.meta.glob(
@@ -129,6 +133,8 @@ describe("developer test bench", () => {
       IDENTIFIERS.aetherCrystal,
       IDENTIFIERS.froststeelIngot,
       IDENTIFIERS.raiderCore,
+      "minecraft:oak_planks",
+      "minecraft:emerald",
     ];
 
     for (const itemId of required) {
@@ -145,6 +151,31 @@ describe("developer test bench", () => {
         expect(entry.count).toBeLessThanOrEqual(limits[entry.itemId] ?? 64);
       }
     }
+  });
+
+  it("stocks enough material for every reference order one at a time", () => {
+    const stocked = new Map<string, number>();
+
+    for (const stall of TEST_BENCH.stalls) {
+      for (const entry of stall.items) {
+        stocked.set(
+          entry.itemId,
+          Math.max(stocked.get(entry.itemId) ?? 0, entry.count),
+        );
+      }
+    }
+
+    for (const reference of REFERENCE_BLUEPRINTS) {
+      for (const material of referenceMaterials(reference)) {
+        expect(
+          stocked.get(material.itemId) ?? 0,
+          `${reference.id}: ${material.itemId}`,
+        ).toBeGreaterThanOrEqual(material.count);
+      }
+    }
+
+    // The highest current labor fee is the 48-emerald Masterwork fee.
+    expect(stocked.get("minecraft:emerald")).toBeGreaterThanOrEqual(48);
   });
 
   it("parses, sorts, deduplicates, marks, and clears ownership state", () => {

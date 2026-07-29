@@ -289,6 +289,8 @@ export const TEST_BENCH = {
         { itemId: "minecraft:coal", count: 64 },
         { itemId: "minecraft:redstone", count: 64 },
         { itemId: "minecraft:oak_log", count: 64 },
+        { itemId: "minecraft:oak_planks", count: 64 },
+        { itemId: "minecraft:emerald", count: 64 },
       ],
     },
     {

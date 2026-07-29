@@ -118,6 +118,7 @@ export function spawnSkyRaiderForPlayer(
   repository: WorldStateRepository,
   logger: Logger,
   force = false,
+  requestedLocation?: DockLocation,
 ): Entity | undefined {
   const worldState = repository.load();
   const existing = validEntity(worldState.skyRaiderEncounter.entityId);
@@ -140,7 +141,7 @@ export function spawnSkyRaiderForPlayer(
   }
 
   const direction = horizontalDirection(player.getViewDirection());
-  const location: DockLocation = {
+  const location: DockLocation = requestedLocation ?? {
     dimensionId: player.dimension.id,
     x:
       player.location.x +

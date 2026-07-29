@@ -8,6 +8,10 @@ Validation evidence and pending hands-on gates are maintained in
 
 ### Added
 
+- Added `/skyknights:test_setup`, a cheat-gated, repeatable starter-dock
+  inspection hub that waits for required islands, restocks every developer
+  material, prepares all five Skycraft berths and eight reference plans,
+  stages four mobile craft, and resets an isolated Ashwing Raider combat lane.
 - Added the migration-safe `a4` ambient planner. Its 374 Fibonacci-cohort
   cluster centers are distributed across four vertical decks with at least
   560 blocks between same-deck centers; deterministic cluster vigor produces

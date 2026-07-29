@@ -336,6 +336,38 @@ export function ensureApprenticeBerth(logger: Logger): boolean {
   );
 }
 
+export interface DeveloperSkycraftBerthReport {
+  prepared: string[];
+  skipped: string[];
+}
+
+/**
+ * Prepare every fixed certification berth for the explicit developer setup.
+ *
+ * The normal progression path still prepares pads one at a time. This helper
+ * only invokes the same obstruction-safe platform service for each berth.
+ */
+export function prepareDeveloperSkycraftBerths(
+  logger: Logger,
+): DeveloperSkycraftBerthReport {
+  const report: DeveloperSkycraftBerthReport = {
+    prepared: [],
+    skipped: [],
+  };
+
+  for (const definition of SKYCRAFT_BERTHS) {
+    if (
+      ensureBerthPlatform(definition, logger.child(definition.certification))
+    ) {
+      report.prepared.push(definition.berth.id);
+    } else {
+      report.skipped.push(definition.berth.id);
+    }
+  }
+
+  return report;
+}
+
 export function runSkycraftSweep(logger: Logger): void {
   for (const id of airships.ids()) {
     const state = airships.load(id);

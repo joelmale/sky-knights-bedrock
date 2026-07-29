@@ -34,6 +34,11 @@ import {
   resumeArchipelagoGeneration,
 } from "../generation/archipelago-control";
 import { recoverPlayer } from "../gameplay/recovery";
+import {
+  DeveloperTestSetupReport,
+  prepareDeveloperTestSetup,
+} from "../gameplay/developer-test-setup";
+import { DEVELOPER_TEST_SETUP } from "../gameplay/developer-test-setup-layout";
 import { spawnSkyRaiderForPlayer } from "../gameplay/sky-raider";
 import {
   loadShipState,
@@ -340,6 +345,53 @@ export function registerDevelopmentCommands(
 
   registry.registerCommand(
     {
+      name: "skyknights:test_setup",
+      description:
+        "Developer shortcut: prepare the starter inspection hub, fleet, blueprints, and Raider.",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: true,
+    },
+    (origin) => {
+      const player = commandPlayer(origin.sourceEntity);
+
+      if (player === undefined) {
+        return {
+          status: CustomCommandStatus.Failure,
+          message: "Run this command as a player.",
+        };
+      }
+
+      system.run(() => {
+        player.sendMessage(
+          "§bDeveloper setup:§r waiting for required islands, then preparing the starter dock.",
+        );
+        void prepareDeveloperTestSetup(
+          player,
+          worldRepository,
+          logger.child("test-setup"),
+        )
+          .then((report) => sendDeveloperSetupReport(player, report))
+          .catch((error: unknown) => {
+            const message =
+              error instanceof Error ? error.message : String(error);
+            logger.error("Developer test setup failed.", {
+              playerId: player.id,
+              error: message,
+            });
+            if (player.isValid) {
+              player.sendMessage(`§cDeveloper setup failed: ${message}§r`);
+            }
+          });
+      });
+      return {
+        status: CustomCommandStatus.Success,
+        message: "Preparing the developer test setup.",
+      };
+    },
+  );
+
+  registry.registerCommand(
+    {
       name: "skyknights:testbench_clear",
       description: "Developer shortcut: remove the starter-island test bench.",
       permissionLevel: CommandPermissionLevel.GameDirectors,
@@ -467,6 +519,44 @@ export function registerDevelopmentCommands(
       };
     },
   );
+}
+
+function sendDeveloperSetupReport(
+  player: Player,
+  report: DeveloperTestSetupReport,
+): void {
+  if (!player.isValid) {
+    return;
+  }
+
+  player.sendMessage(
+    `§aDeveloper setup ready:§r ${report.spawnedCraft.length} craft, ${report.berths.prepared}/5 berths, ${report.benchStalls.placed}/8 bench stalls, ${report.referenceBlueprints.length} reference blueprints, Raider ${
+      report.raiderReady ? "ready" : "missing"
+    }.`,
+  );
+  player.sendMessage(
+    `§bInspection route:§r ${DEVELOPER_TEST_SETUP.route
+      .map(
+        (stop) =>
+          `${stop.label} (${stop.location.x}, ${stop.location.y}, ${stop.location.z})`,
+      )
+      .join(" -> ")}`,
+  );
+  player.sendMessage(
+    "§eUse Dockmaster Elian to build one reference Skycraft at a time; rerun /skyknights:test_setup to restock and reset the tagged fleet.§r",
+  );
+
+  for (const warning of report.benchStalls.skipped) {
+    player.sendMessage(`§cBench warning: ${warning}§r`);
+  }
+  for (const berthId of report.berths.skipped) {
+    player.sendMessage(`§cBerth warning: ${berthId} is obstructed.§r`);
+  }
+  if (!report.dockmasterReady) {
+    player.sendMessage(
+      "§cDockmaster warning: the authored dock was not ready.§r",
+    );
+  }
 }
 
 function sendDebugReport(

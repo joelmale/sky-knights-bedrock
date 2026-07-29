@@ -14,6 +14,7 @@ import { PlayerStateRepository } from "../persistence/repositories";
 import { ShipFrame } from "../persistence/schema";
 import {
   entityDockLocation,
+  isPrimaryShipEntity,
   isShipOwner,
   loadShipState,
   saveShipState,
@@ -108,6 +109,10 @@ export function adoptNearbyOwnedShip(player: Player): Entity | undefined {
     });
 
     for (const candidate of candidates) {
+      if (!isPrimaryShipEntity(candidate)) {
+        continue;
+      }
+
       const shipState = loadShipState(candidate);
 
       if (shipState === undefined) {

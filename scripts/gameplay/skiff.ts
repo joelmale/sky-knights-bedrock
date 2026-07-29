@@ -37,11 +37,26 @@ const DEFAULT_SKIFF_MODULES: ShipModuleSlots = {
   engine: "starter_thruster",
 };
 
+export const NON_PRIMARY_SHIP_TAG = "skyknights.ship.non_primary";
+
+export function isPrimaryShipEntity(entity: Entity): boolean {
+  return !entity.hasTag(NON_PRIMARY_SHIP_TAG);
+}
+
+export interface ShipSpawnOptions {
+  /**
+   * Whether this craft becomes the player's canonical recall/tutorial ship.
+   * Developer inspection fleets retain entity ownership but opt out.
+   */
+  trackAsPrimary?: boolean;
+}
+
 export function spawnSkiffForPlayer(
   player: Player,
   logger: Logger,
   requestedLocation?: Vector3,
   modules: ShipModuleSlots = DEFAULT_SKIFF_MODULES,
+  options: ShipSpawnOptions = {},
 ): Entity {
   const location =
     requestedLocation ??
@@ -53,6 +68,7 @@ export function spawnSkiffForPlayer(
     location,
     modules,
     logger,
+    options,
   );
 }
 
@@ -61,6 +77,7 @@ export function spawnSkycutterForPlayer(
   logger: Logger,
   requestedLocation: Vector3,
   modules: ShipModuleSlots = SKYCUTTER_LOADOUT,
+  options: ShipSpawnOptions = {},
 ): Entity {
   return spawnOwnedShip(
     player,
@@ -69,6 +86,7 @@ export function spawnSkycutterForPlayer(
     requestedLocation,
     modules,
     logger,
+    options,
   );
 }
 
@@ -146,6 +164,10 @@ export function updateOwnedShipTracking(): void {
 
     for (const typeId of [IDENTIFIERS.skiff, IDENTIFIERS.skycutter]) {
       for (const entity of dimension.getEntities({ type: typeId })) {
+        if (!isPrimaryShipEntity(entity)) {
+          continue;
+        }
+
         const shipState = loadShipState(entity);
 
         if (shipState === undefined) {
@@ -250,15 +272,23 @@ function spawnOwnedShip(
   location: Vector3,
   modules: ShipModuleSlots,
   logger: Logger,
+  options: ShipSpawnOptions,
 ): Entity {
+  const trackAsPrimary = options.trackAsPrimary !== false;
   const ship = player.dimension.spawnEntity(typeId, location, {
     initialPersistence: true,
   });
-  const playerRepository = new PlayerStateRepository(
-    player,
-    STARTER_ISLAND.safeDock,
-  );
-  const playerState = playerRepository.load();
+
+  if (!trackAsPrimary) {
+    // Mark the entity before any repository/component work can throw so an
+    // incomplete developer spawn can never be adopted as the canonical ship.
+    ship.addTag(NON_PRIMARY_SHIP_TAG);
+  }
+
+  const playerRepository = trackAsPrimary
+    ? new PlayerStateRepository(player, STARTER_ISLAND.safeDock)
+    : undefined;
+  const playerState = playerRepository?.load();
   const shipId = `${frame}-${system.currentTick}-${ship.id.slice(-8)}`;
   const repository = new ShipStateRepository(
     ship,
@@ -287,20 +317,23 @@ function spawnOwnedShip(
   ship.addTag("skyknights.ship");
   ship.addTag(`skyknights.ship.${frame}`);
 
-  playerState.ownedShip = {
-    entityId: ship.id,
-    shipId,
-    frame,
-    lastKnownLocation: entityDockLocation(ship),
-    modules: { ...modules },
-  };
-  playerRepository.save(playerState);
+  if (playerRepository !== undefined && playerState !== undefined) {
+    playerState.ownedShip = {
+      entityId: ship.id,
+      shipId,
+      frame,
+      lastKnownLocation: entityDockLocation(ship),
+      modules: { ...modules },
+    };
+    playerRepository.save(playerState);
+  }
 
   logger.info("Owned ship spawned.", {
     shipId,
     frame,
     ownerPlayerId: player.id,
     dimensionId: player.dimension.id,
+    trackAsPrimary,
   });
 
   return ship;

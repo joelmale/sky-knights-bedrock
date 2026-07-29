@@ -66,6 +66,59 @@ Expected installed paths:
 
 Do not edit deployed copies. They are build output and are replaced by the next deployment.
 
+## One-command inspection hub
+
+In a newly generated disposable development world, a Game Director with cheats
+enabled can run:
+
+```text
+/skyknights:test_setup
+```
+
+The command waits up to 60 seconds for the three required authored islands,
+then teleports the requesting player to the starter dock and prepares one
+repeatable inspection hub:
+
+- eight safely owned/restockable test-bench stalls, including the component
+  blocks, oak planks, and emerald fees required by reference Skycraft orders;
+- all five obstruction-safe certification berths and the
+  `skyknights.skycraft_experimental` tester tag;
+- Dockmaster Elian and access to all eight reference plans: Minnow, Dart,
+  Cargo Punt, Cloudwhale, Aether Disc, Frostwing, Surveyor, and Grand Cruiser;
+- a Skiff, fully refitted combat Skycutter, Aether Outrigger prototype, and
+  Steampunk Blimp prototype at fixed starter-dock positions; and
+- a reset Ashwing Raider in a separate fixed combat lane, outside the arrival
+  safety radius but inside the staged Skycutter's cannon range.
+
+The entity inspection positions are:
+
+| Subject          | X    | Y   | Z     |
+| ---------------- | ---- | --- | ----- |
+| Skiff            | 24.5 | 164 | -7.5  |
+| Skycutter        | 46.5 | 164 | 8.5   |
+| Aether Outrigger | 5.5  | 170 | -18.5 |
+| Steampunk Blimp  | 5.5  | 174 | 20.5  |
+| Ashwing Raider   | 54   | 176 | 54    |
+
+The command reports the predictable island inspection route after setup:
+Starter Island `(3, 169, 1)`, Ember Outpost `(84, 169, 0)`, then Frostspire
+`(253, 169, 0)`.
+
+Reference Skycraft are not faked as extra entities. Use Dockmaster Elian to
+construct and launch one through the real berth/blueprint/runtime flow, then
+dismantle it before using another reference registered to that berth. This
+preserves active-craft limits, material accounting, and reconstruction
+behavior.
+
+Rerunning the command restocks the bench and replaces only entities carrying
+the `skyknights.dev_test_setup` ownership tag. It refuses a fleet slot
+containing a block and never stamps another island. The Raider encounter is
+intentionally reset. The staged Skiff and Skycutter retain per-entity owner
+controls but are marked non-primary, so setup and reruns do not replace the
+player's canonical recall/tutorial ship. This shortcut is for entity,
+movement, rendering, and system checks; never count a setup-assisted session
+as fresh progression or onboarding acceptance.
+
 ## Optional BDS/GameTest validation
 
 The repository does not install or redistribute BDS. Download and extract the

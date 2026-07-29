@@ -11,6 +11,7 @@ present in a build used for fresh-player acceptance testing.
 ## Usage
 
 ```text
+/skyknights:test_setup        Prepare the full inspection hub and restock the row
 /skyknights:testbench          Place or restock the row
 /skyknights:testbench_clear    Remove the row
 ```
@@ -42,16 +43,16 @@ clear of the dock without a running engine. Only
 
 ## Stall inventory
 
-| Stall             | Contents                                                          |
-| ----------------- | ----------------------------------------------------------------- |
-| Starter Parts     | Ship Core ×8, Canvas Bundle ×16, Thruster Module ×8               |
-| Skycutter Base    | Reinforced Hull ×4, Aether Engine ×1, Cargo Hold ×4, Navigator ×4 |
-| Advanced Modules  | Armored Hull ×4, Frostfire Engine ×1, Expanded Cargo Hold ×4      |
-| Cannon + Ammo     | Aether Cannon ×1, Cannon Control ×1, Aether Charge ×64            |
-| Shield + Repair   | Shield Projector ×1, Repair Kit ×16                               |
-| Progression Items | Aether Crystal ×16, Froststeel Ingot ×64, Raider Core ×8          |
-| Raw Materials     | Iron ×64, Diamond ×32, Coal ×64, Redstone ×64, Oak Log ×64        |
-| Survival Kit      | Cooked Beef ×64, Diamond Pickaxe, Diamond Sword, Torch ×64        |
+| Stall             | Contents                                                                       |
+| ----------------- | ------------------------------------------------------------------------------ |
+| Starter Parts     | Ship Core ×8, Canvas Bundle ×16, Thruster Module ×8                            |
+| Skycutter Base    | Reinforced Hull ×4, Aether Engine ×1, Cargo Hold ×4, Navigator ×4              |
+| Advanced Modules  | Armored Hull ×4, Frostfire Engine ×1, Expanded Cargo Hold ×4                   |
+| Cannon + Ammo     | Aether Cannon ×1, Cannon Control ×1, Aether Charge ×64                         |
+| Shield + Repair   | Shield Projector ×1, Repair Kit ×16                                            |
+| Progression Items | Aether Crystal ×16, Froststeel Ingot ×64, Raider Core ×8                       |
+| Raw Materials     | Iron ×64, Diamond ×32, Coal ×64, Redstone ×64, Oak Log/Planks ×64, Emerald ×64 |
+| Survival Kit      | Cooked Beef ×64, Diamond Pickaxe, Diamond Sword, Torch ×64                     |
 
 A host test asserts every custom ship part, module, and progression item is
 stocked somewhere in the row, so a system can never become unreachable from the
