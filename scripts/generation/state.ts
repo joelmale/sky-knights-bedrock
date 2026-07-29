@@ -73,6 +73,32 @@ export function advancePartCursor(
   };
 }
 
+/**
+ * Drops an unrecoverable job without recording its island as generated.
+ *
+ * `completeGeneration` is the only other writer of `activeGeneration:
+ * undefined`, and it requires a placed structure. That meant a job failing a
+ * non-retryable error stayed active forever: the queue believed generation was
+ * still in progress, so no ambient island and no required progression island
+ * was ever started again for that world, silently and with no way to clear it.
+ *
+ * An a3 id encodes only its site index, so its tier, origin and structure are
+ * re-derived from the current planner constants. Changing any of those
+ * constants invalidates an already-queued job and raises exactly that
+ * non-retryable error, which made editing the planner enough to freeze a world.
+ * Abandoning the job lets the planner pick a valid one on the next sweep.
+ */
+export function abandonGeneration(state: WorldState): WorldState {
+  if (state.activeGeneration === undefined) {
+    return state;
+  }
+
+  return {
+    ...state,
+    activeGeneration: undefined,
+  };
+}
+
 export function completeGeneration(state: WorldState): WorldState {
   const job = state.activeGeneration;
 

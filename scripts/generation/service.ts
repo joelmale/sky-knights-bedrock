@@ -26,7 +26,9 @@ import {
   archipelagoIslandDefinition,
 } from "./archipelago-runtime";
 import { ARCHIPELAGO_TEMPLATES } from "./archipelago";
+import { ARCHIPELAGO_V3_TEMPLATES } from "./archipelago-v3";
 import {
+  abandonGeneration,
   advancePartCursor,
   completeGeneration,
   markStructurePlaced,
@@ -140,11 +142,18 @@ async function monitorGeneration(
 
     if (job !== undefined && isRetryableGenerationError(message)) {
       scheduleGenerationRetry(repository, logger, job);
-    } else {
-      logger.error("Generation job paused after a non-retryable error.", {
-        error: message,
-        jobId: job?.id,
-      });
+    } else if (job !== undefined) {
+      // Abandon rather than leave the job active. A retained unrecoverable job
+      // blocks every later ambient AND required-island job for the life of the
+      // world, because the queue treats a set activeGeneration as "busy".
+      repository.save(abandonGeneration(repository.load()));
+      logger.error(
+        "Generation job abandoned after a non-retryable error; generation continues.",
+        {
+          error: message,
+          jobId: job.id,
+        },
+      );
     }
   } finally {
     activeGenerationTask = undefined;
@@ -357,6 +366,10 @@ async function runMultipartGeneration(
   const shouldPlace = job.stage === "queued" && beforePlacement.length > 0;
   const startingCursor = job.partCursor ?? 0;
   let cursor = startingCursor;
+  // Checkpointed parts holding a player edit rather than our blocks. They are
+  // deliberately not re-placed, so they are also excluded from row
+  // verification, which would otherwise fail on the edit.
+  const preservedParts = new Set<number>();
 
   if (shouldPlace && ambient) {
     const conflict = await firstMultipartPreflightConflict(
@@ -401,14 +414,25 @@ async function runMultipartGeneration(
     try {
       if (shouldPlace) {
         for (const { index, part } of row.parts) {
-          if (index < cursor) {
+          // Every part is re-verified on every attempt, including parts the
+          // persisted cursor claims are done. The cursor advances immediately
+          // after place() and before the row is verified, so a place() that
+          // returned without landing blocks used to leave the cursor past a
+          // part that was never written; skipping on `index < cursor` meant no
+          // retry ever revisited it and the island completed with a permanent
+          // void.
+          //
+          // A checkpointed part that fails its probe is only re-placed when the
+          // probe is empty. A different block there is a player edit, which is
+          // preserved exactly as before.
+          //
+          // advancePartCursor is monotonic, so re-checking an early part can
+          // never rewind the cursor.
+          if (index < cursor && !partProbeIsEmpty(part, dimension)) {
+            preservedParts.add(index);
             continue;
           }
 
-          // A crash can occur after place() but before the next cursor save.
-          // Accept that one intact part and advance the persisted checkpoint;
-          // otherwise its own blocks would look like an obstruction and strand
-          // the remaining continent.
           if (verifyPartIntegrity(part, dimension) === undefined) {
             const state = advancePartCursor(
               repository.load(),
@@ -464,8 +488,12 @@ async function runMultipartGeneration(
         }
       }
 
+      // Verify the whole row, not just parts at or after the cursor this
+      // attempt started from. Filtering by `startingCursor` made a resumed row
+      // verify an empty set and pass vacuously, which is what let a stranded
+      // part reach completion.
       const failures = await waitForPartRowIntegrity(
-        row.parts.filter(({ index }) => index >= startingCursor),
+        row.parts.filter(({ index }) => !preservedParts.has(index)),
         dimension,
       );
 
@@ -794,6 +822,17 @@ function partSize(part: GenerationPart, island: IslandDefinition): BlockVector {
     }
   }
 
+  for (const templateKey of Object.keys(ARCHIPELAGO_V3_TEMPLATES)) {
+    const template = ARCHIPELAGO_V3_TEMPLATES[templateKey];
+    const matchingPart = template.parts.find(
+      (candidate) => candidate.structureId === part.structureId,
+    );
+
+    if (matchingPart !== undefined) {
+      return matchingPart.size;
+    }
+  }
+
   return island.size;
 }
 
@@ -1090,6 +1129,28 @@ function verifyPartIntegrity(
   }
 
   return `${location.x},${location.y},${location.z} expected ${part.integrityBlock.typeId}, found ${actual ?? "unavailable"}`;
+}
+
+/**
+ * True when a checkpointed part's probe is empty rather than merely different.
+ *
+ * The persisted cursor cannot distinguish "this part was placed and a player
+ * has since edited it" from "place() returned but never landed the blocks".
+ * Both fail the integrity probe. The difference is what is actually there: a
+ * player edit leaves some other block, whereas a placement that never happened
+ * leaves the void the island was going to fill.
+ *
+ * Air therefore means re-place; any other mismatch means preserve the edit.
+ */
+function partProbeIsEmpty(part: GenerationPart, dimension: Dimension): boolean {
+  const location = addBlockVectors(part.origin, part.integrityBlock.offset);
+
+  try {
+    return dimension.getBlock(location)?.isAir === true;
+  } catch {
+    // An unreadable probe is not evidence of an empty one.
+    return false;
+  }
 }
 
 function verifyPartRowIntegrity(
