@@ -4,7 +4,7 @@
 >
 > Branch: `codex/procedural-archipelago`
 >
-> Source/playtest version: `0.3.8`
+> Source/playtest version: `0.3.10`
 
 ## Read this first
 
@@ -15,15 +15,22 @@ owns integration, documentation, full verification, and the final commit.
 Substantial slices use bounded specialists with disjoint file ownership and an
 independent read-only QA role.
 
-The branch contains the `0.3.8` island-variety checkpoint. Generated files
-under `dist/` are ignored and may be rebuilt; tracked source and documentation
-are authoritative. Inspect `git status` and preserve unrelated owner-authored
-work.
+The branch contains the `0.3.8` island-variety checkpoint plus separately
+tracked summon-only Aether Outrigger and Steampunk Blimp entity prototypes.
+The `0.3.9` correction doubles the Outrigger model, moves its sail behind the
+helm sightline, and gives both large prototypes a mount-scoped third-person
+camera assist with larger rideable camera radii.
+The `0.3.10` correction replaces new solo generation with a migration-safe
+Fibonacci/golden-angle `a3` field and 9.15–11.09× larger usable island tops.
+Generated files under `dist/` are ignored and may be rebuilt; tracked source
+and documentation are authoritative. Inspect `git status` and preserve
+unrelated owner-authored art.
 
 Read the [`VALIDATION_LOG.md`](VALIDATION_LOG.md) hands-on section before
 changing starter or archipelago content. The latest Minecraft archipelago
-evidence is still `0.3.6`; the `0.3.8` variety planner has host evidence but
-still needs Sessions C-G in a real client.
+evidence is still `0.3.6`; the `0.3.8` variety and `0.3.10`
+scale/distribution planners have host evidence, but run 3 still needs Sessions
+B-G in a real client.
 
 ## Product and architecture state
 
@@ -41,11 +48,16 @@ The current implementation includes:
 - a bounded player-built Skycraft prototype with wood airframes, Helm/Core
   scanning, mass/lift/thrust/certification rules, reference blueprints,
   authored moving proxies, roles, damage/repair, persistence, and combat;
-- a bounded deterministic procedural archipelago with more than 850 solo
-  candidates, four clustered visual families, four weighted size tiers, five
-  altitude bands, rare bounded burn variants, six sparse continent sites,
-  resumable 21-part continent placement, occupied-space protection, and
-  separate 224-solo/two-continent caps; and
+- a bounded deterministic procedural archipelago with 2,563 active `a3`
+  Fibonacci/golden-angle solo candidates, eight family hubs, four weighted
+  large size tiers, five altitude bands, six preserved `a2` continent sites,
+  resumable multipart placement, occupied-space protection, and separate
+  224-solo/two-continent caps;
+- two summon-only entity-art prototypes: a doubled two-seat Aether Outrigger
+  with an aft, raised sail and a four-seat Steampunk Blimp with an external
+  texture, detailed dirigible model, and animated twin propellers. Both use a
+  mount-scoped third-person camera assist that preserves player FOV and clears
+  on dismount; and
 - a stable strategy of scripted `.mcstructure` island placement over a packaged
   void Overworld. The opt-in custom dimension and native biome feature rules
   remain experiments rather than release authority.
@@ -62,15 +74,51 @@ Authoritative detail lives in:
 - [`PROCEDURAL_ARCHIPELAGO.md`](PROCEDURAL_ARCHIPELAGO.md) — island-field
   planner and placement design.
 
-## Current `0.3.8` checkpoint
+### Entity-art prototypes
+
+The Aether Outrigger and Steampunk Blimp are deliberately outside owned-ship
+progression and persistence. Their canonical editable sources live under
+`art_source/blockbench/`; deterministic entity-specific tools under
+`tools/models/` reproduce their exported geometry and textures.
+
+Use `/skyknights:outrigger` and `/skyknights:blimp` only in cheat-enabled test
+worlds. Client acceptance remains pending; follow
+[`AETHER_OUTRIGGER_TEST_PLAN.md`](AETHER_OUTRIGGER_TEST_PLAN.md) and
+[`STEAMPUNK_BLIMP_TEST_PLAN.md`](STEAMPUNK_BLIMP_TEST_PLAN.md).
+
+## Current `0.3.10` checkpoint
+
+### Large prototype scale and camera correction
+
+The Outrigger's hull, bow, engines, and lift drums are twice their original
+dimensions. Its mast/sail are aft of both forward seats, and the sail begins
+above the expected eye line. The stable runtime checks `minecraft:riding`
+every five ticks and selects `minecraft:third_person` once when a player
+boards an Outrigger or Blimp. The active preset intentionally keeps third
+person for the ride. It does not affect other mounts, redundantly reapply the
+preset, or alter FOV. Camera activation and clear calls retry safely with
+deduplicated warnings; a successful dismount clear restores normal perspective
+selection.
 
 ### Ambient island variety
 
-New ambient IDs use planner version `a2`. Existing `a1` terrain stays where it
-was and does not consume the new caps; a valid interrupted `a1` job can still
-finish against its frozen Standard template. Solo islands select Islet,
+New ambient solo IDs use planner version `a3`. Existing `a1`/`a2` terrain stays
+where it was and does not consume the new solo cap; valid interrupted legacy
+jobs still finish against frozen templates. Solo islands select Islet,
 Standard, Crag, or Landmark templates across deterministic Deep, Low, Mid,
 High, and Crown altitude bands.
+
+The active field uses ten Fibonacci-sized annular cohorts with a seeded golden
+angle, 2,563 candidates between radius 600 and 3,200, and eight family-only
+Voronoi hubs. Reference 512-block windows expose about 2.0–2.6× the run-2
+candidate count; runtime queries 768 blocks. The permanent cap remains 224
+until persistence is compacted or sharded.
+
+Measured usable top cells are 377, 1,009, 2,828, and 9,176. Islets and
+Standards place once, Crags use four 32×34×32 quadrants, and Landmarks use
+sixteen 30×40×30 parts. Every placement stays below 50,000 bounding cells and
+11,000 solid blocks. Run-2 burn assets remain packaged for compatibility, but
+new large solo selection does not yet provide burn-content parity.
 
 The planner exposes six widely spaced continent sites and generates at most
 two. Each continent is a 150×40×150 composition of 21 seam-safe components.
@@ -140,7 +188,7 @@ contract.
 
 ## Latest verification evidence
 
-The `0.3.8` combined working tree passed:
+The `0.3.10` combined working tree passed:
 
 ```powershell
 npm run verify
@@ -149,18 +197,29 @@ npm audit --audit-level=high
 
 Results:
 
-- 265 host tests across 45 files;
-- all 35 generated structures, formatting, TypeScript, stable bundle, BDS NBT
+- 287 host tests across 48 files;
+- all 63 generated structures, formatting, TypeScript, stable bundle, BDS NBT
   fixtures, production `.mcaddon`, and both opt-in profiles passed;
 - npm reported zero vulnerabilities;
-- 39 focused tests cover planner/runtime/structure/persistence/multipart
-  behavior, including full-footprint preflight, stale-cursor recovery,
+- 15 focused tests cover both prototype asset contracts, the doubled
+  Outrigger geometry, larger seat-camera radii, camera entry/dismount
+  transitions, retrying activation/cleanup failures, unrelated mounts, and
+  player departure;
+- 49 focused tests cover planner/runtime/structure/persistence/multipart
+  behavior, including Fibonacci density, generated-catalog synchronization,
+  useful-area scaling, full-footprint preflight, stale-cursor recovery,
   checkpointed-player-edit preservation, and structure-verified safe docks.
+
+The production package is 207,063 bytes with SHA-256
+`0de7282608be6659381d0fd8a704447a6854d35a11336d5406bd9a3181038f5e`;
+both nested pack manifests report `0.3.10`, and all 28 `a3` source structures
+are present in the Behavior Pack.
 
 The last BDS smoke, full-height void scan, and packaged-template evidence remain
 the historical `0.3.6` results in [`VALIDATION_LOG.md`](VALIDATION_LOG.md).
-They were not rerun and do not prove `0.3.8` continent placement, fire,
-rendering, reload, or performance.
+They were not rerun and do not prove `0.3.10` large solo or preserved
+continent placement, `0.3.9` prototype camera behavior, rendering, reload, or
+performance.
 
 ## What is not yet proven
 
@@ -173,9 +232,12 @@ Automation does not prove:
   that a first-time player finds the six visible ore outcrops without help;
 - save/quit/reopen, world copy, `/reload`, schema migration, or
   player-modified island protection in a real client;
-- `0.3.8` tier/altitude readability, burn behavior, continent seams,
-  interrupted multipart placement, obstruction behavior, exploration pacing,
-  or weakest-device performance;
+- `0.3.10` Fibonacci-ring naturalness, family arcs, large-tier readability,
+  usable landing/build areas, Crag/Landmark/continent seams, interrupted
+  multipart placement, obstruction behavior, exploration pacing, or
+  weakest-device performance;
+- `0.3.9` Outrigger scale/seat/collision readability or Outrigger/Blimp camera
+  transition, restoration, comfort, and device behavior;
 - multiplayer, controller, or touch behavior; or
 - the full player-built Skycraft acceptance matrix.
 
@@ -203,19 +265,20 @@ what the generator emitted.
 
 ## Recommended next slice
 
-The immediate slice should be **`0.3.8` island-variety client acceptance**, not
-more archipelago content.
+The immediate slice should be **`0.3.10` Fibonacci/large-island client
+acceptance**, not more archipelago content.
 
 1. Run `npm run world-template:install` and restart Minecraft. Double-clicking
    the `.mctemplate` does nothing on this machine: no Minecraft file extension
    is registered with Windows.
 2. In Minecraft, create a new world from **Sky Knights: Void Realm** under
    templates. Do not add the standalone `.mcaddon`; both packs are embedded.
-3. Confirm `/skyknights:debug` reports `v0.3.8` and `below=void`, then run
-   Sessions C-G of
+3. Confirm `/skyknights:debug` reports `v0.3.10` and `below=void`, then run
+   Sessions B-G of
    [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md),
-   recording family/tier/altitude variety, rare burns, one continent,
-   save/close/reopen during continent placement, occupied-volume preservation,
+   recording local density, Fibonacci-ring naturalness, family/tier/altitude
+   variety, useful landing/build space, one Crag, Landmark, and continent,
+   save/close/reopen during multipart placement, occupied-volume preservation,
    exploration pacing, and placement hitch.
 4. Keep the earlier `0.3.6` Sessions A, A2, and B as historical evidence; rerun
    them only if bootstrap, starter content, or the template changes.

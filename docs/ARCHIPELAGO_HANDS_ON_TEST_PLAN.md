@@ -1,6 +1,6 @@
 # Procedural Archipelago Hands-On Test Plan
 
-> Build under test: `0.3.8`
+> Build under test: `0.3.10`
 >
 > Automated status is not Minecraft acceptance. Record the exact commit,
 > Minecraft version, world type, device, input method, and Content Log result.
@@ -44,7 +44,7 @@ Knights Behavior Pack and its Resource Pack.
 
 Pass when:
 
-- debug reports `Sky Knights debug v0.3.8`;
+- debug reports `Sky Knights debug v0.3.10`;
 - debug reports `below=void`; stop and restart the session on a template world
   if it reports vanilla terrain;
 - starter island, Ember Outpost, and Frostspire complete automatically;
@@ -86,7 +86,8 @@ still runs short of.
 Pass when:
 
 - the ambient count increases without a developer generation command;
-- only one `a2_...` job is active at a time;
+- only one `a3_...` solo job or preserved `a2_...` continent job is active at
+  a time;
 - new islands remain outside the authored central realm;
 - no island stamps directly around a player or occupied craft;
 - entering a queued target before placement preserves the entity and skips that
@@ -97,58 +98,69 @@ Pass when:
 Record count after two minutes, longest visible hitch, and approximate client
 FPS before and during placement.
 
-## Session C — family, tier, altitude, and rare-variant variety
+## Session C — family, tier, altitude, scale, and pattern variety
 
-Visit the four broad planner quadrants across the deep, low, mid, high, and
-crown altitude bands. The exact centers vary by world seed, but the reference
-layout places family clusters roughly around:
+Visit the broad family arcs across the deep, low, mid, high, and crown altitude
+bands. Run 3 uses eight seed-rotated Voronoi hubs rather than fixed quadrants,
+so use palette changes and `/skyknights:debug` instead of expecting one family
+at one compass direction.
 
-| Quadrant               | Expected dominant family |
-| ---------------------- | ------------------------ |
-| northwest (`-X`, `-Z`) | Verdant                  |
-| northeast (`+X`, `-Z`) | Desert                   |
-| southwest (`-X`, `+Z`) | Tundra                   |
-| southeast (`+X`, `+Z`) | Volcanic                 |
+Sample at least 40 solo islands between 600 and 3,200 blocks from the origin,
+covering several arcs of the golden-angle/Fibonacci-annulus field. Visit at
+least two Islets and Standards, one Crag, and one Landmark. Then travel to one
+of the six preserved run-2 continent sites on the outer ring and let its
+complete 21-part job finish.
 
-Sample at least ten solo islands in each quadrant between about 1,200 and 2,000
-blocks from the origin. Visit at least one islet, Standard island, crag, and
-landmark. Then travel to one of the six continent sites on the outer ring and
-let its complete 21-part job finish.
+Expected run-3 scale:
+
+| Tier     | Logical size | Usable top | Placement model |
+| -------- | ------------ | ---------: | --------------- |
+| Islet    | 25×14×25     |        377 | one structure   |
+| Standard | 39×20×39     |      1,009 | one structure   |
+| Crag     | 64×34×64     |      2,828 | four parts      |
+| Landmark | 120×40×120   |      9,176 | sixteen parts   |
 
 Pass when:
 
-- each quadrant is visually dominated by its expected palette;
+- all four families form recognizable multi-island arcs rather than
+  alternating randomly at every site;
 - all four palettes are readily distinguishable at normal flight distance;
 - island origins visibly span multiple altitude bands rather than one shelf;
-- islets, Standard islands, crags, and landmarks have distinct silhouettes;
+- the golden-angle field reads as irregular clustered rings with useful flight
+  corridors rather than rigid spokes or an obvious square grid;
+- each sampled island offers a clear landing area, and at least one Standard,
+  Crag, and Landmark has enough navigable flat space for a small player base;
+- Islets, Standards, Crags, and Landmarks have distinct silhouettes and do not
+  expose open multipart seams;
 - one continent reads as a rounded, continuous landmass with no open component
   seams, contains a central massif, at least two lakes, a chasm, and a bridge,
   and does not visibly place all 21 parts in one frozen frame;
-- volcanic burn islands are rare, an ember island keeps its oaks isolated from
-  eternal netherrack fire, and a reactive pyre eventually consumes its bounded
-  grove without restamping it;
-- no continent contains a burn variant;
 - no ambient island contains a Dockmaster, progression chest, custom entity,
   Aether Core, or Relic Shard.
 
 These are visual biome families, not true Bedrock biome assignments. Weather,
 sky color, and the biome readout are not expected to change in this slice.
+Run-2 burn structures remain packaged for existing terrain and interrupted
+jobs, but run-3 large solo selection does not currently create new burn
+variants. Do not wait for one or record their absence as a failure.
 
 ## Session D — reload and duplicate safety
 
-1. While exploring new space, watch debug until an `a2_...` job is active.
+1. While exploring new space, watch debug until an `a3_...` solo job is active.
 2. Close the world during or immediately after visible placement.
 3. Reopen the same world.
 4. Return to that island and run debug.
 5. Repeat the close/reopen after at least 25 ambient islands exist.
-6. At a continent site, close once during the 21-part placement and reopen.
+6. Close once during a four-part Crag or sixteen-part Landmark placement and
+   reopen. At a continent site, close once during its 21-part placement and
+   reopen.
 
 Pass when:
 
 - the active job completes or safely retries;
 - the island is not duplicated, shifted, or partially overlaid;
-- the continent resumes after its persisted part cursor and finishes without
-  erasing or rejecting the components already placed;
+- each multipart island resumes after its persisted part cursor and finishes
+  without erasing or rejecting components already placed;
 - the ambient count never decreases or double-increments for one ID;
 - no ticking area named `skyknights_generation_*` remains stuck;
 - dynamic property bytes remain below the configured world-document limit.
@@ -210,24 +222,26 @@ Record:
 - save size before and after;
 - dynamic-property byte count;
 - memory or disconnect symptoms;
-- multiplayer observations if a second player explores another quadrant.
+- multiplayer observations if a second player explores another family arc.
 
-Pass when generation remains responsive, restart-safe, and below the 224-solo
-and two-continent lifetime caps. Reaching either cap is not required for the
-first hands-on pass.
+Pass when generation remains responsive, restart-safe, and below the 224-`a3`
+solo and two-`a2`-continent lifetime caps. Reaching either cap is not required
+for the first hands-on pass. Record whether nearby terrain feels about two to
+three times as available as the earlier run-2 field without looking crowded or
+causing persistent placement backlog.
 
 ## Acceptance record
 
-| Session                        | Result | Evidence/notes |
-| ------------------------------ | ------ | -------------- |
-| A — bootstrap/world type       | [ ]    |                |
-| A2 — starter resource route    | [ ]    |                |
-| B — lazy generation            | [ ]    |                |
+| Session                          | Result | Evidence/notes |
+| -------------------------------- | ------ | -------------- |
+| A — bootstrap/world type         | [ ]    |                |
+| A2 — starter resource route      | [ ]    |                |
+| B — lazy generation              | [ ]    |                |
 | C — family/tier/altitude variety | [ ]    |                |
-| D — reload safety              | [ ]    |                |
-| E — occupied volume            | [ ]    |                |
-| F — normal world compatibility | [ ]    |                |
-| G — performance/cap            | [ ]    |                |
+| D — reload safety                | [ ]    |                |
+| E — occupied volume              | [ ]    |                |
+| F — normal world compatibility   | [ ]    |                |
+| G — performance/cap              | [ ]    |                |
 
 The slice is ready for broader play only when Sessions A–F pass on a fresh void
 world and the Content Log is clean. Session G supplies the measurements needed

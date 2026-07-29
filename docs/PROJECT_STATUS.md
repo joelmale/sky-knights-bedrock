@@ -2,7 +2,7 @@
 
 > Last updated: 2026-07-28
 >
-> Current playtest version: `0.3.8`
+> Current playtest version: `0.3.10`
 >
 > Stable API baseline: Minecraft Bedrock 1.26.30+, `@minecraft/server` 2.8.0,
 > `@minecraft/server-ui` 2.1.0
@@ -11,16 +11,22 @@
 > realm stabilization, the bounded player-built Skycraft prototype, and the
 > `0.3.4` clustered procedural-template archipelago, the `0.3.5` visible
 > starter-stone correction, the automated fixed-seed void-world template
-> pipeline, the `0.3.6` reachable 2.5x starter resource budget, and the `0.3.8`
-> varied procedural archipelago are integrated. Repository evidence is green;
-> Minecraft altitude, continent, fire, reload, multiplayer, migration,
+> pipeline, the `0.3.6` reachable 2.5x starter resource budget, the `0.3.7`
+> dock-destruction response, a summon-only Aether Outrigger art/handling
+> prototype, the `0.3.8` varied procedural archipelago, a separate summon-only
+> four-seat Steampunk Blimp art/animation/handling prototype, and the `0.3.9`
+> large-prototype scale/camera accessibility correction, plus the `0.3.10`
+> Fibonacci-annulus and useful-area ambient-island correction are integrated.
+> Repository evidence is green; Minecraft altitude, continent, fire, entity
+> rendering, seating, camera, flight, reload, multiplayer, migration,
 > performance, and device gates remain.
 >
 > Archipelago hands-on Sessions A, A2, and B passed on a `0.3.6` void-template
-> world. The `0.3.8` variety changes have not been exercised in Minecraft;
-> Sessions C-G, the Phase 3 migration matrix, Skycraft acceptance, and the
-> device/multiplayer matrix remain. One open defect: the Dockmaster is not
-> handled when its dock deck is destroyed.
+> world. The `0.3.8` variety and `0.3.10` scale/distribution changes have not
+> been exercised in Minecraft;
+> Sessions B-G, the Phase 3 migration matrix, Skycraft acceptance, and the
+> device/multiplayer matrix remain. The Dockmaster hostile transformation and
+> both the Aether Outrigger and Steampunk Blimp remain hands-on gates.
 
 This is the authoritative implementation tracker. The roadmap describes the
 target product; this document records what the repository currently delivers.
@@ -64,8 +70,8 @@ not require them.
 
 | Content type       | Implemented                                                                                               |
 | ------------------ | --------------------------------------------------------------------------------------------------------- |
-| Authored islands   | 8 progression templates plus 26 ambient solo, variant, and component templates                            |
-| Custom entities    | Dockmaster, starter skiff, Skycutter, Ashwing Raider, Skycraft flight proxy                                |
+| Authored islands   | 8 progression templates plus 26 frozen run-2 and 28 active run-3 ambient source templates                 |
+| Custom entities    | Dockmaster, starter skiff, Skycutter, Aether Outrigger, Steampunk Blimp, Ashwing Raider, Skycraft proxy   |
 | Custom items       | 20 legacy/progression items plus 18 placeable Skycraft block-items                                        |
 | Custom recipes     | 30                                                                                                        |
 | Ship frames        | Starter skiff, Skycutter, eight editable Skycraft reference fixtures                                      |
@@ -74,8 +80,8 @@ not require them.
 | Advanced modules   | Armored Hull, Frostfire Engine, Expanded Cargo Hold, Aether Cannon, Shield Projector                      |
 | Encounters         | Ember Guardian, Frostspire Warden, Ashwing Raider                                                         |
 | GameTests          | 4 registered; 1 executed by the opt-in BDS smoke harness                                                  |
-| Host tests         | See the current `0.3.8` verification snapshot below                                                       |
-| Developer commands | `debug`, `skiff`, `skycutter`, `island`, `raider`, `recover`, test bench, objective                        |
+| Host tests         | See the current `0.3.10` verification snapshot below                                                      |
+| Developer commands | `debug`, `skiff`, `skycutter`, `outrigger`, `blimp`, `island`, `raider`, `recover`, test bench, objective |
 
 ## Systems implemented
 
@@ -103,19 +109,29 @@ not require them.
 - Authored `.mcstructure` placement through a resumable generation queue.
 - Four-family deterministic registry with three permanently pinned islands and
   five seeded island placements.
-- Bounded ambient planner with more than 850 possible solo locations, four
-  clustered visual families, four size tiers, five altitude bands, a
-  460-block authored-realm exclusion, and a 224-solo persistence/performance
-  cap.
+- Active `a3` planner with 2,563 Fibonacci-cohort/golden-angle candidates from
+  radius 600–3,200, eight family hubs, four size tiers, five altitude bands,
+  complete-footprint 460-block authored-realm exclusion, and a 224-solo
+  persistence/performance cap.
+- Reference 512-block windows contain approximately 2.0–2.6× the frozen `a2`
+  candidate density. Runtime queries 768 blocks so the inner cohort can prepare
+  from the central realm.
+- Run-3 solo tiers provide 9.15–11.09× their prior usable top area. Islets and
+  Standards are single structures; Crags use four bounded parts and Landmarks
+  sixteen. Every unique placement remains below 50,000 bounding cells and
+  11,000 solid blocks.
 - Six sparse continent sites, each composed from 21 seam-safe parts; at most
   two generate in one world.
-- Lazy nearby placement uses `a2` planner IDs, per-island observer clearance,
-  occupied-volume protection, and one persisted job at a time. Multipart jobs
-  checkpoint every part and load only one continent row at once.
-- Rare mutually exclusive volcanic ember and bounded reactive-pyre variants;
-  continents never evaluate burn gates.
-- Existing `a1` terrain remains untouched and outside the new caps. A valid
-  in-flight `a1` job can still finish against its original Standard template.
+- Lazy nearby solo placement uses compact `a3_<base36>` IDs, per-island
+  observer clearance, occupied-volume protection, and one persisted job at a
+  time. Multipart jobs checkpoint every part and load only one row at once.
+- Existing `a1` and `a2` terrain remains untouched and outside the `a3` solo
+  cap. Valid in-flight legacy jobs still finish against their original
+  templates. The six `a2` continent sites remain active and reserve their
+  complete footprint against run-3 solos.
+- Run-2 rare volcanic ember and bounded reactive-pyre structures remain
+  packaged for compatibility. New run-3 large solo selection does not yet have
+  burn-content parity and this is tracked as partial rather than implied.
 - Persisted world profile, layout seed, layout version, origins, reserved
   bounds, and sticky player-modified protection.
 - Island activation remains explicit; all eight current structures are
@@ -154,6 +170,15 @@ Current implementation:
 
 - Native entity-based three-dimensional flight.
 - Two-seat starter skiff and four-seat Skycutter.
+- Summon-only two-seat Aether Outrigger and four-seat Steampunk Blimp visual
+  prototypes, kept outside owned-ship persistence and progression.
+- A mount-scoped stable-camera assist selects the built-in third-person view when
+  boarding either large prototype. Outrigger and Blimp seat radii are 12 and
+  16 blocks respectively. The preset remains active for the ride; normal
+  perspective selection is restored on dismount, and FOV is untouched.
+  Throwable camera activation and clear calls retry with deduplicated warnings.
+- The Outrigger's primary geometry is doubled from its original imported
+  model, with the mast/sail moved aft and above the forward helm sightline.
 - Owner pilot arbitration with passenger/gunner support.
 - Persistent module blueprints and entity-load restoration.
 - Starter-craft range boundary and long-range engine modules.
@@ -193,7 +218,7 @@ not implementation evidence.
 
 ## Verification snapshot
 
-The current `0.3.8` combined working tree has passed:
+The current `0.3.10` combined working tree has passed:
 
 ```text
 npm run verify
@@ -202,18 +227,23 @@ npm audit --audit-level=high
 
 Results:
 
-- non-mutating generated-structure verification: passed;
+- non-mutating verification of all 63 generated structures: passed;
 - formatting/lint: passed;
 - TypeScript/stable bundle: passed;
-- host tests: 265 passed across 45 files;
+- host tests: 287 passed across 48 files;
 - BDS NBT fixture tests: passed;
 - production `.mcaddon`: built;
 - experimental profile: built;
 - GameTest profile: built;
 - npm vulnerabilities: 0;
 
+The production `sky_knights.mcaddon` is 207,063 bytes with SHA-256
+`0de7282608be6659381d0fd8a704447a6854d35a11336d5406bd9a3181038f5e`.
+Both nested packs report `0.3.10`, and archive inspection confirms the prior
+prototype assets plus all 28 run-3 ambient structures.
+
 The latest external-server and void-template evidence remains the earlier
-`0.3.6` gate; those commands were not rerun for `0.3.8`:
+`0.3.6` gate; those commands were not rerun for `0.3.10`:
 
 - opt-in BDS `1.26.34.3` smoke: passed — both packs loaded without
   content errors and the named skiff-seat test passed. This smoke does not
@@ -235,32 +265,41 @@ guards. The remaining Minecraft validation is explicitly tracked below.
 
 ## Open validation gates
 
-| Gate                                                                 | Status               | Test source                                                                                                                    |
-| -------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `0.3.1` Phase 3 fresh bootstrap/schema-4 migration and layout safety | Pending              | [`PHASE_3_STABILIZATION_TEST_PLAN.md`](PHASE_3_STABILIZATION_TEST_PLAN.md); visible-but-queued starter failure requires retest |
-| Phase 3 player-modified terrain protection                           | Pending              | Phase 3 stabilization plan, Session D                                                                                          |
-| Phase 3 structure-only activation isolation                          | Pending              | Phase 3 stabilization plan, Session E                                                                                          |
-| BDS `SimulatedPlayer` interaction/mounting smoke                     | Pending              | [`BDS_GAME_TEST_HARNESS.md`](BDS_GAME_TEST_HARNESS.md); current runner executes one component-only GameTest                    |
-| `0.2.0` fresh Survival progression                                   | Pending              | [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md)                                                     |
-| `0.1.0` → `0.2.0` world migration                                    | Pending              | Dockyard test plan, Session A                                                                                                  |
-| All refit effects and visuals                                        | Pending              | Dockyard test plan, Sessions D–E                                                                                               |
-| Cannon negative cases and Raider battle                              | Pending              | Dockyard test plan, Sessions F–G                                                                                               |
-| Core delivery and Shield Projector                                   | Pending              | Dockyard test plan, Session H                                                                                                  |
-| Reload/recovery matrix                                               | Pending              | Dockyard test plan, Session I                                                                                                  |
-| Two-player owner/gunner/refit behavior                               | Pending              | Dockyard test plan, Session J                                                                                                  |
-| Controller and touch                                                 | Pending              | Dockyard test plan, Session K                                                                                                  |
-| Clean-client `.mcaddon` import                                       | Pending              | [`HANDS_ON_TEST_PLAN.md`](HANDS_ON_TEST_PLAN.md)                                                                               |
-| World-template import                                                | Pending              | Hands-on plan, Session 11                                                                                                      |
-| Opt-in custom dimension                                              | Pending/non-blocking | Hands-on plan, Session 10                                                                                                      |
-| `0.3.3` starter resource visibility and Apprentice recovery          | Pending              | [`SKYCRAFT_HANDS_ON_TEST_PLAN.md`](SKYCRAFT_HANDS_ON_TEST_PLAN.md), Sessions A–D                                               |
-| `0.3.3` reference/personal-blueprint material accounting             | Pending              | Skycraft plan, Session E                                                                                                       |
-| `0.3.4` void presentation and lazy generation                        | Passed 2026-07-27    | Archipelago plan, Sessions A and B                                                                                             |
-| `0.3.6` reachable starter resource route to the first ship           | Passed 2026-07-27    | Archipelago plan, Sessions A and A2                                                                                            |
-| `0.3.8` tier/altitude/burn/continent variety and performance         | Pending              | Archipelago plan, Sessions C-G; earlier `0.3.6` Session B passed                                                               |
-| Advanced proxy/cap/device profile                                    | Pending/gated        | Skycraft plan, Sessions F and J; normal activation remains disabled                                                            |
-| Skycraft damage/repair/combat and multiplayer permissions            | Pending              | Skycraft plan, Sessions G–H                                                                                                    |
-| Skycraft progression and legacy coexistence                          | Pending              | Skycraft plan, Session I                                                                                                       |
-| Player-built physical cargo                                          | Not activated        | Requires a future no-duplication transaction and restart/destruction matrix                                                    |
+| Gate                                                                 | Status               | Test source                                                                                                                         |
+| -------------------------------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `0.3.1` Phase 3 fresh bootstrap/schema-4 migration and layout safety | Pending              | [`PHASE_3_STABILIZATION_TEST_PLAN.md`](PHASE_3_STABILIZATION_TEST_PLAN.md); visible-but-queued starter failure requires retest      |
+| Phase 3 player-modified terrain protection                           | Pending              | Phase 3 stabilization plan, Session D                                                                                               |
+| Phase 3 structure-only activation isolation                          | Pending              | Phase 3 stabilization plan, Session E                                                                                               |
+| BDS `SimulatedPlayer` interaction/mounting smoke                     | Pending              | [`BDS_GAME_TEST_HARNESS.md`](BDS_GAME_TEST_HARNESS.md); current runner executes one component-only GameTest                         |
+| `0.2.0` fresh Survival progression                                   | Pending              | [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md)                                                          |
+| `0.1.0` → `0.2.0` world migration                                    | Pending              | Dockyard test plan, Session A                                                                                                       |
+| All refit effects and visuals                                        | Pending              | Dockyard test plan, Sessions D–E                                                                                                    |
+| Cannon negative cases and Raider battle                              | Pending              | Dockyard test plan, Sessions F–G                                                                                                    |
+| Core delivery and Shield Projector                                   | Pending              | Dockyard test plan, Session H                                                                                                       |
+| Reload/recovery matrix                                               | Pending              | Dockyard test plan, Session I                                                                                                       |
+| Two-player owner/gunner/refit behavior                               | Pending              | Dockyard test plan, Session J                                                                                                       |
+| Controller and touch                                                 | Pending              | Dockyard test plan, Session K                                                                                                       |
+| Clean-client `.mcaddon` import                                       | Pending              | [`HANDS_ON_TEST_PLAN.md`](HANDS_ON_TEST_PLAN.md)                                                                                    |
+| World-template import                                                | Pending              | Hands-on plan, Session 11                                                                                                           |
+| Opt-in custom dimension                                              | Pending/non-blocking | Hands-on plan, Session 10                                                                                                           |
+| `0.3.3` starter resource visibility and Apprentice recovery          | Pending              | [`SKYCRAFT_HANDS_ON_TEST_PLAN.md`](SKYCRAFT_HANDS_ON_TEST_PLAN.md), Sessions A–D                                                    |
+| `0.3.3` reference/personal-blueprint material accounting             | Pending              | Skycraft plan, Session E                                                                                                            |
+| `0.3.4` void presentation and lazy generation                        | Passed 2026-07-27    | Archipelago plan, Sessions A and B                                                                                                  |
+| `0.3.6` reachable starter resource route to the first ship           | Passed 2026-07-27    | Archipelago plan, Sessions A and A2                                                                                                 |
+| `0.3.8` tier/altitude/burn/continent variety and performance         | Pending              | Archipelago plan, Sessions C-G; earlier `0.3.6` Session B passed                                                                    |
+| `0.3.9` Outrigger scale and large-prototype camera behavior          | Pending              | [`AETHER_OUTRIGGER_TEST_PLAN.md`](AETHER_OUTRIGGER_TEST_PLAN.md) and [`STEAMPUNK_BLIMP_TEST_PLAN.md`](STEAMPUNK_BLIMP_TEST_PLAN.md) |
+| `0.3.10` Fibonacci distribution, large usable tops, multipart seams, and performance | Pending | [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md), Sessions B-G |
+| Advanced proxy/cap/device profile                                    | Pending/gated        | Skycraft plan, Sessions F and J; normal activation remains disabled                                                                 |
+| Skycraft damage/repair/combat and multiplayer permissions            | Pending              | Skycraft plan, Sessions G–H                                                                                                         |
+| Skycraft progression and legacy coexistence                          | Pending              | Skycraft plan, Session I                                                                                                            |
+| Player-built physical cargo                                          | Not activated        | Requires a future no-duplication transaction and restart/destruction matrix                                                         |
+
+Use the ordered
+[`CONSOLIDATED_HANDS_ON_ACCEPTANCE_PLAN.md`](CONSOLIDATED_HANDS_ON_ACCEPTANCE_PLAN.md)
+to execute and report these gates against the current build. Historical
+version labels identify the feature or migration under test; they do not
+require reinstalling every old add-on version. Migration rows still require a
+trustworthy backed-up old-world fixture.
 
 ## Known scope boundaries
 
@@ -288,11 +327,13 @@ guards. The remaining Minecraft validation is explicitly tracked below.
 
 ## Next recommended work
 
-1. Build and import the `0.3.8` `sky_knights_void_world.mctemplate`, confirm
-   `/skyknights:debug` reports `below=void`, and execute procedural archipelago
-   Sessions C-G with explicit altitude, burn, continent, interruption, and
-   weakest-device measurements. Earlier `0.3.6` Sessions A, A2, and B remain
-   useful evidence but do not validate the new variety planner.
+1. Build and import the `0.3.10` `sky_knights_void_world.mctemplate`, confirm
+   `/skyknights:debug` reports `v0.3.10` and `below=void`, and execute
+   procedural archipelago Sessions B-G with explicit density, Fibonacci-ring
+   naturalness, family arcs, useful landing/build area, Crag/Landmark seams,
+   continent interruption, and weakest-device measurements. Earlier `0.3.6`
+   Sessions A, A2, and B remain historical evidence but do not validate the
+   run-3 planner.
 2. Execute and record the Phase 3 stabilization plan on a fresh world and a
    backed-up schema-4 world copy.
 3. Run the Skycraft BDS pack-load/reconstruction/restart matrix and add one
@@ -313,27 +354,30 @@ guards. The remaining Minecraft validation is explicitly tracked below.
 
 ## Documentation map
 
-| Document                                                                   | Purpose                                                            |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| [`CHANGELOG.md`](../CHANGELOG.md)                                          | Version-by-version implementation history                          |
-| [`PROJECT_STATUS.md`](PROJECT_STATUS.md)                                   | Current authoritative implementation and remaining work            |
-| [`VALIDATION_LOG.md`](VALIDATION_LOG.md)                                   | Automated and hands-on evidence ledger                             |
-| [`DECISIONS.md`](DECISIONS.md)                                             | Accepted architecture decisions                                    |
-| [`MULTI_AGENT_WORKFLOW.md`](MULTI_AGENT_WORKFLOW.md)                       | Vendor-neutral central/specialist/QA workflow                      |
-| [`BDS_GAME_TEST_HARNESS.md`](BDS_GAME_TEST_HARNESS.md)                     | Opt-in server smoke setup, ownership, evidence, and limits         |
-| [`AI_HANDOFF.md`](AI_HANDOFF.md)                                           | Current checkpoint, takeover commands, and recommended next slice  |
-| [`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md)         | Player-built airframes, lift/engine tech, blueprints, and gates    |
-| [`SKYCRAFT_IMPLEMENTATION_STATUS.md`](SKYCRAFT_IMPLEMENTATION_STATUS.md)   | Exact integrated, gated, and pending Skycraft capability map       |
-| [`SKYCRAFT_HANDS_ON_TEST_PLAN.md`](SKYCRAFT_HANDS_ON_TEST_PLAN.md)         | Skycraft Minecraft, multiplayer, input, migration, and device plan |
-| [`PROCEDURAL_ARCHIPELAGO.md`](PROCEDURAL_ARCHIPELAGO.md)                   | Bounded clustered island-generation architecture                   |
-| [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md)   | Void-world, clustering, reload, safety, and performance plan       |
-| [`BEDROCK_ADDON_ROADMAP.md`](../BEDROCK_ADDON_ROADMAP.md)                  | Product target and phased roadmap                                  |
-| [`DEVELOPMENT_ENVIRONMENT.md`](DEVELOPMENT_ENVIRONMENT.md)                 | Tooling, deployment, audit, and debugging                          |
-| [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md) | Current `0.2.0` acceptance plan                                    |
-| [`PHASE_3_STABILIZATION_TEST_PLAN.md`](PHASE_3_STABILIZATION_TEST_PLAN.md) | Schema-5, layout, activation, and migration acceptance             |
-| [`CRYSTAL_TO_CUTTER_TEST_PLAN.md`](CRYSTAL_TO_CUTTER_TEST_PLAN.md)         | Base Skycutter progression regression                              |
-| [`PHASE_2_PLAYTEST.md`](PHASE_2_PLAYTEST.md)                               | Short starter-island/skiff regression                              |
-| [`HANDS_ON_TEST_PLAN.md`](HANDS_ON_TEST_PLAN.md)                           | Broad platform, input, multiplayer, profile, and packaging matrix  |
+| Document                                                                               | Purpose                                                              |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [`CHANGELOG.md`](../CHANGELOG.md)                                                      | Version-by-version implementation history                            |
+| [`PROJECT_STATUS.md`](PROJECT_STATUS.md)                                               | Current authoritative implementation and remaining work              |
+| [`CONSOLIDATED_HANDS_ON_ACCEPTANCE_PLAN.md`](CONSOLIDATED_HANDS_ON_ACCEPTANCE_PLAN.md) | Ordered checklist and reporting format for all open validation gates |
+| [`VALIDATION_LOG.md`](VALIDATION_LOG.md)                                               | Automated and hands-on evidence ledger                               |
+| [`DECISIONS.md`](DECISIONS.md)                                                         | Accepted architecture decisions                                      |
+| [`MULTI_AGENT_WORKFLOW.md`](MULTI_AGENT_WORKFLOW.md)                                   | Vendor-neutral central/specialist/QA workflow                        |
+| [`BDS_GAME_TEST_HARNESS.md`](BDS_GAME_TEST_HARNESS.md)                                 | Opt-in server smoke setup, ownership, evidence, and limits           |
+| [`AETHER_OUTRIGGER_TEST_PLAN.md`](AETHER_OUTRIGGER_TEST_PLAN.md)                       | Outrigger rendering, seats, handling, reload, and acceptance gates   |
+| [`STEAMPUNK_BLIMP_TEST_PLAN.md`](STEAMPUNK_BLIMP_TEST_PLAN.md)                         | Blimp art, animation, seats, flight, reload, and acceptance gates    |
+| [`AI_HANDOFF.md`](AI_HANDOFF.md)                                                       | Current checkpoint, takeover commands, and recommended next slice    |
+| [`SKYCRAFT_TECHNOLOGY_ROADMAP.md`](SKYCRAFT_TECHNOLOGY_ROADMAP.md)                     | Player-built airframes, lift/engine tech, blueprints, and gates      |
+| [`SKYCRAFT_IMPLEMENTATION_STATUS.md`](SKYCRAFT_IMPLEMENTATION_STATUS.md)               | Exact integrated, gated, and pending Skycraft capability map         |
+| [`SKYCRAFT_HANDS_ON_TEST_PLAN.md`](SKYCRAFT_HANDS_ON_TEST_PLAN.md)                     | Skycraft Minecraft, multiplayer, input, migration, and device plan   |
+| [`PROCEDURAL_ARCHIPELAGO.md`](PROCEDURAL_ARCHIPELAGO.md)                               | Bounded clustered island-generation architecture                     |
+| [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md)               | Void-world, clustering, reload, safety, and performance plan         |
+| [`BEDROCK_ADDON_ROADMAP.md`](../BEDROCK_ADDON_ROADMAP.md)                              | Product target and phased roadmap                                    |
+| [`DEVELOPMENT_ENVIRONMENT.md`](DEVELOPMENT_ENVIRONMENT.md)                             | Tooling, deployment, audit, and debugging                            |
+| [`DOCKYARD_REFIT_COMBAT_TEST_PLAN.md`](DOCKYARD_REFIT_COMBAT_TEST_PLAN.md)             | Current `0.2.0` acceptance plan                                      |
+| [`PHASE_3_STABILIZATION_TEST_PLAN.md`](PHASE_3_STABILIZATION_TEST_PLAN.md)             | Schema-5, layout, activation, and migration acceptance               |
+| [`CRYSTAL_TO_CUTTER_TEST_PLAN.md`](CRYSTAL_TO_CUTTER_TEST_PLAN.md)                     | Base Skycutter progression regression                                |
+| [`PHASE_2_PLAYTEST.md`](PHASE_2_PLAYTEST.md)                                           | Short starter-island/skiff regression                                |
+| [`HANDS_ON_TEST_PLAN.md`](HANDS_ON_TEST_PLAN.md)                                       | Broad platform, input, multiplayer, profile, and packaging matrix    |
 
 ## Tracker maintenance
 

@@ -131,6 +131,7 @@ See [BEDROCK_ADDON_ROADMAP.md](BEDROCK_ADDON_ROADMAP.md) for the full implementa
 - [Player-built skycraft technology roadmap](docs/SKYCRAFT_TECHNOLOGY_ROADMAP.md)
 - [Skycraft implementation and gate tracker](docs/SKYCRAFT_IMPLEMENTATION_STATUS.md)
 - [Skycraft hands-on test plan](docs/SKYCRAFT_HANDS_ON_TEST_PLAN.md)
+- [Aether Outrigger hands-on test plan](docs/AETHER_OUTRIGGER_TEST_PLAN.md)
 - [Procedural archipelago architecture](docs/PROCEDURAL_ARCHIPELAGO.md)
 - [Procedural archipelago hands-on test plan](docs/ARCHIPELAGO_HANDS_ON_TEST_PLAN.md)
 
@@ -267,6 +268,8 @@ Development commands:
 ```text
 /skyknights:skiff            Developer shortcut: spawn a test skiff
 /skyknights:skycutter        Developer shortcut: spawn a configured Skycutter
+/skyknights:outrigger        Spawn the Aether Outrigger art/handling prototype
+/skyknights:blimp            Spawn the Steampunk Blimp art/animation prototype
 /skyknights:debug            Show schema, generation, input, and entity state
 /skyknights:island           Safely resume required-island bootstrap when needed
 /skyknights:archipelago_pause
@@ -319,6 +322,11 @@ keyboard, controller, touch, reload, multiplayer, GameTest, experimental
 dimension, and world-template validation sessions. The shorter
 [docs/PHASE_0_VALIDATION.md](docs/PHASE_0_VALIDATION.md) remains the acceptance
 checklist.
+
+Entity-art prototypes have focused client test plans:
+
+- [Aether Outrigger](docs/AETHER_OUTRIGGER_TEST_PLAN.md)
+- [Steampunk Blimp](docs/STEAMPUNK_BLIMP_TEST_PLAN.md)
 
 Substantial future slices use the vendor-neutral
 [multi-agent development workflow](docs/MULTI_AGENT_WORKFLOW.md): one central

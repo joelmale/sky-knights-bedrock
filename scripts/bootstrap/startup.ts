@@ -22,6 +22,7 @@ import {
   registerDockyardInteractions,
 } from "../gameplay/dockyard";
 import { runDestinationDiscoverySweep } from "../gameplay/exploration";
+import { initializePrototypeCraftCameraAssist } from "../gameplay/prototype-craft-camera";
 import { runRecoverySweep } from "../gameplay/recovery";
 import {
   registerSkyRaiderEvents,
@@ -65,6 +66,7 @@ registerDockyardInteractions(logger.child("dockyard"));
 registerShipEvents(logger.child("ships"));
 registerSkyRaiderEvents(worldRepository, logger.child("sky-raider"));
 registerSkycraftRuntime(logger.child("skycraft"));
+initializePrototypeCraftCameraAssist(logger.child("prototype-camera"));
 registerIslandModificationTracking(
   worldRepository,
   logger.child("island-modifications"),

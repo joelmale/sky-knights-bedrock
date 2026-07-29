@@ -4,6 +4,7 @@ import { IDENTIFIERS } from "../config/constants";
 import { shippedIslandStructureIds } from "../config/islands";
 import { Logger } from "../diagnostics/logger";
 import { ARCHIPELAGO_STRUCTURE_IDS } from "../generation/archipelago";
+import { ARCHIPELAGO_V3_STRUCTURE_IDS } from "../generation/archipelago-v3";
 import { SKYCRAFT_COMPONENT_IDS, SKYCRAFT_IDS } from "../skycraft/config";
 
 export interface ValidationResult {
@@ -17,6 +18,8 @@ export function validateRegistries(logger: Logger): ValidationResult {
   const requiredEntities = [
     IDENTIFIERS.skiff,
     IDENTIFIERS.skycutter,
+    IDENTIFIERS.aetherOutrigger,
+    IDENTIFIERS.steampunkBlimp,
     IDENTIFIERS.dockmaster,
     IDENTIFIERS.skyRaider,
     SKYCRAFT_IDS.flightEntity,
@@ -26,6 +29,7 @@ export function validateRegistries(logger: Logger): ValidationResult {
   const requiredStructures = [
     ...shippedIslandStructureIds(),
     ...ARCHIPELAGO_STRUCTURE_IDS,
+    ...ARCHIPELAGO_V3_STRUCTURE_IDS,
   ];
   const requiredItems = [
     IDENTIFIERS.shipCore,

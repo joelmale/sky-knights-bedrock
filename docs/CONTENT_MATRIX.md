@@ -34,16 +34,16 @@ Ember Skiff, and Specialist Airframe. Expedition and Masterwork certifications
 remain tier 3 and add capacity/specialization rather than unlocking otherwise
 unreachable Relic sources.
 
-| Island id        | Family   | Tier | Purpose                                                                                | Guaranteed reward                             | Status |
-| ---------------- | -------- | ---: | -------------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| Island id        | Family   | Tier | Purpose                                                                                                             | Guaranteed reward                                   | Status |
+| ---------------- | -------- | ---: | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------ |
 | `starter_island` | verdant  |    0 | Home, dock, Dockmaster, 4 oak trees, 6 visible surface ore columns, 10-block stone boulder, crafting table, furnace | 2.5x the raw resources the first-skiff route spends | built  |
-| `ember_outpost`  | volcanic |    1 | First expedition, ruin, guardian                                                       | 1 Aether Crystal, 24 iron, 8 redstone         | built  |
-| `frostspire`     | tundra   |    2 | Range-gated raid, warden                                                               | 16 Froststeel, 2 diamond                      | built  |
-| `sunspire_reach` | desert   |    1 | Seeded structure and guaranteed Balloonwright metal cache; custom goblins remain later | 16 gold ingot, 8 copper                       | built  |
-| `verdant_hollow` | verdant  |    1 | Seeded structure and guaranteed wood/Canvas cache; passive fauna remain later          | 1 Repair Kit, saplings, Canvas Bundles        | built  |
-| `glacier_vault`  | tundra   |    3 | Seeded watchtower and guaranteed Frostwright/relic cache; custom Yeti remains later    | 4 diamond, 1 Relic Shard                      | built  |
-| `ashfall_crater` | volcanic |    3 | Seeded shrine and guaranteed relic cache; custom Demon remains later                   | 2 Aether Crystal, 1 Relic Shard               | built  |
-| `aether_sanctum` | desert   |    3 | Seeded arena and guaranteed completion cache; custom Giant remains later               | 1 Aether Core                                 | built  |
+| `ember_outpost`  | volcanic |    1 | First expedition, ruin, guardian                                                                                    | 1 Aether Crystal, 24 iron, 8 redstone               | built  |
+| `frostspire`     | tundra   |    2 | Range-gated raid, warden                                                                                            | 16 Froststeel, 2 diamond                            | built  |
+| `sunspire_reach` | desert   |    1 | Seeded structure and guaranteed Balloonwright metal cache; custom goblins remain later                              | 16 gold ingot, 8 copper                             | built  |
+| `verdant_hollow` | verdant  |    1 | Seeded structure and guaranteed wood/Canvas cache; passive fauna remain later                                       | 1 Repair Kit, saplings, Canvas Bundles              | built  |
+| `glacier_vault`  | tundra   |    3 | Seeded watchtower and guaranteed Frostwright/relic cache; custom Yeti remains later                                 | 4 diamond, 1 Relic Shard                            | built  |
+| `ashfall_crater` | volcanic |    3 | Seeded shrine and guaranteed relic cache; custom Demon remains later                                                | 2 Aether Crystal, 1 Relic Shard                     | built  |
+| `aether_sanctum` | desert   |    3 | Seeded arena and guaranteed completion cache; custom Giant remains later                                            | 1 Aether Core                                       | built  |
 
 Layout rule: the three released islands retain their pinned coordinates; seeded
 island centers come from the deterministic layout registry. Travel lanes
@@ -79,17 +79,18 @@ share enemy health or loot families.
 
 ## Structures
 
-| Structure             | Contents                                                                                              | Placement                      | Status  |
-| --------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------ | ------- |
-| Starter dock/workshop | dock, Dockmaster, launch berths, crafting table, furnace                                              | starter_island                 | built   |
-| Small ruin            | loot chest, guardian                                                                                  | ember_outpost                  | built   |
-| Frost tower           | loot chest, warden                                                                                    | frostspire                     | built   |
-| Wood hut              | geometry built; tier-1 chest content inactive                                                         | sunspire_reach, verdant_hollow | partial |
-| Watchtower            | geometry built; encounter and chest content inactive                                                  | glacier_vault                  | partial |
-| Biome shrine          | geometry built; relic and ambient content inactive                                                    | ashfall_crater                 | partial |
-| Boss arena            | geometry built; Giant and completion objective inactive                                               | aether_sanctum                 | partial |
-| Ambient solo islands  | islet, Standard, crag, landmark, and rare volcanic burn variants without progression loot or entities | bounded procedural archipelago | built   |
-| Continent kit         | six seam-safe component roles plus dual-purpose `duo_mesa`; 21 parts per continent                    | six sparse planner sites       | built   |
+| Structure                  | Contents                                                                                                                                                | Placement                          | Status  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------- |
+| Starter dock/workshop      | dock, Dockmaster, launch berths, crafting table, furnace                                                                                                | starter_island                     | built   |
+| Small ruin                 | loot chest, guardian                                                                                                                                    | ember_outpost                      | built   |
+| Frost tower                | loot chest, warden                                                                                                                                      | frostspire                         | built   |
+| Wood hut                   | geometry built; tier-1 chest content inactive                                                                                                           | sunspire_reach, verdant_hollow     | partial |
+| Watchtower                 | geometry built; encounter and chest content inactive                                                                                                    | glacier_vault                      | partial |
+| Biome shrine               | geometry built; relic and ambient content inactive                                                                                                      | ashfall_crater                     | partial |
+| Boss arena                 | geometry built; Giant and completion objective inactive                                                                                                 | aether_sanctum                     | partial |
+| Large ambient solo islands | 9.15–11.09× usable-area Islet, Standard, Crag, and Landmark family templates without progression loot or entities                                       | `a3` Fibonacci-annulus archipelago | built   |
+| Legacy ambient variants    | run-2 small tiers and rare volcanic burn variants retained for existing terrain and interrupted jobs; large burn-content parity is not selected by `a3` | frozen `a1`/`a2` compatibility     | partial |
+| Continent kit              | six seam-safe component roles plus dual-purpose `duo_mesa`; 21 parts per continent                                                                      | six sparse planner sites           | built   |
 
 ## Skycraft construction and technology
 
@@ -98,21 +99,23 @@ program is now an integrated prototype. Automated contracts are present, while
 representation, device-performance, BDS, and hands-on acceptance gates remain
 open; those rows therefore stay `partial`.
 
-| Capability                        | Progression/source                                     | Status  |
-| --------------------------------- | ------------------------------------------------------ | ------- |
-| Legacy Skiff and Skycutter        | Starter, Ember, and Frostspire path                    | built   |
-| Bounded owned dock berth          | Starter Dockmaster/Ship Core                           | partial |
-| Helm-centered connected wood scan | Apprentice Raft certification                          | partial |
-| Canonical block blueprint         | Dock validation and persistence                        | partial |
-| Mass, lift, thrust, and control   | Apprentice engineering rules                           | partial |
-| Downward/aft engine orientation   | Starter and Ember propulsion                           | partial |
-| Dockmaster reference blueprints   | Eight gated plans and exact construction orders        | partial |
-| Player-saved personal blueprints  | Owner library, revision checks, exact materialization  | partial |
-| Ember custom cutter               | Aether Crystal, iron, and redstone                     | partial |
-| Balloonwright/dirigible branch    | Sunspire gold/copper and Verdant renewable fabric/wood | partial |
-| Frostwright compact-lift branch   | Frostspire Froststeel and diamond                      | partial |
-| Expedition certification          | Glacier/Ashfall Relic Shards                           | partial |
-| Masterwork skycraft               | Aether Sanctum Aether Core                             | partial |
+| Capability                        | Progression/source                                      | Status  |
+| --------------------------------- | ------------------------------------------------------- | ------- |
+| Legacy Skiff and Skycutter        | Starter, Ember, and Frostspire path                     | built   |
+| Aether Outrigger prototype        | Summon-only visual, seating, and handling test craft    | partial |
+| Steampunk Blimp prototype         | Summon-only art, animation, and four-seat handling test | partial |
+| Bounded owned dock berth          | Starter Dockmaster/Ship Core                            | partial |
+| Helm-centered connected wood scan | Apprentice Raft certification                           | partial |
+| Canonical block blueprint         | Dock validation and persistence                         | partial |
+| Mass, lift, thrust, and control   | Apprentice engineering rules                            | partial |
+| Downward/aft engine orientation   | Starter and Ember propulsion                            | partial |
+| Dockmaster reference blueprints   | Eight gated plans and exact construction orders         | partial |
+| Player-saved personal blueprints  | Owner library, revision checks, exact materialization   | partial |
+| Ember custom cutter               | Aether Crystal, iron, and redstone                      | partial |
+| Balloonwright/dirigible branch    | Sunspire gold/copper and Verdant renewable fabric/wood  | partial |
+| Frostwright compact-lift branch   | Frostspire Froststeel and diamond                       | partial |
+| Expedition certification          | Glacier/Ashfall Relic Shards                            | partial |
+| Masterwork skycraft               | Aether Sanctum Aether Core                              | partial |
 
 Reference designs, provisional certification caps, component families, and
 validation gates are defined in
@@ -157,18 +160,18 @@ refilled per player.
 Closure test asserts every `Guaranteed = yes` item is reachable from a fresh
 world holding nothing.
 
-| Tier           | Source                                  | Unlocks                                    |
-| -------------- | --------------------------------------- | ------------------------------------------ |
-| Wood           | starter_island's two oak trees (8 logs) | starter tools, canvas bundles, dock repair |
-| Stone          | starter island's exposed 5-block boulder and core | stone pickaxe, basic ship parts   |
-| Coal           | starter_island's 8 exposed coal ore     | smelting fuel, Ship Core, Thruster Module  |
-| Iron           | starter_island's 12 exposed iron ore    | Ship Core, Thruster Module, skiff          |
-| Gold/copper    | sunspire_reach                          | stronger weapons and Balloonwright systems |
-| Aether crystal | ember_outpost                           | Skycutter                                  |
-| Froststeel     | frostspire                              | refit modules and compact-lift engineering |
-| Diamond        | glacier_vault, ashfall_crater           | final tools, relic access                  |
-| Relic shard ×2 | glacier_vault, ashfall_crater           | aether_sanctum access                      |
-| Aether core    | aether_sanctum boss                     | completion objective                       |
+| Tier           | Source                                            | Unlocks                                    |
+| -------------- | ------------------------------------------------- | ------------------------------------------ |
+| Wood           | starter_island's two oak trees (8 logs)           | starter tools, canvas bundles, dock repair |
+| Stone          | starter island's exposed 5-block boulder and core | stone pickaxe, basic ship parts            |
+| Coal           | starter_island's 8 exposed coal ore               | smelting fuel, Ship Core, Thruster Module  |
+| Iron           | starter_island's 12 exposed iron ore              | Ship Core, Thruster Module, skiff          |
+| Gold/copper    | sunspire_reach                                    | stronger weapons and Balloonwright systems |
+| Aether crystal | ember_outpost                                     | Skycutter                                  |
+| Froststeel     | frostspire                                        | refit modules and compact-lift engineering |
+| Diamond        | glacier_vault, ashfall_crater                     | final tools, relic access                  |
+| Relic shard ×2 | glacier_vault, ashfall_crater                     | aether_sanctum access                      |
+| Aether core    | aether_sanctum boss                               | completion objective                       |
 
 ### Custom-skycraft capability mapping
 

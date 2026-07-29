@@ -7,6 +7,8 @@ import {
 export const IDENTIFIERS = {
   skiff: "skyknights:skiff",
   skycutter: "skyknights:skycutter",
+  aetherOutrigger: "skyknights:aether_outrigger",
+  steampunkBlimp: "skyknights:steampunk_blimp",
   dockmaster: "skyknights:dockmaster",
   // Keep legacy consumers aligned with the authoritative island registry.
   starterIsland: ISLAND_STRUCTURE_IDS.starter_island,
@@ -37,7 +39,7 @@ export const IDENTIFIERS = {
   airshipFlight: "skyknights:airship_flight",
 } as const;
 
-export const ADDON_VERSION = "0.3.8";
+export const ADDON_VERSION = "0.3.10";
 
 function pinnedIsland(id: string): {
   definition: IslandDefinition;

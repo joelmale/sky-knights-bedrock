@@ -4,10 +4,89 @@ This file records shipped playtest builds and notable repository milestones.
 Validation evidence and pending hands-on gates are maintained in
 [`docs/VALIDATION_LOG.md`](docs/VALIDATION_LOG.md).
 
+## [0.3.10] — 2026-07-28
+
+### Added
+
+- Added the migration-safe `a3` ambient planner: 2,563 deterministic sites are
+  organized into Fibonacci-sized annular cohorts and phased by the golden
+  angle. Integer square root and fixed-point CORDIC keep placement independent
+  from wall-clock time, random streams, and platform trigonometry.
+- Added 28 reusable family-specific structure sources for large ambient
+  islands. Islets and Standards place once; Crags use four resumable quadrants;
+  Landmarks use sixteen rotated corner, edge, and inner parts.
+- Added measured structure contracts for usable top area, part bounds, solid
+  blocks, safe docks, integrity probes, complete multipart reconstruction, and
+  a 30 KB migrated-world persistence projection.
+
+### Changed
+
+- Increased reference-window ambient candidate density to approximately
+  2.0–2.6 times the `a2` planner while shifting preferred tier weights to 15%
+  Islet, 55% Standard, 25% Crag, and 5% Landmark.
+- Increased usable top area by 9.15–11.09 times per solo tier. The new logical
+  footprints are 25×14×25, 39×20×39, 64×34×64, and 120×40×120.
+- Increased the lazy observation window from 512 to 768 blocks so the
+  600-block inner annulus can begin generating while players remain near the
+  authored realm.
+- Kept the 224-solo lifetime cap pending a compact/sharded persistence
+  migration and measured Bedrock performance. The density increase affects
+  nearby choices, not unbounded save growth.
+- Preserved `a1` and `a2` identifiers, structure bytes, generated terrain, and
+  interrupted-job recovery. New solo generation uses compact `a3_<base36>`
+  identifiers; the existing six `a2` continent sites remain active under their
+  separate two-continent cap.
+- Bumped the add-on, stable packs, world template, and GameTest profile to
+  `0.3.10`.
+
+### Validation
+
+- Host contracts cover deterministic Fibonacci placement, candidate density,
+  family clustering, 3D clearance, exact generated geometry, multipart
+  reconstruction, bounded placement calls, runtime dispatch, legacy
+  compatibility, caps, persistence, and restart-safe Landmark placement.
+- Fresh void-world pacing, visual ring naturalness, landing/build usefulness,
+  multipart hitch behavior, reload, multiplayer exploration, and weakest-device
+  performance remain Minecraft hands-on gates.
+
+## [0.3.9] — 2026-07-28
+
+### Changed
+
+- Doubled the Aether Outrigger hull, bow, engines, and lift-pod geometry. Its
+  mast and sail now sit aft of the forward seats, and the sail begins above the
+  seated eye line instead of occupying the helm camera.
+- Moved both Outrigger seats onto the forward deck, expanded its collision
+  contract for the larger model, removed the forced top-center dismount, and
+  increased its third-person camera radius from 6 to 12 blocks.
+- Increased every Steampunk Blimp seat's third-person camera radius from 9 to
+  16 blocks.
+- Added a stable Script API camera assist for the two large summon-only
+  prototypes. Boarding activates the built-in third-person view for the ride;
+  dismount restores normal perspective control, unrelated mounts are
+  unaffected, and player FOV is never overridden. Throwable camera activation
+  and cleanup calls retry without repeated warning spam, so a transient clear
+  failure cannot permanently strand the player in the scripted view.
+
+### Validation
+
+- Focused model, rideable, transition, and regression contracts plus the full
+  repository, package, dependency-audit, and independent QA evidence are
+  recorded in `docs/VALIDATION_LOG.md`.
+- Camera restoration, seat placement, collision feel, scale readability, and
+  all input/device behavior remain Minecraft hands-on gates.
+
 ## [0.3.8] — 2026-07-28
 
 ### Added
 
+- Added the separate summon-only Steampunk Blimp prototype with a large ribbed
+  canvas envelope, suspended wooden gondola, twin Aether engines, four seats,
+  slow heavy-airship handling, and continuously counter-rotating propellers.
+  The external 256×256 texture, editable Blockbench source, deterministic asset
+  generators, startup validation, `/skyknights:blimp` command, focused
+  contracts, and hands-on plan remain isolated from progression and owned
+  Skycraft persistence.
 - Added the approved ambient island variety library:
   - four cheap 11×8×9 islets;
   - four byte-stable 15×10×13 Standard islands;
@@ -87,6 +166,14 @@ Validation evidence and pending hands-on gates are maintained in
 
 ### Added
 
+- Added the summon-only two-seat Aether Outrigger visual/handling prototype.
+  Its tracked Blockbench source, 256×256 embedded texture, pack geometry,
+  client binding, stable flight behavior, startup registry contract, and
+  `/skyknights:outrigger` test command are isolated from owned-ship persistence
+  and progression.
+- Remodeled the Outrigger around its reference silhouette: compact aft cyan
+  lift drums with paired hull struts, an upright broad sail, readable mast
+  yards, and named stern-engine parts.
 - Destroying the dock deck beneath the Dockmaster now has consequences, gated
   so it cannot trap a new player:
   - before the player's first ship, the deck plank is rebuilt, because the
@@ -108,6 +195,10 @@ Validation evidence and pending hands-on gates are maintained in
 
 ### Validation
 
+- The Aether Outrigger asset/content tests and combined `npm run verify` passed
+  with 241 tests across 42 files; `npm audit --audit-level=high` reported zero
+  vulnerabilities. Rendering, UV appearance, seat placement, flight handling,
+  multiplayer, and reload remain Minecraft hands-on gates.
 - `npm run verify` passed with 238 tests across 41 files.
 - `npm audit --audit-level=high` reported zero vulnerabilities.
 - The dock-deck decision table is exhaustively unit-tested, including a

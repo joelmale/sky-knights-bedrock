@@ -1,7 +1,7 @@
 # Procedural Archipelago Architecture
 
-> Status: island-variety run 2 integrated in `0.3.8` source; Minecraft
-> acceptance pending.
+> Status: Fibonacci/large-island run 3 integrated in `0.3.10` source;
+> Minecraft acceptance pending.
 
 ## Decision
 
@@ -17,10 +17,72 @@ This preserves the useful part of Bedrock feature generation—small authored
 templates repeated into a large field—while adding the progression, migration,
 and recovery guarantees the project needs.
 
-## Current implementation
+## Active run-3 implementation
 
-The stable pack contains a deterministic 26-template ambient library grouped by
-role:
+New ambient solo generation uses `scripts/generation/archipelago-v3.ts`.
+It exposes 2,563 deterministic candidate sites from radius 600 through 3,200.
+The sites are divided into Fibonacci-sized annular cohorts:
+
+```text
+13, 21, 34, 55, 89, 144, 233, 377, 610, 987
+```
+
+Within those cohorts, an area-uniform radius and seeded golden-angle phase
+produce a natural spiral/ring field. Integer square root and fixed-point CORDIC
+avoid `Math.random()`, wall-clock state, and platform trigonometry. Eight
+family-only Voronoi hubs assign two broad regions each to Verdant, Desert,
+Tundra, and Volcanic without changing physical sites.
+
+The active tier contract is:
+
+| Tier     | Logical size | Preferred roll | Usable top | Scale vs run 2 | Placement               |
+| -------- | ------------ | -------------: | ---------: | -------------: | ----------------------- |
+| Islet    | 25×14×25     |            15% |        377 |         10.77× | one whole structure     |
+| Standard | 39×20×39     |            55% |      1,009 |         11.09× | one whole structure     |
+| Crag     | 64×34×64     |            25% |      2,828 |          9.15× | four 32×34×32 quadrants |
+| Landmark | 120×40×120   |             5% |      9,176 |         10.18× | sixteen 30×40×30 parts  |
+
+“Scale” measures flat usable top cells, not rectangular bounds or linear
+dimensions. Every unique structure placement stays within Bedrock's 64-block
+horizontal authoring limit, the project's 50,000-cell scan budget, and the
+11,000-solid-block placement ceiling. Large tiers use the same persisted
+multipart cursor, complete preflight, row loading, integrity verification, and
+five-tick placement spacing as continents.
+
+Reference 512-block observation windows contain approximately 2.0–2.6 times as
+many solo candidates as run 2. Runtime uses a 768-block query so sites in the
+600-block inner annulus can start preparing while a player remains near the
+authored realm. Exact footprint-plus-altitude checks keep accepted candidates
+separate and can deterministically downgrade a conflicting site. Complete
+island edges remain outside the authored 460-block protected radius.
+
+The permanent limit remains 224 run-3 solo outcomes. Increasing nearby choice
+does not increase permanent state without bound: a 448-solo migrated-world
+projection exceeds the current 30 KB dynamic-property contract. A later cap
+increase requires compact/sharded persistence and in-engine performance
+evidence.
+
+Run-3 IDs use `a3_<base36 index>`. Existing `a1` and `a2` terrain remains
+untouched and outside this cap. Valid interrupted jobs still rederive against
+their original plan. The six run-2 continent sites stay active under their
+separate two-continent cap, and their full footprints are reserved against new
+run-3 candidates.
+
+The 28 new source structures use four family palettes and seven reusable roles:
+
+- `a3_islet_<family>_whole`;
+- `a3_standard_<family>_whole`;
+- `a3_crag_<family>_quadrant`;
+- `a3_landmark_<family>_{outer_corner,outer_left,outer_right,inner}`.
+
+Their generators and measured catalog live in
+`tools/structures/archipelago_v3_shared.mjs`. All use structure void outside
+the body, so empty template cells do not erase existing blocks.
+
+## Preserved run-2 implementation
+
+The stable pack also retains the deterministic 26-template run-2 library
+grouped by role:
 
 | Role         | Contents                                                                                 |
 | ------------ | ---------------------------------------------------------------------------------------- |
@@ -46,7 +108,7 @@ first component's persisted origin.
 | Landmark  | 39×30×35   |        4% | One large feature-rich structure               |
 | Continent | 150×40×150 |  separate | Twenty-one resumable parts on six sparse sites |
 
-The planner in `scripts/generation/archipelago.ts` provides:
+The frozen run-2 planner in `scripts/generation/archipelago.ts` provides:
 
 - a 57×57 bounded planning envelope, roughly 5,376 blocks across;
 - more than 850 possible solo islands for the reference seed;
@@ -67,8 +129,9 @@ The planner in `scripts/generation/archipelago.ts` provides:
 
 The `a1` identifier prefix remains permanently paired with the original flat
 planner. Existing `a1` terrain and generated IDs stay intact but become inert:
-the new planner neither relocates nor restamps them. Run 2 uses `a2`, and a
-future selection change that reinterprets coordinates must use another prefix.
+later planners neither relocate nor restamp them. Run 2 uses `a2`; its solo
+terrain is now also inert while its continent sites remain active. Run 3 uses
+`a3`, so no released coordinate/identifier contract is reinterpreted.
 
 Altitude is deterministic integer math. Each solo tier chooses from a weighted
 subset of deep, low, mid, high, and crown bands, then applies a small
@@ -87,28 +150,29 @@ After the starter island, Ember Outpost, and Frostspire are ready, a sweep runs
 every 40 ticks:
 
 1. collect players in the configured archipelago dimension;
-2. find the nearest ungenerated planned island within 512 horizontal blocks;
+2. find the nearest ungenerated run-3 solo within 768 horizontal blocks or
+   run-2 continent within its frozen 512-block window;
 3. reject candidates inside that island's per-tier observer clearance;
 4. persist one generation job;
-5. load the complete solo target, or preflight every remaining continent part
+5. load a single-part target, or preflight every remaining multipart target
    one row at a time;
-6. refuse to stamp any continent part if a later remaining part is already
-   occupied, so no partial continent is created;
+6. refuse to stamp any multipart island if a later remaining part is already
+   occupied, so no partial Crag, Landmark, or continent is created;
 7. recheck each loaded target for players, craft, blocks, or other entities
    immediately before placement and preserve/skip that candidate if one is
    present;
-8. place the resolved solo structure, or resume the continent at its persisted
-   part cursor with five ticks between parts;
+8. place the resolved single structure, or resume the multipart island at its
+   persisted part cursor with five ticks between parts;
 9. verify the solo probes, or each newly handled part while its row remains
    loaded without retry-gating earlier checkpointed player edits;
 10. checkpoint and mark the island generated.
 
 Only one global generation job runs at a time. A crash after placement but
-before the checkpoint accepts an intact structure without restamping it. A
-continent persists its next-part cursor after every component, so a restart
-recognizes a valid placement made just before a missed cursor save and never
-treats a partial continent as finished. A player or vanilla block found in any
-ungenerated target volume causes that location to be recorded as skipped,
+before the checkpoint accepts an intact structure without restamping it. Every
+multipart island persists its next-part cursor after each component, so a
+restart recognizes a valid placement made just before a missed cursor save and
+never treats a partial island as finished. A player or vanilla block found in
+any ungenerated target volume causes that location to be recorded as skipped,
 preserving the existing blocks.
 
 The stable target is currently `minecraft:overworld` so the add-on remains

@@ -8,6 +8,7 @@ import {
   parsePlayerState,
   parseShipState,
 } from "./schema";
+import { compactWorldDocument, expandWorldDocument } from "./compact";
 
 type DynamicPropertyValue =
   boolean | number | string | { x: number; y: number; z: number } | undefined;
@@ -65,15 +66,21 @@ export class WorldStateRepository {
 
   public load(): WorldState {
     const state = migrateWorldState(
-      readJson(this.host, PROPERTY_KEYS.world),
+      expandWorldDocument(readJson(this.host, PROPERTY_KEYS.world)),
       this.createSeed,
     );
-    writeJsonIfChanged(this.host, PROPERTY_KEYS.world, state);
+    writeJsonIfChanged(
+      this.host,
+      PROPERTY_KEYS.world,
+      compactWorldDocument(state),
+    );
     return state;
   }
 
   public save(state: WorldState): void {
-    writeJson(this.host, PROPERTY_KEYS.world, state);
+    // Compaction happens only here, at the serialisation boundary. WorldState
+    // keeps its string[] shape in memory so no consumer has to know about it.
+    writeJson(this.host, PROPERTY_KEYS.world, compactWorldDocument(state));
   }
 
   public update(mutator: (state: WorldState) => WorldState): WorldState {

@@ -14,6 +14,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { island as aetherSanctum } from "./structures/aether_sanctum.mjs";
+import { A3_AMBIENT_STRUCTURE_MODULES } from "./structures/archipelago_v3_shared.mjs";
 import { island as ambientDesert } from "./structures/ambient_desert.mjs";
 import { island as ambientTundra } from "./structures/ambient_tundra.mjs";
 import { island as ambientVerdant } from "./structures/ambient_verdant.mjs";
@@ -53,6 +54,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const checkOnly = process.argv.includes("--check");
 
 const ISLAND_MODULES = [
+  ...A3_AMBIENT_STRUCTURE_MODULES,
   aetherSanctum,
   ambientDesert,
   ambientTundra,

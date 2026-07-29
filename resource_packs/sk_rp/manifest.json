@@ -4,7 +4,7 @@
     "name": "Sky Knights Resource Pack",
     "description": "Development resources for Sky Knights: Bedrock.",
     "uuid": "83d16786-1603-4b13-b4d1-4c555fb37865",
-    "version": [0, 3, 8],
+    "version": [0, 3, 10],
     "min_engine_version": [1, 26, 30]
   },
   "modules": [
@@ -12,7 +12,7 @@
       "description": "Sky Knights client resources",
       "type": "resources",
       "uuid": "1e99d67d-081d-4970-b047-2cb6f0b6be52",
-      "version": [0, 3, 8]
+      "version": [0, 3, 10]
     }
   ]
 }

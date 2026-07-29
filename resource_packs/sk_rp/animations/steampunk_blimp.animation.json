@@ -1,0 +1,17 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.skyknights.steampunk_blimp.propellers": {
+      "loop": true,
+      "animation_length": 1,
+      "bones": {
+        "propeller_left": {
+          "rotation": [0, 0, "query.anim_time * 720.0"]
+        },
+        "propeller_right": {
+          "rotation": [0, 0, "query.anim_time * -720.0"]
+        }
+      }
+    }
+  }
+}

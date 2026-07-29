@@ -100,6 +100,57 @@ export const TIER_GEOMETRY = Object.freeze({
 });
 
 /**
+ * Additive run-3 geometry. These values describe complete logical islands;
+ * structures larger than one part are sliced by `archipelago_v3_shared.mjs`.
+ *
+ * "10x" is intentionally measured as usable top surface, not as a 10x linear
+ * scale (which would produce 1000x the blocks). Square footprints allow each
+ * multipart role to be reused through Bedrock's four structure rotations.
+ * Nothing in the run-1/run-2 contracts above reads these values, so their
+ * shipped structure bytes and identifiers remain frozen.
+ */
+export const A3_AMBIENT_SOLID_BLOCK_CEILING = 11_000;
+export const A3_AMBIENT_PART_BOX_CEILING = 50_000;
+export const A3_TIER_GEOMETRY = Object.freeze({
+  islet: Object.freeze({
+    size: Object.freeze([25, 14, 25]),
+    topY: 6,
+    topRadius: 11,
+    grid: 1,
+    partSize: 25,
+    clearanceRadius: 25,
+    heightRadius: 14,
+  }),
+  standard: Object.freeze({
+    size: Object.freeze([39, 20, 39]),
+    topY: 10,
+    topRadius: 18,
+    grid: 1,
+    partSize: 39,
+    clearanceRadius: 34,
+    heightRadius: 17,
+  }),
+  crag: Object.freeze({
+    size: Object.freeze([64, 34, 64]),
+    topY: 18,
+    topRadius: 30,
+    grid: 2,
+    partSize: 32,
+    clearanceRadius: 53,
+    heightRadius: 24,
+  }),
+  landmark: Object.freeze({
+    size: Object.freeze([120, 40, 120]),
+    topY: 19,
+    topRadius: 54,
+    grid: 4,
+    partSize: 30,
+    clearanceRadius: 92,
+    heightRadius: 27,
+  }),
+});
+
+/**
  * Per-family palettes shared by every solo tier. `air` is always the LAST
  * entry, so a module that adds a carve never shifts an existing constant.
  */

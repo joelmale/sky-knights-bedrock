@@ -13,8 +13,16 @@ import {
   STARTER_ISLAND,
 } from "../config/constants";
 import { ensureRequiredIslandsQueued } from "../generation/service";
-import { ARCHIPELAGO_CONFIG } from "../generation/archipelago";
 import {
+  ARCHIPELAGO_CONFIG,
+  parseArchipelagoIslandId,
+} from "../generation/archipelago";
+import {
+  ARCHIPELAGO_V3_CONFIG,
+  parseArchipelagoV3IslandId,
+} from "../generation/archipelago-v3";
+import {
+  ARCHIPELAGO_LAYOUT_VERSION,
   isArchipelagoIslandId,
   nextArchipelagoGenerationJob,
 } from "../generation/archipelago-runtime";
@@ -219,6 +227,85 @@ export function registerDevelopmentCommands(
 
   registry.registerCommand(
     {
+      name: "skyknights:outrigger",
+      description: "Developer shortcut: spawn the Aether Outrigger prototype.",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: true,
+    },
+    (origin) => {
+      const player = commandPlayer(origin.sourceEntity);
+
+      if (player === undefined) {
+        return {
+          status: CustomCommandStatus.Failure,
+          message: "Run this command as a player.",
+        };
+      }
+
+      system.run(() => {
+        const craft = player.dimension.spawnEntity(
+          IDENTIFIERS.aetherOutrigger,
+          getSkiffSpawnLocation(player.location, player.getViewDirection()),
+          { initialPersistence: true },
+        );
+        craft.nameTag = "Aether Outrigger Prototype";
+        logger.info("Aether Outrigger prototype spawned.", {
+          playerId: player.id,
+          entityId: craft.id,
+          dimensionId: craft.dimension.id,
+        });
+      });
+      return {
+        status: CustomCommandStatus.Success,
+        message: "Spawning the Aether Outrigger prototype.",
+      };
+    },
+  );
+
+  registry.registerCommand(
+    {
+      name: "skyknights:blimp",
+      description: "Developer shortcut: spawn the Steampunk Blimp prototype.",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: true,
+    },
+    (origin) => {
+      const player = commandPlayer(origin.sourceEntity);
+
+      if (player === undefined) {
+        return {
+          status: CustomCommandStatus.Failure,
+          message: "Run this command as a player.",
+        };
+      }
+
+      system.run(() => {
+        const direction = player.getViewDirection();
+        const craft = player.dimension.spawnEntity(
+          IDENTIFIERS.steampunkBlimp,
+          {
+            x: player.location.x + direction.x * 9,
+            y: player.location.y + 2,
+            z: player.location.z + direction.z * 9,
+          },
+          { initialPersistence: true },
+        );
+        craft.nameTag = "Steampunk Blimp Prototype";
+        logger.info("Steampunk Blimp prototype spawned.", {
+          playerId: player.id,
+          entityId: craft.id,
+          dimensionId: craft.dimension.id,
+        });
+      });
+      return {
+        status: CustomCommandStatus.Success,
+        message: "Spawning the Steampunk Blimp prototype.",
+      };
+    },
+  );
+
+  registry.registerCommand(
+    {
       name: "skyknights:testbench",
       description:
         "Developer shortcut: place a labelled row of stocked barrels on the starter island.",
@@ -394,6 +481,12 @@ function sendDebugReport(
   const skycutterCount = player.dimension.getEntities({
     type: IDENTIFIERS.skycutter,
   }).length;
+  const outriggerCount = player.dimension.getEntities({
+    type: IDENTIFIERS.aetherOutrigger,
+  }).length;
+  const blimpCount = player.dimension.getEntities({
+    type: IDENTIFIERS.steampunkBlimp,
+  }).length;
   const raiderCount = player.dimension.getEntities({
     type: IDENTIFIERS.skyRaider,
   }).length;
@@ -416,8 +509,39 @@ function sendDebugReport(
   const ambientIslandIds = state.generatedIslandIds.filter((id) =>
     isArchipelagoIslandId(state, id),
   );
+  const v3AmbientIslands = [];
+  const v2AmbientIslands = [];
+
+  for (const id of ambientIslandIds) {
+    const v3Island = parseArchipelagoV3IslandId(state.worldSeed, id);
+
+    if (v3Island !== undefined) {
+      v3AmbientIslands.push(v3Island);
+      continue;
+    }
+
+    const v2Island = parseArchipelagoIslandId(
+      state.worldSeed,
+      ARCHIPELAGO_LAYOUT_VERSION,
+      id,
+    );
+
+    if (v2Island !== undefined) {
+      v2AmbientIslands.push(v2Island);
+    }
+  }
+  const soloAmbientCount = v3AmbientIslands.length;
+  const archivedA2Count = v2AmbientIslands.filter(
+    (island) => island.tier !== "continent",
+  ).length;
+  const continentCount = v2AmbientIslands.filter(
+    (island) => island.tier === "continent",
+  ).length;
+  const archivedA1Count = state.generatedIslandIds.filter((id) =>
+    id.startsWith("a1_"),
+  ).length;
   const authoredIslandIds = state.generatedIslandIds.filter(
-    (id) => !isArchipelagoIslandId(state, id),
+    (id) => !isArchipelagoIslandId(state, id) && !id.startsWith("a1_"),
   );
   const nextAmbient = nextArchipelagoGenerationJob(state, [
     {
@@ -440,7 +564,7 @@ function sendDebugReport(
     }`,
   );
   player.sendMessage(
-    `archipelago=${ambientIslandIds.length}/${ARCHIPELAGO_CONFIG.maxGeneratedIslands} paused=${isArchipelagoGenerationPaused()} next=${
+    `archipelago=${soloAmbientCount}/${ARCHIPELAGO_V3_CONFIG.maxGeneratedIslands} continents=${continentCount}/${ARCHIPELAGO_CONFIG.maxGeneratedContinents} archivedA2=${archivedA2Count} archivedA1=${archivedA1Count} paused=${isArchipelagoGenerationPaused()} next=${
       nextAmbient === undefined
         ? "none"
         : `${nextAmbient.id}@${nextAmbient.origin.x},${nextAmbient.origin.y},${nextAmbient.origin.z}`
@@ -449,7 +573,7 @@ function sendDebugReport(
   const islandVersions: string[] = [];
 
   for (const id in state.islandVersions) {
-    if (!isArchipelagoIslandId(state, id)) {
+    if (!isArchipelagoIslandId(state, id) && !id.startsWith("a1_")) {
       islandVersions.push(`${id}:v${state.islandVersions[id]}`);
     }
   }
@@ -466,7 +590,7 @@ function sendDebugReport(
     );
   }
   player.sendMessage(
-    `skiffsHere=${skiffCount} skycuttersHere=${skycutterCount} raidersHere=${raiderCount} dockmastersHere=${dockmasterCount}`,
+    `skiffsHere=${skiffCount} skycuttersHere=${skycutterCount} outriggersHere=${outriggerCount} blimpsHere=${blimpCount} raidersHere=${raiderCount} dockmastersHere=${dockmasterCount}`,
   );
   player.sendMessage(
     `raiderEncounter=${state.skyRaiderEncounter.status}:${state.skyRaiderEncounter.entityId ?? "none"}`,

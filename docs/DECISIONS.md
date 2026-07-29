@@ -406,3 +406,80 @@ variation does not consume flight range. These choices, the planner weights,
 component layout, and hands-on gates are specified in
 [`design/archipelago_variety_spec.json`](design/archipelago_variety_spec.json)
 and [`ARCHIPELAGO_HANDS_ON_TEST_PLAN.md`](ARCHIPELAGO_HANDS_ON_TEST_PLAN.md).
+
+## ADR-019 — Mount-scoped camera assist for large prototype craft
+
+Status: accepted for the `0.3.9` summon-only prototype slice; Minecraft
+acceptance remains pending.
+
+Bedrock's rideable seat contract can set the third-person camera radius, but it
+does not force a player's perspective. The stable Script API therefore selects
+the built-in `minecraft:third_person` preset once when a player transitions
+onto the Aether Outrigger or Steampunk Blimp. An active Bedrock camera preset
+locks its perspective, so third person intentionally remains active for the
+mounted interval even though the runtime does not redundantly reapply it.
+Dismounting or changing to another mount clears the scripted camera, restores
+the player's selected normal perspective and perspective input, and permits a
+fresh assist on the next mount. FOV is never changed, and the Skiff,
+Skycutter, owned Skycraft, and unrelated mounts are outside this behavior.
+Because the stable camera calls can throw, activation and cleanup remain
+explicit retry states. Warnings are deduplicated per transition, but a failed
+clear is never treated as successful or forgotten.
+
+The Outrigger uses geometry as the primary sightline correction: its main
+design is doubled, both seats move to the forward deck, and the mast/sail move
+aft with the sail's lower edge above seated eye height. The Outrigger and Blimp
+use 12- and 16-block third-person seat radii respectively. Client testing must
+still prove transition timing, mounted perspective locking, dismount
+restoration, camera collision, motion comfort, normal perspective-input
+restoration, and input/device behavior.
+
+## ADR-020 — Fibonacci-annulus `a3` planner and useful-area scaling
+
+Status: accepted for the `0.3.10` ambient-density and scale slice; Minecraft
+acceptance remains pending.
+
+“Ten times larger” is defined as approximately ten times usable top area, not
+ten times every linear dimension. A literal linear scale would create one
+hundred times the footprint and one thousand times the volume, exceed
+Bedrock's 64-block horizontal Structure Block limit, violate the project's
+top-Y contract, and make the requested density physically impossible.
+Progression islands and the existing 150×40×150 continents therefore remain
+unchanged. The new scale applies only to ambient solo tiers.
+
+Run 3 uses compact `a3_<base36 index>` identifiers. It distributes 2,563
+candidate sites from radius 600 through 3,200 in Fibonacci-sized annular
+cohorts of 13, 21, 34, 55, 89, 144, 233, 377, 610, and 987 sites. A seeded
+golden-angle phase produces a natural spiral/annulus field rather than rigid
+concentric spokes. Radius selection is area-uniform; direction uses fixed-point
+CORDIC; neither placement nor selection uses wall-clock time, shared random
+streams, or floating-point trigonometry.
+
+The active preferred tier weights are 15% Islet, 55% Standard, 25% Crag, and
+5% Landmark. Exact 3D overlap checks may deterministically fall back to a
+smaller tier or another legal altitude. Eight family-only Voronoi hubs assign
+Verdant, Desert, Tundra, and Volcanic palettes without moving the sites. The
+reference 512-block windows contain 2.0–2.6 times the `a2` solo candidates,
+while the runtime query radius is 768 so the inner 600-block cohort can begin
+preparing from the central realm.
+
+Measured usable top areas are 377, 1,009, 2,828, and 9,176 cells, or
+10.77×, 11.09×, 9.15×, and 10.18× their `a2` equivalents. Islets and Standards
+remain single placements. A 64×34×64 Crag uses four 32×34×32 quadrants, and a
+120×40×120 Landmark uses sixteen reusable 30×40×30 parts. Every unique
+placement remains at or below 50,000 bounding cells and 11,000 solid blocks;
+multipart jobs retain the existing persisted cursor, row loading, preflight,
+five-tick spacing, and integrity behavior.
+
+This is a new plan, not a reinterpretation. `a1` and `a2` identifiers,
+structure bytes, terrain, and valid interrupted jobs remain supported. Old
+solo history is outside the `a3` cap. The six `a2` continent sites remain
+authoritative and retain their separate two-continent cap; the runtime reserves
+their complete footprints against `a3` candidates.
+
+The permanent solo cap remains 224. “Two to three times more” means nearby
+candidate density in this slice, not two to three times the saved history.
+Worst-case migrated state exceeds the tested 30 KB document budget before a
+448-island cap, so any cap increase requires an explicit compact/sharded
+persistence migration plus fresh-world, restart, multiplayer, and weakest
+device evidence.
