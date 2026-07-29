@@ -8,6 +8,7 @@ the code exists.
 | ---------------------------------------------------------------- | ---------------------- | --------------------------------------------------- |
 | [`archipelago_variety_spec.json`](archipelago_variety_spec.json) | Ambient island variety | Implemented in source; Minecraft acceptance pending |
 | [`CONTINENT_TERRAIN.md`](CONTINENT_TERRAIN.md)                   | Formula-generated continents | Specified; not implemented                    |
+| [`CLASS_SYSTEM.md`](CLASS_SYSTEM.md)                             | RPG class system             | Specified; not implemented                    |
 
 ## Ambient island variety
 
