@@ -42,6 +42,21 @@ const TICKING_AREA_LOAD_TIMEOUT_TICKS = 20 * 30;
 const INTEGRITY_RETRY_INTERVAL_TICKS = 5;
 const INTEGRITY_TIMEOUT_TICKS = 20 * 10;
 const CONTINENT_PART_GAP_TICKS = 5;
+/**
+ * Obstruction cells inspected before the scan yields the tick.
+ *
+ * The preflight walks a whole bounding box one getBlock at a time and only
+ * exits early on the first non-air block. In a void world - the intended
+ * substrate - nothing is ever non-air, so the early exit never fires and the
+ * full volume is always scanned: 30,420 cells for one standard island, 139,264
+ * across a four-part crag, 576,000 across a sixteen-part landmark. Run inside a
+ * single tick that is a visible freeze, and the stall is itself a likely cause
+ * of the transient placement failures the part-cursor repair recovers from.
+ *
+ * Yielding keeps the scan exact and merely spreads it. Generation is already
+ * asynchronous, so the only cost is elapsed ticks.
+ */
+const OBSTRUCTION_SCAN_BUDGET = 4096;
 const STRUCTURE_ROTATIONS: Readonly<
   Record<GenerationPart["rotation"], StructureRotation>
 > = {
@@ -228,7 +243,7 @@ async function runGeneration(
           );
           continue;
         } else {
-          const obstruction = firstStructureObstruction(
+          const obstruction = await firstStructureObstruction(
             island,
             job.origin,
             dimension,
@@ -445,7 +460,11 @@ async function runMultipartGeneration(
           }
 
           if (ambient) {
-            const obstruction = firstPartObstruction(part, island, dimension);
+            const obstruction = await firstPartObstruction(
+              part,
+              island,
+              dimension,
+            );
 
             if (obstruction !== undefined) {
               completeAmbientGenerationWithoutPlacement(
@@ -636,7 +655,7 @@ async function firstMultipartPreflightConflict(
           continue;
         }
 
-        const obstruction = firstPartObstruction(part, island, dimension);
+        const obstruction = await firstPartObstruction(part, island, dimension);
 
         if (obstruction !== undefined) {
           return { kind: "block", value: obstruction };
@@ -786,12 +805,20 @@ function sameGenerationParts(
   });
 }
 
-function firstStructureObstruction(
+async function firstStructureObstruction(
   island: IslandDefinition,
   origin: GenerationJob["origin"],
   dimension: Dimension,
-): { x: number; y: number; z: number; typeId: string } | undefined {
-  const bounds = structureBounds(origin, island.size);
+): Promise<{ x: number; y: number; z: number; typeId: string } | undefined> {
+  return scanForObstruction(structureBounds(origin, island.size), dimension);
+}
+
+/** Exact bounding-box obstruction scan that yields instead of stalling. */
+async function scanForObstruction(
+  bounds: StructureBounds,
+  dimension: Dimension,
+): Promise<{ x: number; y: number; z: number; typeId: string } | undefined> {
+  let inspected = 0;
 
   for (let x = bounds.from.x; x <= bounds.to.x; x += 1) {
     for (let y = bounds.from.y; y <= bounds.to.y; y += 1) {
@@ -804,6 +831,12 @@ function firstStructureObstruction(
 
         if (block.typeId !== "minecraft:air") {
           return { x, y, z, typeId: block.typeId };
+        }
+
+        inspected += 1;
+
+        if (inspected % OBSTRUCTION_SCAN_BUDGET === 0) {
+          await system.waitTicks(1);
         }
       }
     }
@@ -843,30 +876,12 @@ function partBounds(
   return structureBounds(part.origin, partSize(part, island));
 }
 
-function firstPartObstruction(
+async function firstPartObstruction(
   part: GenerationPart,
   island: IslandDefinition,
   dimension: Dimension,
-): { x: number; y: number; z: number; typeId: string } | undefined {
-  const bounds = partBounds(part, island);
-
-  for (let x = bounds.from.x; x <= bounds.to.x; x += 1) {
-    for (let y = bounds.from.y; y <= bounds.to.y; y += 1) {
-      for (let z = bounds.from.z; z <= bounds.to.z; z += 1) {
-        const block = dimension.getBlock({ x, y, z });
-
-        if (block === undefined) {
-          return { x, y, z, typeId: "unavailable" };
-        }
-
-        if (block.typeId !== "minecraft:air") {
-          return { x, y, z, typeId: block.typeId };
-        }
-      }
-    }
-  }
-
-  return undefined;
+): Promise<{ x: number; y: number; z: number; typeId: string } | undefined> {
+  return scanForObstruction(partBounds(part, island), dimension);
 }
 
 function firstStructureOccupant(

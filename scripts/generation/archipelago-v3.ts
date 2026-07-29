@@ -330,20 +330,21 @@ export const ARCHIPELAGO_V3_CONFIG = {
   minObserverClearanceBase: 24,
   maxQueryRadius: 768,
   /**
-   * Lifetime solo-island cap.
+   * Lifetime solo-island cap, deliberately equal to `siteCount`: the plan is
+   * the limit, and persistence no longer throttles it.
    *
-   * 224 was inherited from the a2 contract on the stated grounds that a larger
-   * count "exceeds the current 30 KB dynamic-property contract". Measurement
-   * disproves that: one island costs exactly 20 bytes, so 224 spends 4,235 of
-   * the 30,000-byte budget — 14%. It also froze a world after roughly 9% of
-   * the plan, filling a disc of about 929 blocks and then leaving empty sky.
+   * This was 224, inherited from a2 on the stated grounds that more "exceeds
+   * the current 30 KB dynamic-property contract". Measurement disproved that
+   * twice over. Islands cost 20 bytes each as strings, so 224 spent 14% of the
+   * budget while freezing a world after roughly 9% of the plan — a 929-block
+   * disc, then empty sky forever. Since the generated set is now stored as a
+   * bitset over the index space, the entire 2,563-site plan costs 761 bytes,
+   * 2.5% of the budget, and the cost no longer grows with island count.
    *
-   * 1,500 is the measured worst case against the same budget. The remaining
-   * headroom is thin, which is why `docs/design/CONTINENT_TERRAIN.md`-style
-   * compact storage is the next step: a bitset over the 2,563-site index space
-   * is 448 bytes flat and would retire this cap entirely.
+   * `archipelagoCapCoversPlan` asserts these stay equal, so a future planner
+   * change cannot silently reintroduce a throttle.
    */
-  maxGeneratedIslands: 1500,
+  maxGeneratedIslands: 2563,
   bucketSize: 256,
   absoluteMinY: 60,
   absoluteMaxTopY: 314,
@@ -782,4 +783,18 @@ export function archipelagoV3Clusters(
   worldSeed: number,
 ): readonly ArchipelagoV3Cluster[] {
   return familyClusters(worldSeed >>> 0);
+}
+
+/**
+ * True when the lifetime cap does not throttle the planned site field.
+ *
+ * The cap existed to bound persistence. Since the generated set is stored as a
+ * bitset whose size depends on the index space rather than the island count,
+ * capping below `siteCount` now only removes content for no saving. A test
+ * asserts this so a planner change cannot quietly restore the old throttle.
+ */
+export function archipelagoCapCoversPlan(): boolean {
+  return (
+    ARCHIPELAGO_V3_CONFIG.maxGeneratedIslands >= ARCHIPELAGO_V3_CONFIG.siteCount
+  );
 }
