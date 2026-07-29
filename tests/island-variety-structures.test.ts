@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { expectByteIdentical } from "./byte-equality";
+
 // @ts-expect-error Structure tooling modules are plain JavaScript.
 import { island as isletDesert } from "../tools/structures/islet_desert.mjs";
 // @ts-expect-error Structure tooling modules are plain JavaScript.
@@ -213,7 +215,11 @@ describe("archipelago variety structure contracts", () => {
         }
       }
 
-      expect(structure.build()).toEqual(structure.build());
+      expectByteIdentical(
+        structure.build(),
+        structure.build(),
+        String(structure.id),
+      );
     }
   }, 10_000);
 

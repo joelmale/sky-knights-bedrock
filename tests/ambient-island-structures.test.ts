@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { expectByteIdentical } from "./byte-equality";
+
 import { ISLAND_FAMILIES } from "../scripts/config/islands";
 import { ARCHIPELAGO_TEMPLATES } from "../scripts/generation/archipelago";
 // @ts-expect-error Structure tooling modules are plain JavaScript.
@@ -157,7 +159,7 @@ describe("ambient island structures", () => {
       expect(placedBlocks).toBeLessThanOrEqual(512);
       expect(island.palette.length).toBeLessThanOrEqual(8);
       expect(island.build().byteLength).toBeLessThanOrEqual(20_000);
-      expect(island.build()).toEqual(island.build());
+      expectByteIdentical(island.build(), island.build(), String(island.id));
     }
   });
 
