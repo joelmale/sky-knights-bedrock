@@ -104,8 +104,30 @@ const LAKE_DEPTH_RANGE = 6;
 
 export type ContinentBand = "air" | "core" | "subsurface" | "surface" | "water";
 
+/**
+ * Which constant set the field uses.
+ *
+ * `continent` is the original tuning and is never altered: its span floor, edge
+ * margin, elevation curve and base altitude are exactly what shipped and what
+ * the continent tests pin.
+ *
+ * `island` reuses the same mathematics at ambient-island scale. Three of the
+ * continent constants are absolute rather than proportional and collapse when
+ * the radius shrinks: a fixed 8-block edge margin leaves a 24-block islet only
+ * 17% land, and the `40 + (radius - 300) * 16 / 600` elevation curve makes that
+ * same islet 33 blocks tall — taller than it is wide. The island profile makes
+ * all three scale with the radius.
+ */
+export type ContinentFieldProfile = "continent" | "island";
+
+/**
+ * Span floor for the island profile. Below roughly this size the domain warp
+ * rounds to zero and the coastline degenerates back to a circle.
+ */
+export const ISLAND_MIN_SPAN = 24;
+
 export interface ContinentFieldOptions {
-  /** Footprint span in blocks, clamped to 600-1800. */
+  /** Footprint span in blocks, clamped to 600-1800 (24-1800 for islands). */
   readonly span?: number;
   /**
    * Centre selected by the owning planner. Runtime callers must supply this
@@ -114,6 +136,13 @@ export interface ContinentFieldOptions {
   readonly center?: { readonly x: number; readonly z: number };
   /** Host-tooling fallback radius when no planner-owned centre is supplied. */
   readonly ringRadius?: number;
+  /** Constant set. Omitted means `continent`, i.e. unchanged behaviour. */
+  readonly profile?: ContinentFieldProfile;
+  /**
+   * Base altitude override. Ambient islands take their altitude from the a4
+   * planner's deck assignment rather than the continent deck spread.
+   */
+  readonly baseY?: number;
 }
 
 export interface ContinentField {
@@ -357,10 +386,11 @@ export function createContinentField(
   continentIndex: number,
   options: ContinentFieldOptions = {},
 ): ContinentField {
+  const island = (options.profile ?? "continent") === "island";
   const span =
     clamp(
       Math.trunc(options.span ?? CONTINENT_DEFAULT_SPAN),
-      CONTINENT_MIN_SPAN,
+      island ? ISLAND_MIN_SPAN : CONTINENT_MIN_SPAN,
       CONTINENT_MAX_SPAN,
     ) & ~1;
   const radius = idiv(span, 2);
@@ -368,12 +398,25 @@ export function createContinentField(
   // Total warp displacement is 3/16 of the radius: enough to cut deep bays and
   // throw out peninsulas, while leaving the coastline provably inside `radius`.
   const warpAmplitude = idiv(3 * radius, 16);
-  const falloffRadius = radius - warpAmplitude - 8;
+
+  // The margin between the falloff zero and the hard radius bound. Eight blocks
+  // is negligible against a 300-block continent radius and fatal against a
+  // 12-block islet, where it would leave 17% of the footprint as land. The
+  // island profile scales it, holding land at roughly 70-75% of radius at every
+  // tier.
+  const edgeMargin = island ? Math.max(1, idiv(radius, 8)) : 8;
+  const falloffRadius = radius - warpAmplitude - edgeMargin;
   const warpShift = floorLog2(Math.max(2, idiv(radius, 2)));
 
-  // 40 blocks tall at the 600 span, rising to 56 at 1800: the design doc's
-  // "40+ blocks tall against 52-block deck spacing".
-  const amplitude = 40 + idiv((radius - 300) * 16, 600);
+  // Continent: 40 blocks tall at the 600 span, rising to 56 at 1800 — the
+  // design doc's "40+ blocks tall against 52-block deck spacing".
+  //
+  // Island: proportional, so an island is never taller than it is wide. Half
+  // the radius reproduces the retiring a3 tier heights closely (islet 6,
+  // standard 9, crag 16) while giving the landmark real vertical presence.
+  const amplitude = island
+    ? Math.max(4, idiv(radius, 2))
+    : 40 + idiv((radius - 300) * 16, 600);
   const ridgeAmplitude = idiv(amplitude * 3, 10);
 
   const centerSeed = seedOf(worldSeed, 0, "continent_ring");
@@ -389,8 +432,13 @@ export function createContinentField(
   };
 
   // Deck-aligned base elevation, spread across the usable altitude range.
+  // Ambient islands override this with the deck altitude their planner assigned,
+  // so island altitude stays owned by the a4 deck model rather than duplicated
+  // here.
   const baseY =
-    96 + ((seedOf(worldSeed, continentIndex, "base_y") >>> 8) % 25) * 4;
+    options.baseY === undefined
+      ? 96 + ((seedOf(worldSeed, continentIndex, "base_y") >>> 8) % 25) * 4
+      : coordinate(Math.trunc(options.baseY), "baseY");
 
   return {
     worldSeed: worldSeed >>> 0,
