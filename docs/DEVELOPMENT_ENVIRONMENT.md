@@ -87,18 +87,19 @@ repeatable inspection hub:
   Cargo Punt, Cloudwhale, Aether Disc, Frostwing, Surveyor, and Grand Cruiser;
 - a Skiff, fully refitted combat Skycutter, Aether Outrigger prototype, and
   Steampunk Blimp prototype at fixed starter-dock positions; and
-- a reset Ashwing Raider in a separate fixed combat lane, outside the arrival
-  safety radius but inside the staged Skycutter's cannon range.
+- a reset Ashwing Raider in the first clear height of a separate, temporarily
+  loaded combat lane, outside the arrival safety radius but inside the staged
+  Skycutter's cannon range.
 
 The entity inspection positions are:
 
-| Subject          | X    | Y   | Z     |
-| ---------------- | ---- | --- | ----- |
-| Skiff            | 24.5 | 164 | -7.5  |
-| Skycutter        | 46.5 | 164 | 8.5   |
-| Aether Outrigger | 5.5  | 170 | -18.5 |
-| Steampunk Blimp  | 5.5  | 174 | 20.5  |
-| Ashwing Raider   | 54   | 176 | 54    |
+| Subject          | X    | Y                                       | Z     |
+| ---------------- | ---- | --------------------------------------- | ----- |
+| Skiff            | 24.5 | 164                                     | -7.5  |
+| Skycutter        | 46.5 | 164                                     | 8.5   |
+| Aether Outrigger | 5.5  | 170                                     | -18.5 |
+| Steampunk Blimp  | 5.5  | 174                                     | 20.5  |
+| Ashwing Raider   | 54   | first clear: 176, 184, 192, 200, or 208 | 54    |
 
 The command reports the predictable island inspection route after setup:
 Starter Island `(3, 169, 1)`, Ember Outpost `(84, 169, 0)`, then Frostspire
@@ -112,12 +113,17 @@ behavior.
 
 Rerunning the command restocks the bench and replaces only entities carrying
 the `skyknights.dev_test_setup` ownership tag. It refuses a fleet slot
-containing a block and never stamps another island. The Raider encounter is
-intentionally reset. The staged Skiff and Skycutter retain per-entity owner
+containing a block and never stamps another island. The Raider chunk is loaded
+before inspection, and terrain at the primary Y 176 position advances the
+Raider upward through the fixed candidate list. If every candidate is blocked
+or ticking-area capacity is unavailable, the craft, bench, berths, and
+blueprints still finish, any prior setup Raider remains intact, and the command
+reports a Raider-only warning. The Raider encounter is intentionally reset when
+a replacement is staged. The Skiff and Skycutter retain per-entity owner
 controls but are marked non-primary, so setup and reruns do not replace the
-player's canonical recall/tutorial ship. This shortcut is for entity,
-movement, rendering, and system checks; never count a setup-assisted session
-as fresh progression or onboarding acceptance.
+player's canonical recall/tutorial ship. This shortcut is for entity, movement,
+rendering, and system checks; never count a setup-assisted session as fresh
+progression or onboarding acceptance.
 
 ## Optional BDS/GameTest validation
 

@@ -28,6 +28,10 @@ Validation evidence and pending hands-on gates are maintained in
 
 ### Changed
 
+- Made `/skyknights:test_setup` explicitly load its Raider lane, advance through
+  five deterministic cannon-range heights when terrain blocks the primary
+  position, and finish the rest of the inspection hub with a focused warning
+  when no Raider position is available.
 - New solo terrain uses `a4` IDs and cluster-center planning. Frozen `a3`
   terrain and valid interrupted jobs remain rederivable and are treated as
   occupied history, not relocated or restamped.

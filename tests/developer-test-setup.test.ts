@@ -10,6 +10,11 @@ const mocks = vi.hoisted(() => ({
   placeTestBench: vi.fn(),
   waitTicks: vi.fn(async () => {}),
   getDimension: vi.fn(),
+  tickingAreas: new Set<string>(),
+  hasTickingArea: vi.fn(),
+  removeTickingArea: vi.fn(),
+  hasTickingAreaCapacity: vi.fn(),
+  createTickingArea: vi.fn(),
 }));
 
 vi.mock("@minecraft/server", () => ({
@@ -21,6 +26,12 @@ vi.mock("@minecraft/server", () => ({
   },
   world: {
     getDimension: mocks.getDimension,
+    tickingAreaManager: {
+      hasTickingArea: mocks.hasTickingArea,
+      removeTickingArea: mocks.removeTickingArea,
+      hasCapacity: mocks.hasTickingAreaCapacity,
+      createTickingArea: mocks.createTickingArea,
+    },
   },
 }));
 
@@ -56,6 +67,7 @@ import { Logger } from "../scripts/diagnostics/logger";
 import { prepareDeveloperTestSetup } from "../scripts/gameplay/developer-test-setup";
 import {
   DEVELOPER_TEST_ENTITY_TAG,
+  DEVELOPER_TEST_RAIDER_TICKING_AREA,
   DEVELOPER_TEST_SETUP,
 } from "../scripts/gameplay/developer-test-setup-layout";
 import { WorldStateRepository } from "../scripts/persistence/repositories";
@@ -94,6 +106,13 @@ describe("developer test setup runtime", () => {
     teleport: ReturnType<typeof vi.fn>;
     addTag: ReturnType<typeof vi.fn>;
   };
+  let worldState: {
+    generatedIslandIds: string[];
+    skyRaiderEncounter: {
+      status: "active";
+      entityId: string;
+    };
+  };
   let repository: {
     load: ReturnType<typeof vi.fn>;
   };
@@ -125,11 +144,27 @@ describe("developer test setup runtime", () => {
       teleport: vi.fn(),
       addTag: vi.fn(),
     };
-    repository = {
-      load: vi.fn(() => ({
-        generatedIslandIds: REQUIRED_ISLANDS.map((island) => island.id),
-      })),
+    worldState = {
+      generatedIslandIds: REQUIRED_ISLANDS.map((island) => island.id),
+      skyRaiderEncounter: {
+        status: "active",
+        entityId: "old-raider",
+      },
     };
+    repository = {
+      load: vi.fn(() => worldState),
+    };
+    mocks.tickingAreas.clear();
+    mocks.hasTickingArea.mockImplementation((id: string) =>
+      mocks.tickingAreas.has(id),
+    );
+    mocks.removeTickingArea.mockImplementation((id: string) => {
+      mocks.tickingAreas.delete(id);
+    });
+    mocks.hasTickingAreaCapacity.mockReturnValue(true);
+    mocks.createTickingArea.mockImplementation(async (id: string) => {
+      mocks.tickingAreas.add(id);
+    });
     mocks.getDimension.mockReturnValue(dimension);
     mocks.prepareDeveloperSkycraftBerths.mockReturnValue({
       prepared: [
@@ -152,9 +187,13 @@ describe("developer test setup runtime", () => {
     mocks.spawnSkycutterForPlayer.mockReturnValue(
       fakeEntity("new-skycutter", IDENTIFIERS.skycutter),
     );
-    mocks.spawnSkyRaiderForPlayer.mockReturnValue(
-      fakeEntity("new-raider", IDENTIFIERS.skyRaider),
-    );
+    mocks.spawnSkyRaiderForPlayer.mockImplementation(() => {
+      const removePreviousRaider = oldEntities.find(
+        (entity) => entity.typeId === IDENTIFIERS.skyRaider,
+      )?.remove as unknown as (() => void) | undefined;
+      removePreviousRaider?.();
+      return fakeEntity("new-raider", IDENTIFIERS.skyRaider);
+    });
   });
 
   it("prepares and reports the complete fixed inspection hub", async () => {
@@ -198,7 +237,14 @@ describe("developer test setup runtime", () => {
       repository,
       expect.any(Logger),
       true,
-      DEVELOPER_TEST_SETUP.raider,
+      DEVELOPER_TEST_SETUP.raiderCandidates[0].location,
+    );
+    expect(mocks.createTickingArea).toHaveBeenCalledWith(
+      DEVELOPER_TEST_RAIDER_TICKING_AREA,
+      expect.objectContaining({ dimension }),
+    );
+    expect(mocks.removeTickingArea).toHaveBeenCalledWith(
+      DEVELOPER_TEST_RAIDER_TICKING_AREA,
     );
 
     const taggedEntities = [
@@ -223,6 +269,7 @@ describe("developer test setup runtime", () => {
       berths: { prepared: 5, skipped: [] },
       dockmasterReady: true,
       raiderReady: true,
+      raiderLocation: DEVELOPER_TEST_SETUP.raiderCandidates[0].location,
     });
     expect(report.referenceBlueprints).toHaveLength(8);
   });
@@ -268,6 +315,126 @@ describe("developer test setup runtime", () => {
     );
     expect(mocks.waitTicks).toHaveBeenCalledWith(5);
     expect(player.teleport).toHaveBeenCalled();
+  });
+
+  it("loads the Raider lane before probing it", async () => {
+    let laneLoaded = false;
+    mocks.createTickingArea.mockImplementation(async (id: string) => {
+      mocks.tickingAreas.add(id);
+      laneLoaded = true;
+    });
+    dimension.getBlock.mockImplementation(({ x, y, z }) => {
+      const isRaiderLane = x >= 52 && x <= 56 && z >= 52 && z <= 56;
+
+      if (isRaiderLane && !laneLoaded) {
+        throw new Error("chunk not loaded");
+      }
+
+      return {
+        isAir: true,
+        typeId: "minecraft:air",
+      };
+    });
+
+    const report = await prepareDeveloperTestSetup(
+      player as unknown as Player,
+      repository as unknown as WorldStateRepository,
+      new Logger("test", () => {}),
+    );
+
+    expect(report.raiderReady).toBe(true);
+    expect(mocks.createTickingArea).toHaveBeenCalledOnce();
+    expect(mocks.spawnSkyRaiderForPlayer).toHaveBeenCalledOnce();
+  });
+
+  it("uses the next deterministic Raider height when terrain blocks the primary lane", async () => {
+    dimension.getBlock.mockImplementation(({ x, y, z }) => {
+      const blocksPrimaryRaiderLane =
+        x >= 52 && x <= 56 && y >= 176 && y <= 179 && z >= 52 && z <= 56;
+
+      return {
+        isAir: !blocksPrimaryRaiderLane,
+        typeId: blocksPrimaryRaiderLane ? "minecraft:stone" : "minecraft:air",
+      };
+    });
+
+    const report = await prepareDeveloperTestSetup(
+      player as unknown as Player,
+      repository as unknown as WorldStateRepository,
+      new Logger("test", () => {}),
+    );
+
+    expect(mocks.spawnSkyRaiderForPlayer).toHaveBeenCalledWith(
+      player,
+      repository,
+      expect.any(Logger),
+      true,
+      DEVELOPER_TEST_SETUP.raiderCandidates[1].location,
+    );
+    expect(report).toMatchObject({
+      raiderReady: true,
+      raiderLocation: DEVELOPER_TEST_SETUP.raiderCandidates[1].location,
+    });
+  });
+
+  it("completes the craft setup when every Raider height is blocked", async () => {
+    const previousEncounter = worldState.skyRaiderEncounter;
+    dimension.getBlock.mockImplementation(({ x, y, z }) => {
+      const blocksRaiderLane =
+        x >= 52 && x <= 56 && y >= 176 && z >= 52 && z <= 56;
+
+      return {
+        isAir: !blocksRaiderLane,
+        typeId: blocksRaiderLane ? "minecraft:stone" : "minecraft:air",
+      };
+    });
+
+    const report = await prepareDeveloperTestSetup(
+      player as unknown as Player,
+      repository as unknown as WorldStateRepository,
+      new Logger("test", () => {}),
+    );
+
+    expect(report).toMatchObject({
+      raiderReady: false,
+      spawnedCraft: [
+        IDENTIFIERS.skiff,
+        IDENTIFIERS.skycutter,
+        IDENTIFIERS.aetherOutrigger,
+        IDENTIFIERS.steampunkBlimp,
+      ],
+    });
+    expect(report.raiderWarning).toMatch(
+      /Every deterministic Raider position/u,
+    );
+    expect(report.raiderLocation).toBeUndefined();
+    expect(mocks.spawnSkyRaiderForPlayer).not.toHaveBeenCalled();
+    expect(oldEntities[0].remove).toHaveBeenCalledOnce();
+    expect(oldEntities[1].remove).not.toHaveBeenCalled();
+    expect(worldState.skyRaiderEncounter).toBe(previousEncounter);
+    expect(mocks.removeTickingArea).toHaveBeenCalledWith(
+      DEVELOPER_TEST_RAIDER_TICKING_AREA,
+    );
+  });
+
+  it("completes the craft setup when Raider ticking-area capacity is unavailable", async () => {
+    const previousEncounter = worldState.skyRaiderEncounter;
+    mocks.hasTickingAreaCapacity.mockReturnValue(false);
+
+    const report = await prepareDeveloperTestSetup(
+      player as unknown as Player,
+      repository as unknown as WorldStateRepository,
+      new Logger("test", () => {}),
+    );
+
+    expect(report.raiderReady).toBe(false);
+    expect(report.raiderWarning).toMatch(/No ticking-area capacity/u);
+    expect(mocks.createTickingArea).not.toHaveBeenCalled();
+    expect(mocks.spawnSkiffForPlayer).toHaveBeenCalledOnce();
+    expect(mocks.spawnSkyRaiderForPlayer).not.toHaveBeenCalled();
+    expect(oldEntities[0].remove).toHaveBeenCalledOnce();
+    expect(oldEntities[1].remove).not.toHaveBeenCalled();
+    expect(worldState.skyRaiderEncounter).toBe(previousEncounter);
   });
 
   it("keeps both owned test craft non-primary on every rerun", async () => {

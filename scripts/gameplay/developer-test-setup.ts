@@ -11,9 +11,11 @@ import { SKYCRAFT_EXPERIMENTAL_CERTIFICATION_TAG } from "../skycraft/progression
 import { ensureDockmaster } from "./dockyard";
 import {
   DEVELOPER_TEST_ENTITY_TAG,
+  DEVELOPER_TEST_RAIDER_TICKING_AREA,
   DEVELOPER_TEST_SETUP,
   DEVELOPER_TEST_SETUP_TIMEOUT_TICKS,
   DeveloperTestCraftPlacement,
+  DeveloperTestRaiderPlacement,
 } from "./developer-test-setup-layout";
 import { spawnSkyRaiderForPlayer } from "./sky-raider";
 import { spawnSkiffForPlayer, spawnSkycutterForPlayer } from "./skiff";
@@ -32,7 +34,15 @@ export interface DeveloperTestSetupReport {
   };
   dockmasterReady: boolean;
   raiderReady: boolean;
+  raiderLocation?: DockLocation;
+  raiderWarning?: string;
   referenceBlueprints: string[];
+}
+
+interface DeveloperRaiderResult {
+  readonly entity?: Entity;
+  readonly location?: DockLocation;
+  readonly warning?: string;
 }
 
 let activePlayerId: string | undefined;
@@ -69,7 +79,7 @@ export async function prepareDeveloperTestSetup(
     await system.waitTicks(10);
     assertFleetSlotsClear(dimension);
 
-    const replacedEntities = clearPreviousSetupEntities(dimension);
+    const clearedEntities = clearPreviousSetupEntities(dimension);
     player.addTag(SKYCRAFT_EXPERIMENTAL_CERTIFICATION_TAG);
 
     const bench = placeTestBench(logger.child("testbench"));
@@ -79,15 +89,15 @@ export async function prepareDeveloperTestSetup(
       logger.child("dockmaster"),
     );
     const spawnedCraft = spawnDeveloperFleet(player, logger.child("fleet"));
-    const raider = spawnSkyRaiderForPlayer(
+    const raider = await spawnDeveloperRaider(
       player,
       repository,
       logger.child("raider"),
-      true,
-      DEVELOPER_TEST_SETUP.raider,
+      dimension,
     );
-
-    raider?.addTag(DEVELOPER_TEST_ENTITY_TAG);
+    const replacedEntities =
+      clearedEntities.removed +
+      (raider.entity === undefined ? 0 : clearedEntities.retainedRaiders);
 
     const report: DeveloperTestSetupReport = {
       replacedEntities,
@@ -101,7 +111,9 @@ export async function prepareDeveloperTestSetup(
         skipped: [...berths.skipped],
       },
       dockmasterReady,
-      raiderReady: raider !== undefined,
+      raiderReady: raider.entity !== undefined,
+      raiderLocation: raider.location,
+      raiderWarning: raider.warning,
       referenceBlueprints: REFERENCE_BLUEPRINTS.map(
         (reference) => reference.name,
       ),
@@ -115,6 +127,8 @@ export async function prepareDeveloperTestSetup(
       berths: report.berths,
       dockmasterReady,
       raiderReady: report.raiderReady,
+      raiderLocation: report.raiderLocation,
+      raiderWarning: report.raiderWarning,
       referenceBlueprints: report.referenceBlueprints,
     });
     return report;
@@ -175,34 +189,11 @@ function assertFleetSlotsClear(dimension: Dimension): void {
       );
     }
   }
-
-  const raiderObstruction = firstBlockObstruction(dimension, {
-    id: "raider",
-    typeId: IDENTIFIERS.skyRaider,
-    location: DEVELOPER_TEST_SETUP.raider,
-    clearance: DEVELOPER_TEST_SETUP.raider.clearance,
-  });
-
-  if (raiderObstruction !== undefined) {
-    throw new Error(
-      `Raider test lane is blocked at ${raiderObstruction}. Move the block and run the command again.`,
-    );
-  }
 }
 
 function firstBlockObstruction(
   dimension: Dimension,
-  placement:
-    | DeveloperTestCraftPlacement
-    | {
-        readonly id: "raider";
-        readonly typeId: string;
-        readonly location: DockLocation;
-        readonly clearance: {
-          readonly horizontalRadius: number;
-          readonly height: number;
-        };
-      },
+  placement: DeveloperTestCraftPlacement | DeveloperTestRaiderPlacement,
 ): string | undefined {
   const centerX = Math.floor(placement.location.x);
   const centerY = Math.floor(placement.location.y);
@@ -241,16 +232,155 @@ function firstBlockObstruction(
   return undefined;
 }
 
-function clearPreviousSetupEntities(dimension: Dimension): number {
+async function spawnDeveloperRaider(
+  player: Player,
+  repository: WorldStateRepository,
+  logger: Logger,
+  dimension: Dimension,
+): Promise<DeveloperRaiderResult> {
+  const manager = world.tickingAreaManager;
+  const candidates = DEVELOPER_TEST_SETUP.raiderCandidates;
+  const clearance = candidates[0].clearance;
+  const options = {
+    dimension,
+    from: {
+      x:
+        Math.min(...candidates.map(({ location }) => location.x)) -
+        clearance.horizontalRadius,
+      y: Math.min(...candidates.map(({ location }) => location.y)),
+      z:
+        Math.min(...candidates.map(({ location }) => location.z)) -
+        clearance.horizontalRadius,
+    },
+    to: {
+      x:
+        Math.max(...candidates.map(({ location }) => location.x)) +
+        clearance.horizontalRadius,
+      y:
+        Math.max(...candidates.map(({ location }) => location.y)) +
+        clearance.height -
+        1,
+      z:
+        Math.max(...candidates.map(({ location }) => location.z)) +
+        clearance.horizontalRadius,
+    },
+  };
+  let tickingAreaCreated = false;
+
+  try {
+    if (manager.hasTickingArea(DEVELOPER_TEST_RAIDER_TICKING_AREA)) {
+      manager.removeTickingArea(DEVELOPER_TEST_RAIDER_TICKING_AREA);
+    }
+
+    if (!manager.hasCapacity(options)) {
+      return warnAndSkipRaider(
+        logger,
+        "No ticking-area capacity is available to load the Raider test lane.",
+      );
+    }
+
+    await manager.createTickingArea(
+      DEVELOPER_TEST_RAIDER_TICKING_AREA,
+      options,
+    );
+    tickingAreaCreated = true;
+    await system.waitTicks(1);
+
+    const blocked: string[] = [];
+
+    for (const candidate of candidates) {
+      const obstruction = firstBlockObstruction(dimension, candidate);
+
+      if (obstruction !== undefined) {
+        blocked.push(`Y ${candidate.location.y}: ${obstruction}`);
+        continue;
+      }
+
+      const location: DockLocation = { ...candidate.location };
+      const entity = spawnSkyRaiderForPlayer(
+        player,
+        repository,
+        logger,
+        true,
+        location,
+      );
+
+      if (entity === undefined) {
+        return warnAndSkipRaider(
+          logger,
+          `The Raider service did not create an entity at ${formatLocation(
+            location,
+          )}.`,
+        );
+      }
+
+      entity.addTag(DEVELOPER_TEST_ENTITY_TAG);
+      return { entity, location };
+    }
+
+    return warnAndSkipRaider(
+      logger,
+      "Every deterministic Raider position at X 54, Z 54 is blocked. Use the void test realm or clear the Y 176-211 lane.",
+      { blocked },
+    );
+  } catch (error) {
+    return warnAndSkipRaider(
+      logger,
+      `The Raider lane could not be loaded: ${errorMessage(error)}.`,
+    );
+  } finally {
+    if (tickingAreaCreated) {
+      try {
+        if (manager.hasTickingArea(DEVELOPER_TEST_RAIDER_TICKING_AREA)) {
+          manager.removeTickingArea(DEVELOPER_TEST_RAIDER_TICKING_AREA);
+        }
+      } catch (error) {
+        logger.warn("Could not release the developer Raider ticking area.", {
+          error: errorMessage(error),
+        });
+      }
+    }
+  }
+}
+
+function warnAndSkipRaider(
+  logger: Logger,
+  warning: string,
+  fields?: Readonly<Record<string, unknown>>,
+): DeveloperRaiderResult {
+  logger.warn("Developer setup skipped the Raider.", { warning, ...fields });
+  return { warning };
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function formatLocation(location: DockLocation): string {
+  return `${location.x}, ${location.y}, ${location.z}`;
+}
+
+function clearPreviousSetupEntities(dimension: Dimension): {
+  readonly removed: number;
+  readonly retainedRaiders: number;
+} {
   const entities = dimension.getEntities({
     tags: [DEVELOPER_TEST_ENTITY_TAG],
   });
+  let removed = 0;
+  let retainedRaiders = 0;
 
   for (const entity of entities) {
+    if (entity.typeId === IDENTIFIERS.skyRaider) {
+      retainedRaiders += 1;
+      continue;
+    }
+
     entity.remove();
+    removed += 1;
   }
 
-  return entities.length;
+  return { removed, retainedRaiders };
 }
 
 function spawnDeveloperFleet(player: Player, logger: Logger): string[] {

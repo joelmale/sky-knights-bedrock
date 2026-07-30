@@ -531,7 +531,9 @@ function sendDeveloperSetupReport(
 
   player.sendMessage(
     `§aDeveloper setup ready:§r ${report.spawnedCraft.length} craft, ${report.berths.prepared}/5 berths, ${report.benchStalls.placed}/8 bench stalls, ${report.referenceBlueprints.length} reference blueprints, Raider ${
-      report.raiderReady ? "ready" : "missing"
+      report.raiderLocation === undefined
+        ? "skipped"
+        : `ready at (${report.raiderLocation.x}, ${report.raiderLocation.y}, ${report.raiderLocation.z})`
     }.`,
   );
   player.sendMessage(
@@ -556,6 +558,9 @@ function sendDeveloperSetupReport(
     player.sendMessage(
       "§cDockmaster warning: the authored dock was not ready.§r",
     );
+  }
+  if (report.raiderWarning !== undefined) {
+    player.sendMessage(`§eRaider warning: ${report.raiderWarning}§r`);
   }
 }
 

@@ -132,17 +132,22 @@ describe("developer test setup layout", () => {
     const skycutter = DEVELOPER_TEST_SETUP.craft.find(
       (craft) => craft.id === "skycutter",
     )!;
-    const raider = DEVELOPER_TEST_SETUP.raider;
 
     expect(
-      distanceSquared(DEVELOPER_TEST_SETUP.landing, raider),
-    ).toBeGreaterThan(
-      DEVELOPER_TEST_ARRIVAL_SAFETY_RADIUS *
-        DEVELOPER_TEST_ARRIVAL_SAFETY_RADIUS,
-    );
-    expect(distanceSquared(skycutter.location, raider)).toBeLessThan(
-      COMBAT.cannonRange * COMBAT.cannonRange,
-    );
+      DEVELOPER_TEST_SETUP.raiderCandidates.map(({ location }) => location.y),
+    ).toEqual([176, 184, 192, 200, 208]);
+
+    for (const { location } of DEVELOPER_TEST_SETUP.raiderCandidates) {
+      expect(
+        distanceSquared(DEVELOPER_TEST_SETUP.landing, location),
+      ).toBeGreaterThan(
+        DEVELOPER_TEST_ARRIVAL_SAFETY_RADIUS *
+          DEVELOPER_TEST_ARRIVAL_SAFETY_RADIUS,
+      );
+      expect(distanceSquared(skycutter.location, location)).toBeLessThan(
+        COMBAT.cannonRange * COMBAT.cannonRange,
+      );
+    }
   });
 
   it("advertises the fixed authored-island route and all references", () => {

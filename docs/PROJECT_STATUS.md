@@ -69,8 +69,10 @@ not require them.
 
 The cheat-gated `/skyknights:test_setup` command prepares the documented
 starter-dock inspection hub, four mobile craft, all five Skycraft berths and
-eight reference plans, a stocked bench, and an isolated Raider lane without
-claiming the staged legacy craft as the player's canonical ship.
+eight reference plans, a stocked bench, and an explicitly loaded Raider lane
+with deterministic terrain-safe height fallbacks, without claiming the staged
+legacy craft as the player's canonical ship. A fully blocked Raider lane is
+reported without discarding the otherwise usable inspection hub.
 
 ## Current content inventory
 

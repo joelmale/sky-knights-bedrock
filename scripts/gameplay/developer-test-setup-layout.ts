@@ -8,6 +8,7 @@ import {
 export const DEVELOPER_TEST_ENTITY_TAG = "skyknights.dev_test_setup";
 export const DEVELOPER_TEST_SETUP_TIMEOUT_TICKS = 20 * 60;
 export const DEVELOPER_TEST_ARRIVAL_SAFETY_RADIUS = 64;
+export const DEVELOPER_TEST_RAIDER_TICKING_AREA = "skyknights_dev_test_raider";
 
 export type DeveloperTestCraftId =
   "skiff" | "skycutter" | "aether_outrigger" | "steampunk_blimp";
@@ -16,6 +17,19 @@ export interface DeveloperTestCraftPlacement {
   readonly id: DeveloperTestCraftId;
   readonly typeId: string;
   readonly location: {
+    readonly x: number;
+    readonly y: number;
+    readonly z: number;
+  };
+  readonly clearance: {
+    readonly horizontalRadius: number;
+    readonly height: number;
+  };
+}
+
+export interface DeveloperTestRaiderPlacement {
+  readonly location: {
+    readonly dimensionId: string;
     readonly x: number;
     readonly y: number;
     readonly z: number;
@@ -55,8 +69,9 @@ function inspectionPoint(island: {
  * Fixed starter-realm developer setup.
  *
  * The mobile craft float above the authored dock and do not require new
- * blocks. The hostile Raider sits in a separate lane more than 64 blocks from
- * the landing point so setup does not immediately turn into combat.
+ * blocks. The hostile Raider uses the first clear height in a separate,
+ * explicitly loaded lane. Every candidate is more than 64 blocks from the
+ * landing point while remaining inside the staged Skycutter's cannon range.
  */
 export const DEVELOPER_TEST_SETUP = {
   dimensionId: STARTER_ISLAND.dimensionId,
@@ -91,13 +106,15 @@ export const DEVELOPER_TEST_SETUP = {
       clearance: { horizontalRadius: 3, height: 4 },
     },
   ] as const satisfies readonly DeveloperTestCraftPlacement[],
-  raider: {
-    dimensionId: STARTER_ISLAND.dimensionId,
-    x: 54,
-    y: 176,
-    z: 54,
+  raiderCandidates: [176, 184, 192, 200, 208].map((y) => ({
+    location: {
+      dimensionId: STARTER_ISLAND.dimensionId,
+      x: 54,
+      y,
+      z: 54,
+    },
     clearance: { horizontalRadius: 2, height: 4 },
-  },
+  })) satisfies readonly DeveloperTestRaiderPlacement[],
   route: [
     {
       id: "starter_island",
