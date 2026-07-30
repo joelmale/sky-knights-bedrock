@@ -33,16 +33,18 @@ import {
   surfaceY,
 } from "./continent-field";
 import { ARCHIPELAGO_V4_DECK_CENTER_Y } from "./archipelago-v4";
+import {
+  ISLAND_TIER_SPAN as TIER_SPAN,
+  type IslandTier as Tier,
+} from "./island-tiers";
 
-/** Tier footprints, in blocks. */
-export const ISLAND_TIER_SPAN = {
-  islet: 24,
-  standard: 38,
-  crag: 64,
-  landmark: 120,
-} as const;
-
-export type IslandTier = keyof typeof ISLAND_TIER_SPAN;
+export {
+  ISLAND_TIER_SPAN,
+  ISLAND_TIERS,
+  islandTierRadius,
+  islandTierSpan,
+} from "./island-tiers";
+export type { IslandTier } from "./island-tiers";
 
 /**
  * Field version for ambient island terrain, independent of the continent field
@@ -57,7 +59,7 @@ export const ISLAND_FIELD_VERSION = 1;
  */
 export interface IslandFieldSource {
   readonly index: number;
-  readonly tier: IslandTier;
+  readonly tier: Tier;
   readonly deck: number;
   readonly x: number;
   readonly z: number;
@@ -87,7 +89,7 @@ export function createIslandField(
     );
   }
 
-  const span = ISLAND_TIER_SPAN[island.tier];
+  const span = TIER_SPAN[island.tier];
 
   if (span === undefined) {
     throw new RangeError(`island tier ${island.tier} has no span`);

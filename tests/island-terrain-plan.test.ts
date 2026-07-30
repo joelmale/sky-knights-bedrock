@@ -93,7 +93,10 @@ describe("island terrain fill plan", () => {
   it("keeps a landmark inside a few seconds of generation", () => {
     const plan = planIslandTerrain(field("landmark"));
 
-    expect(plan.batches.length).toBeLessThan(80);
+    // At span 168 a landmark is ~10,400 volumes, so ~108 batches: about 5.4
+    // seconds of background generation for the rarest tier (17 of 1,214
+    // islands). The bound is generous because the exact count moves with span.
+    expect(plan.batches.length).toBeLessThan(150);
     expect(plan.batches.length).toBe(
       Math.ceil(plan.volumes / ISLAND_FILL_CALL_BUDGET),
     );
