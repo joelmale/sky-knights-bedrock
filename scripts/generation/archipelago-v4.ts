@@ -159,6 +159,10 @@ function siteHash(
   return hash([worldSeed >>> 0, ARCHIPELAGO_V4_CONFIG.idVersion, ...values]);
 }
 
+function idiv(numerator: number, denominator: number): number {
+  return Math.floor(numerator / denominator);
+}
+
 function integerSquareRoot(value: number): number {
   if (value <= 0) return 0;
   let estimate = value;
@@ -400,12 +404,21 @@ function memberSite(
   const preferredTier = satelliteTierFor(worldSeed, cluster.index, memberIndex);
   const anchorRadius = templateFor(cluster.anchorTier, cluster.family).radius;
   const satelliteRadius = templateFor(preferredTier, cluster.family).radius;
-  const shellExtra = memberIndex % 2 === 0 ? 42 : 12;
+  // Satellite distance is a FRACTION of the combined radii, not a sum plus a
+  // gap. The additive form guaranteed a floor of both radii plus at least 24
+  // blocks, so two islands in one cluster could never touch however the cluster
+  // was tuned - and MAX_CLUSTER_REACH never entered this calculation at all,
+  // which is why shrinking it did nothing.
+  //
+  // Alternating shells at 7/10 and 11/10 of the combined radii give a cluster
+  // where some members genuinely intersect the anchor and some sit just clear
+  // of it. Overlap is intended: terrain is written with an air-only fill filter,
+  // so two intersecting islands merge into the union of their terrain instead of
+  // one erasing the other, and the same filter is what keeps generation from
+  // ever overwriting a player build or a placed continent.
+  const shellNumerator = memberIndex % 2 === 0 ? 11 : 7;
   const distance =
-    anchorRadius +
-    satelliteRadius +
-    ARCHIPELAGO_V4_CONFIG.minEdgeGap +
-    shellExtra +
+    idiv((anchorRadius + satelliteRadius) * shellNumerator, 10) +
     (siteHash(worldSeed, [cluster.index, memberIndex, "member_distance"]) % 7);
   const phaseJitter =
     (siteHash(worldSeed, [cluster.index, memberIndex, "member_phase"]) %
@@ -478,10 +491,12 @@ function overlaps(
 ): boolean {
   const dx = candidate.x - other.x;
   const dz = candidate.z - other.z;
-  const horizontalClearance =
-    candidate.radius + other.radius + ARCHIPELAGO_V4_CONFIG.minEdgeGap;
+  // Islands may intersect. What is rejected is a near-coincident duplicate,
+  // which adds overdraw rather than silhouette. Three tenths of the combined
+  // radii keeps a genuine merge and drops a redundant site.
+  const duplicateDistance = idiv((candidate.radius + other.radius) * 3, 10);
 
-  if (dx * dx + dz * dz >= horizontalClearance * horizontalClearance) {
+  if (dx * dx + dz * dz >= duplicateDistance * duplicateDistance) {
     return false;
   }
 
@@ -489,9 +504,7 @@ function overlaps(
   const otherCenterY = other.y + Math.floor(other.size.y / 2);
   return (
     Math.abs(candidateCenterY - otherCenterY) <
-    candidate.heightRadius +
-      other.heightRadius +
-      ARCHIPELAGO_V4_CONFIG.minEdgeGap
+    idiv((candidate.heightRadius + other.heightRadius) * 3, 10)
   );
 }
 

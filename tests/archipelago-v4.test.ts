@@ -169,14 +169,17 @@ describe("a4 clustered archipelago planner", () => {
     }
   });
 
-  it("has no 3D overlap, cross-family bleed on one deck, or hollow anchors", () => {
+  // Islands within a cluster are ALLOWED to intersect, and are expected to:
+  // terrain is written with an air-only fill filter, so two overlapping islands
+  // merge into the union of their terrain rather than one erasing the other.
+  // What must still hold is that separate clusters stay separate, so the field
+  // reads as distinct archipelagos rather than one continuous belt.
+  it("merges within a cluster but keeps clusters apart on a deck", () => {
     for (const seed of SEEDS) {
       const islands = planArchipelagoV4(seed);
 
       for (let left = 0; left < islands.length; left += 1) {
         for (let right = left + 1; right < islands.length; right += 1) {
-          expect(intersects(islands[left], islands[right])).toBe(false);
-
           if (
             islands[left].clusterIndex !== islands[right].clusterIndex &&
             islands[left].deck === islands[right].deck
@@ -193,6 +196,29 @@ describe("a4 clustered archipelago planner", () => {
         }
       }
     }
+  }, 120000);
+
+  // The merge is the feature, so assert it actually happens. Without this the
+  // additive offset floor could return - satellites placed at both radii plus a
+  // fixed gap, which made intersection impossible however the cluster was tuned
+  // - and every other test here would still pass.
+  it("actually produces merged islands", () => {
+    const islands = planArchipelagoV4(SEEDS[0]);
+    const merged = new Set<string>();
+
+    for (let left = 0; left < islands.length; left += 1) {
+      for (let right = left + 1; right < islands.length; right += 1) {
+        if (intersects(islands[left], islands[right])) {
+          merged.add(islands[left].id);
+          merged.add(islands[right].id);
+        }
+      }
+    }
+
+    // Measured at roughly 65% of islands across 482 intersecting pairs. A wide
+    // band, because the exact figure moves with tier mix and presence rolls.
+    expect(merged.size).toBeGreaterThan(islands.length / 4);
+    expect(merged.size).toBeLessThan(islands.length);
   }, 120000);
 
   it("reserves every active a2 continent footprint at planner level", () => {
