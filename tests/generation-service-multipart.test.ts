@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// These drive whole multipart islands - a 21-part continent, a 16-part
+// landmark - through the real generation loop, each part awaiting ticking-area
+// load and integrity verification. They comfortably exceed the 5s default when
+// the suite runs in parallel, and have failed as timeouts that looked like
+// generator bugs. They are slow, not flaky.
+vi.setConfig({ testTimeout: 30_000 });
+
 const minecraft = vi.hoisted(() => {
   const blockTypes = new Map<string, string>();
   const tickingAreas = new Set<string>();

@@ -27,6 +27,11 @@ import {
 } from "./archipelago-runtime";
 import { ARCHIPELAGO_TEMPLATES } from "./archipelago";
 import { ARCHIPELAGO_V3_TEMPLATES } from "./archipelago-v3";
+import { parseArchipelagoV4IslandId } from "./archipelago-v4";
+import type { ArchipelagoFamily } from "./archipelago";
+import type { ContinentField } from "./continent-field";
+import { createIslandField } from "./island-field";
+import { fillIslandTerrain } from "./island-terrain-service";
 import {
   abandonGeneration,
   advancePartCursor,
@@ -190,6 +195,32 @@ async function runGeneration(
     const registered = registeredIsland(state, job);
     const island = registered.definition;
     const dimension = world.getDimension(job.dimensionId);
+
+    // Ambient a4 islands are terrain, not structures. Their blocks come from
+    // the deterministic field rather than from an .mcstructure, so they take a
+    // separate path that fills volumes instead of placing parts. Everything
+    // else - the queue, the retry, the completion bookkeeping - is shared.
+    const terrain = islandTerrainSource(state, job);
+
+    if (terrain !== undefined) {
+      state = await runIslandTerrainGeneration(
+        repository,
+        logger,
+        job,
+        island,
+        terrain,
+        dimension,
+      );
+
+      const nextQueued = queueNextRequiredIsland(state);
+
+      if (nextQueued === state) {
+        return;
+      }
+
+      repository.save(nextQueued);
+      continue;
+    }
 
     if (job.parts !== undefined) {
       state = await runMultipartGeneration(
@@ -732,6 +763,101 @@ function completeAmbientGenerationWithoutPlacement(
     jobId: job.id,
     ...details,
   });
+}
+
+/**
+ * The terrain descriptor for an ambient a4 island, or undefined when the job is
+ * anything else.
+ *
+ * a4 islands are the only jobs whose blocks come from the field. Authored
+ * islands, legacy a1/a2 ambient islands and a2 continents all keep their
+ * existing paths, so this is additive: nothing that worked before changes route.
+ */
+function islandTerrainSource(
+  state: WorldState,
+  job: GenerationJob,
+): { field: ContinentField; family: ArchipelagoFamily } | undefined {
+  const island = parseArchipelagoV4IslandId(state.worldSeed, job.id);
+
+  if (island === undefined) {
+    return undefined;
+  }
+
+  return {
+    field: createIslandField(state.worldSeed, {
+      index: island.index,
+      tier: island.tier,
+      deck: island.deck,
+      x: island.x,
+      z: island.z,
+    }),
+    family: island.family,
+  };
+}
+
+/**
+ * Generates one ambient island as terrain.
+ *
+ * Deliberately simpler than the multipart structure path. Every fill is
+ * air-only, so writing is idempotent: a job interrupted midway can be replayed
+ * from the start without duplicating or stranding anything, which is why there
+ * is no part cursor and no per-part checkpoint here. The obstruction preflight
+ * is also unnecessary - an air-only fill cannot overwrite whatever it finds, so
+ * an occupied volume simply keeps its existing blocks and the island grows
+ * around it.
+ */
+async function runIslandTerrainGeneration(
+  repository: WorldStateRepository,
+  logger: Logger,
+  job: GenerationJob,
+  island: IslandDefinition,
+  terrain: { field: ContinentField; family: ArchipelagoFamily },
+  dimension: Dimension,
+): Promise<WorldState> {
+  const tickingAreaId = await loadIslandChunks(
+    island,
+    job.origin,
+    dimension,
+    logger,
+  );
+
+  try {
+    const result = await fillIslandTerrain(
+      terrain.field,
+      terrain.family,
+      dimension,
+      logger,
+    );
+
+    logger.info("Ambient island terrain generated.", {
+      jobId: job.id,
+      family: terrain.family,
+      blocks: result.blocks,
+      volumes: result.volumes,
+      batches: result.batches,
+      failures: result.failures,
+    });
+
+    if (result.failures > 0) {
+      // Idempotent writes make a retry safe and cheap: the fills that already
+      // landed become no-ops.
+      throw new Error(
+        `${job.id} terrain generation had ${result.failures} failed fills.`,
+      );
+    }
+  } finally {
+    releaseTickingArea(tickingAreaId, logger);
+  }
+
+  let state = markStructurePlaced(repository.load());
+  repository.save(state);
+  // Ambient islands carry no scripted content by design, so this is a no-op
+  // for them today. It is called anyway so the terrain path stays identical to
+  // the structure path if that ever changes.
+  prepareIslandContent(job.id, dimension, logger, job.origin);
+  state = completeGeneration(repository.load());
+  repository.save(state);
+  return state;
 }
 
 function registeredIsland(
