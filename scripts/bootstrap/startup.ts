@@ -124,7 +124,15 @@ function initializeRuntime(validationAttempt: number): void {
       runTutorialSweep();
     }, RECOVERY_INTERVAL_TICKS);
     system.runInterval(() => runSkycraftSweep(logger.child("skycraft")), 20);
-    system.runInterval(runArchipelagoGenerationSweep, 40);
+    // Every 10 ticks, not 40. The sweep queues exactly one island and only one
+    // generation job runs at a time, so the interval is a hard ceiling on how
+    // fast the sky fills. At 40 ticks that ceiling was one island per two
+    // seconds, which was invisible while an island was a single structure
+    // place() call and became the dominant cost once islands became field
+    // terrain spread over many ticks. With roughly 48 islands inside the query
+    // radius of any position, 40 ticks meant over 90 seconds of hovering before
+    // the field looked populated, which reads as sparse rather than slow.
+    system.runInterval(runArchipelagoGenerationSweep, 10);
     system.runInterval(() => {
       try {
         ensureDockmaster(worldRepository, logger.child("dockyard"));
@@ -172,6 +180,12 @@ world.afterEvents.entityLoad.subscribe(({ entity }) => {
 });
 
 world.afterEvents.playerSpawn.subscribe(({ initialSpawn, player }) => {
+  // BDS GameTest can emit a transient player-spawn callback without a usable
+  // player while a SimulatedPlayer is being created or removed.
+  if (player === undefined) {
+    return;
+  }
+
   preparePlayerAfterStartup(player, initialSpawn, 0);
 });
 
