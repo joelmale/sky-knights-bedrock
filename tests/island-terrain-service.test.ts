@@ -119,14 +119,19 @@ describe("island terrain executor", () => {
 
       const used = new Set(dimension.calls.map((call) => call.block));
       const palette = ISLAND_FAMILY_BLOCKS[family];
+      // Listed rather than derived with Object.values, which this project's
+      // TypeScript target does not provide.
+      const allowed = [
+        palette.core,
+        palette.subsurface,
+        palette.surface,
+        palette.water,
+      ];
 
       expect(used.has(palette.surface), `${family} surface`).toBe(true);
       for (const block of used) {
         if (block === "minecraft:air") continue;
-        expect(
-          Object.values(palette) as string[],
-          `${family} used ${block}`,
-        ).toContain(block);
+        expect(allowed, `${family} used ${block}`).toContain(block);
       }
     }
   });
