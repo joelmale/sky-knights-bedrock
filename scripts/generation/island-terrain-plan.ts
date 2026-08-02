@@ -228,3 +228,35 @@ export function islandChunkSpan(field: ContinentField): {
 }
 
 export { CHUNK_SIZE };
+
+/**
+ * The volume an island's terrain occupies, for ticking-area sizing.
+ *
+ * This must come from the field, never from the planner's template size. The a3
+ * template a4 still carries is 9 to 48 blocks smaller than the field span per
+ * tier, so a ticking area sized from it leaves the island's outer ring in
+ * unloaded chunks. Every fill there throws, the job reports failures, and the
+ * retry blocks the whole generation queue behind one island that can never
+ * finish.
+ */
+export function islandTerrainBounds(field: ContinentField): {
+  readonly from: { readonly x: number; readonly y: number; readonly z: number };
+  readonly to: { readonly x: number; readonly y: number; readonly z: number };
+} {
+  // Ridge detail rides on top of the base amplitude, and the dock pad clears
+  // three blocks above the surface, so the top needs headroom beyond amplitude.
+  const top = field.baseY + field.amplitude + field.ridgeAmplitude + 8;
+
+  return {
+    from: {
+      x: field.centerX - field.radius,
+      y: field.baseY,
+      z: field.centerZ - field.radius,
+    },
+    to: {
+      x: field.centerX + field.radius,
+      y: Math.min(319, top),
+      z: field.centerZ + field.radius,
+    },
+  };
+}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   ISLAND_DOCK_PAD_RADIUS,
+  islandTerrainBounds,
   ISLAND_FILL_BLOCK_BUDGET,
   ISLAND_FILL_CALL_BUDGET,
   islandChunkSpan,
@@ -208,6 +209,56 @@ describe("island terrain fill plan", () => {
         span.chunksX * span.chunksZ,
       );
     }
+  });
+
+  // The defect this prevents: the ticking area was sized from the planner's a3
+  // template, which is 9 to 48 blocks smaller per tier than the field span. The
+  // island's outer ring sat in unloaded chunks, every fill there threw, and the
+  // retryable failure blocked the whole generation queue behind one island that
+  // could never finish. Symptom in game: exactly one ambient island generates,
+  // then nothing ever again.
+  describe("ticking-area bounds", () => {
+    it("contains every volume the plan will fill", () => {
+      for (const tier of TIERS) {
+        const target = field(tier);
+        const plan = planIslandTerrain(target);
+        const bounds = islandTerrainBounds(target);
+
+        for (const batch of plan.batches) {
+          for (const volume of batch.volumes) {
+            expect(volume.from.x, tier).toBeGreaterThanOrEqual(bounds.from.x);
+            expect(volume.from.y, tier).toBeGreaterThanOrEqual(bounds.from.y);
+            expect(volume.from.z, tier).toBeGreaterThanOrEqual(bounds.from.z);
+            expect(volume.to.x, tier).toBeLessThanOrEqual(bounds.to.x);
+            expect(volume.to.y, tier).toBeLessThanOrEqual(bounds.to.y);
+            expect(volume.to.z, tier).toBeLessThanOrEqual(bounds.to.z);
+          }
+        }
+      }
+    });
+
+    it("contains the dock pad and its headroom", () => {
+      for (const tier of TIERS) {
+        const target = field(tier);
+        const plan = planIslandTerrain(target);
+        const bounds = islandTerrainBounds(target);
+
+        expect(plan.dockPad.from.x, tier).toBeGreaterThanOrEqual(bounds.from.x);
+        expect(plan.dockPad.to.x, tier).toBeLessThanOrEqual(bounds.to.x);
+        // Three blocks of clearance are cleared above the pad floor.
+        expect(plan.dockPad.to.y + 3, tier).toBeLessThanOrEqual(bounds.to.y);
+      }
+    });
+
+    it("is larger than the retiring template size at every tier", () => {
+      const templateSpan = { islet: 25, standard: 39, crag: 64, landmark: 120 };
+
+      for (const tier of TIERS) {
+        const bounds = islandTerrainBounds(field(tier));
+        const width = bounds.to.x - bounds.from.x + 1;
+        expect(width, tier).toBeGreaterThan(templateSpan[tier]);
+      }
+    });
   });
 
   it("scales work with tier", () => {

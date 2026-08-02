@@ -32,6 +32,7 @@ import type { ArchipelagoFamily } from "./archipelago";
 import type { ContinentField } from "./continent-field";
 import { createIslandField } from "./island-field";
 import { fillIslandTerrain } from "./island-terrain-service";
+import { islandTerrainBounds, planIslandTerrain } from "./island-terrain-plan";
 import {
   abandonGeneration,
   advancePartCursor,
@@ -814,11 +815,16 @@ async function runIslandTerrainGeneration(
   terrain: { field: ContinentField; family: ArchipelagoFamily },
   dimension: Dimension,
 ): Promise<WorldState> {
+  // Size the ticking area from the FIELD, not from the planner template. See
+  // islandTerrainBounds: a template-sized area leaves the outer ring unloaded,
+  // every fill there throws, and the retry blocks the whole queue.
+  const plan = planIslandTerrain(terrain.field);
   const tickingAreaId = await loadIslandChunks(
     island,
     job.origin,
     dimension,
     logger,
+    islandTerrainBounds(terrain.field),
   );
 
   try {
@@ -827,6 +833,7 @@ async function runIslandTerrainGeneration(
       terrain.family,
       dimension,
       logger,
+      { plan },
     );
 
     logger.info("Ambient island terrain generated.", {
@@ -1082,10 +1089,11 @@ async function loadIslandChunks(
   origin: GenerationJob["origin"],
   dimension: Dimension,
   logger: Logger,
+  boundsOverride?: StructureBounds,
 ): Promise<string> {
   const manager = world.tickingAreaManager;
   const identifier = `skyknights_generation_${island.id}`;
-  const bounds = structureBounds(origin, island.size);
+  const bounds = boundsOverride ?? structureBounds(origin, island.size);
   const options = {
     dimension,
     from: bounds.from,
